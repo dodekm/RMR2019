@@ -1,12 +1,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include<QMutex>
+//#include <QMainWindow>
+//#include<QMutex>
 #include<iostream>
-#include<arpa/inet.h>
-#include<unistd.h>
-#include<sys/socket.h>
+//#include<arpa/inet.h>
+//#include<unistd.h>
+//#include<sys/socket.h>
 #include<sys/types.h>
 #include<stdio.h>
 #include<string.h>

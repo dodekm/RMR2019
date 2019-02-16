@@ -1,25 +1,11 @@
 //#pragma once
-////*************************************************************************************
-////*************************************************************************************
-//// autor Martin Dekan  a Peter Beno mail: dekdekan@gmail.com, peter.beno@stuba.sk
-////-------------------------------------------------------------------------------------
-//// co to je:
-//// trieda na pracu s robotom kobuki. mala by mat implementovane citanie dat
-//// a posielanie prikazov...
-//// neobsahuje ziadnu logiku co s datami robit, to je na userovi aby spravil v callback funkcii
-//  jedna sa vlastne len o implementaciu komunikacie s hardwareom, driver
-////*************************************************************************************
-////*************************************************************************************
-#ifndef KOBUKI_CLASS_123456789
-#define KOBUKI_CLASS_123456789
-#define PI          3.141592653589793238462643383279502884L /* pi */
+
+#define PI 3.141592653589793238462643383279502884L /* pi */
 #define MS_INSTRUCTION_DELAY 25
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
-#include "pthread.h"
-#include "unistd.h"
 #include "fcntl.h"
 #include "string.h"
 #include <math.h>
@@ -28,10 +14,7 @@
 #include <fstream>
 #include <cmath>
 #include <iomanip>
-
 #include <sstream>
-
-
 
 using namespace std;
 
@@ -134,9 +117,6 @@ public:
 	};
 	
 
-
-
-
     std::vector<unsigned char> setLed(int led1 = 0, int led2 = 0); //led1 zelena/cervena 2/1, //led2 zelena/cervena 2/1
     std::vector<unsigned char> setTranslationSpeed(int mmpersec);
     std::vector<unsigned char> setRotationSpeed(double radpersec);
@@ -161,10 +141,10 @@ private:
 
 
     static const long double tickToMeter = 0.000085292090497737556558; // [m/tick]
-    static const long double b = 0.23; // wheelbase distance in meters, from kobuki manual https://yujinrobot.github.io/kobuki/doxygen/enAppendixProtocolSpecification.html
-//
+    static const long double b = 0.23; 
+
 
 
 };
 
-#endif
+
