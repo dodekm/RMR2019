@@ -152,19 +152,29 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CKobuki.h" />
+    <ClInclude Include="encoder.h" />
+    <ClInclude Include="map.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="points.h" />
+    <ClInclude Include="regulator.h" />
     <ClInclude Include="RMR_windows.h" />
     <ClInclude Include="rplidar.h" />
+    <ClInclude Include="speed_filter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CKobuki.cpp" />
+    <ClCompile Include="encoder.cpp" />
+    <ClCompile Include="map.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="points.cpp" />
+    <ClCompile Include="regulator.cpp" />
     <ClCompile Include="RMR_windows.cpp" />
+    <ClCompile Include="speed_filter.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

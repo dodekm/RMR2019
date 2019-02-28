@@ -9,11 +9,18 @@
 #include<string>
 #include<chrono>
 #include<stdlib.h>
+#include <queue> 
 
 #include "CKobuki.h"
 #include "rplidar.h"
+#include "points.h"
+#include "speed_filter.h"
+#include "regulator.h"
+#include "encoder.h"
+#include "map.h"
 
 #define encoder_max_value  65535 
+#define arc_line_switch_treshold 0.01
 
 
 typedef struct Odometry
@@ -22,22 +29,13 @@ typedef struct Odometry
 	float wheel_distance_left=0;
 	float wheel_last_distance_right=0;
 	float wheel_last_distance_left=0;
-	float alfa=0;
-	float x_pos=0, y_pos=0;
-};
+	float delta_alfa=0;
+	float delta_l=0;
+	float delta_l_left = 0;
+	float delta_l_right = 0;
+	Position position;
+}Odometry;
 
-
-typedef struct  Encoder
-{
-	uint16_t encoder_current_value;
-	uint16_t encoder_last_value;
-	int encoder_real_value;
-	int owerflow_flounter;
-	
-};
-
-
-void encoder_process(Encoder, uint16_t);
 
 
 class RobotControll
@@ -51,17 +49,41 @@ public:
 	void robotprocess();
 	void laserprocess();
 	void encoders_process();
-	void odometry();
-	void odometry_curved();
+
+	void odometry_backward_euler(Odometry*);
+	void odometry_forward_euler(Odometry*);
+	void odometry_trapezoidal_rule(Odometry*);
+	void odometry_curved(Odometry*);
+	
+
 	void processThisLidar(LaserMeasurement &laserData);
 	void processThisRobot();
 	void start_threads();
+	void automode();
+	void build_map();
+
+	
 	void move_arc(int mmpersec, int radius);
 	void forward(int);
 	void back(int);
 	void left(double);
 	void right(double);
 	void stop();
+	
+	int isRegulated()
+	{
+		return (PointsDistance(actual_position.coordinates, wanted_position.coordinates) < regulator.position_deadzone);
+	}
+
+	void addPoint(Position P)
+	{
+		path.push(P);
+	}
+
+	void set_command(std::string command)
+	{
+		this->command = command;
+	}
 
 	std::thread robotthreadHandle; // handle na vlakno
 	
@@ -100,14 +122,36 @@ private:
 	std::string ipaddress= "192.168.1.13";
 	CKobuki robot;
 	TKobukiData robotdata;
-	int datacounter;
 	
-	Encoder encL = { 0,0,0,0 };
-	Encoder encR = { 0,0,0,0 };
-	Odometry odometria;
+	int datacounter=0;
+	
+	Encoder encL;
+	Encoder encR;
+	Odometry odometria_1;
+	Odometry odometria_2;
+	Odometry odometria_3;
+	Odometry odometria_4;
+
+	int motors_working_speed = 0; 
+	int motors_working_radius = 0;
+	
+	
+	Position actual_position;
+	Position wanted_position;
+	std::queue <Position> path;
+
+
+	Speed_filter filter;
+	RobotRegulator regulator;
+	Map mapa;
+
+	std::string command;
 
 	const long double tickToMeter = 0.000085292090497737556558; // [m/tick]
 	const long double d = 0.23;
 	
 
 };
+
+
+
