@@ -15,6 +15,15 @@ int main()
 	while (1)
 	{
 		std::getline(std::cin, command);
+	 if (command == "go")
+		{
+		float x, y;
+		std::cin >> x;
+		std::cin >> y;
+		robot1.addPoint(Position(x, y));
+		command = "auto";
+		}
+
 		robot1.set_command(command);
 		
 	}
@@ -24,7 +33,9 @@ int main()
 }
 
 
-RobotControll::RobotControll()
+RobotControll::RobotControll():
+regulator(200, 100),
+mapa(100, 100, -5.0, 5.0, -5.0, 5.0)
 {
 	WinSock_setup();
 	//std::cout << "Zadaj IP adresu:" << std::endl;
@@ -35,7 +46,7 @@ RobotControll::RobotControll()
 	path.push(Position(1.0, 1.0));
 	path.push(Position(1.0, 0.0));
 	path.push(Position(0.0, 0.0));
-	regulator=RobotRegulator(200,100);
+	
 	start_threads();
 
 }
@@ -146,16 +157,23 @@ void RobotControll::processThisRobot()
 			automode();
 		}
 		
-		else if (command == "go")
+		
+		else if (command == "save")
 		{
-			float x, y;
-			std::cin >> x;
-			std::cin >> y;
-			addPoint(Position(x, y));
-			command = " ";
+		
+			mapa.saveMap("file.txt");
+			command = "";
 		}
 
-		move_arc(filter.new_speed(motors_working_speed,5), motors_working_radius);
+		else if (command == "load")
+		{
+
+			mapa.loadMap("file.txt");
+			command = "";
+		}
+
+		int filter_steps = 5;
+		move_arc(filter.new_speed(motors_working_speed,filter_steps), motors_working_radius);
 		//move_arc(motors_working_speed, motors_working_radius);
 
 	}
@@ -185,9 +203,9 @@ void RobotControll::automode()
 
 void RobotControll::build_map()
 {
-	for(int i = 0; copyOfLaserData.numberOfScans; i++)
+	for(int i = 0; i<copyOfLaserData.numberOfScans; i++)
 	{
-		homogen_transformation(copyOfLaserData.Data[i], odometria_3.position);
+		mapa.addPoint(homogen_transformation(copyOfLaserData.Data[i], actual_position));
 	}
 }
 
@@ -311,7 +329,6 @@ void RobotControll::processThisLidar(LaserMeasurement &laserData)
 {
 	std::cout << "Processing Lidar" << std::endl;
 	memcpy(&copyOfLaserData, &laserData, sizeof(LaserMeasurement));
-	
 	build_map();
 }
 

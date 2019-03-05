@@ -16,5 +16,5 @@
 #include "points.h"
 #include "encoder.h"
 #include "regulator.h"
-
+#include "map.h"
 #endif //PCH_H

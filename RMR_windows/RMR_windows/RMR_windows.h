@@ -142,11 +142,12 @@ private:
 
 
 	Speed_filter filter;
+	Mapa mapa;
 	RobotRegulator regulator;
-	Map mapa;
-
+	
 	std::string command;
 
+	
 	const long double tickToMeter = 0.000085292090497737556558; // [m/tick]
 	const long double d = 0.23;
 	

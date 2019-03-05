@@ -1,4 +1,6 @@
 ﻿  map.cpp
-x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\map.cpp(6): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\map.cpp(7): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\map.cpp(8): warning C4244: '=': conversion from 'long double' to 'float', possible loss of data
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\map.cpp(9): warning C4244: '=': conversion from 'long double' to 'float', possible loss of data
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\map.cpp(62): warning C4244: 'return': conversion from 'long double' to 'float', possible loss of data
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\map.cpp(67): warning C4244: 'return': conversion from 'long double' to 'float', possible loss of data
   RMR_windows.vcxproj -> X:\Dropbox\FEI\RMR\RMR2019\RMR_windows\Debug\RMR_windows.exe

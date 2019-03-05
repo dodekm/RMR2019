@@ -15,7 +15,6 @@ void RobotRegulator::regulate(Position robot_position, Position desired_position
 	delta = atan2(y_error, x_error);
 	rotation_output = rotation_gain / delta * sign(translation_output);
 
-
 	saturate_radius();
 	saturate();
 }
