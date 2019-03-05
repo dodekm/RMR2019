@@ -1,6 +1,18 @@
-﻿  map.cpp
-x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\map.cpp(8): warning C4244: '=': conversion from 'long double' to 'float', possible loss of data
-x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\map.cpp(9): warning C4244: '=': conversion from 'long double' to 'float', possible loss of data
-x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\map.cpp(62): warning C4244: 'return': conversion from 'long double' to 'float', possible loss of data
-x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\map.cpp(67): warning C4244: 'return': conversion from 'long double' to 'float', possible loss of data
+﻿  RMR_windows.cpp
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\rmr_windows.cpp(194): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\rmr_windows.cpp(195): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\rmr_windows.cpp(230): warning C4244: '=': conversion from 'long double' to 'float', possible loss of data
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\rmr_windows.cpp(231): warning C4244: '=': conversion from 'long double' to 'float', possible loss of data
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\rmr_windows.cpp(243): warning C4244: '=': conversion from 'long double' to 'float', possible loss of data
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\rmr_windows.cpp(253): warning C4244: '=': conversion from 'long double' to 'float', possible loss of data
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\rmr_windows.cpp(254): warning C4244: '=': conversion from 'long double' to 'float', possible loss of data
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\rmr_windows.cpp(266): warning C4244: '=': conversion from 'long double' to 'float', possible loss of data
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\rmr_windows.cpp(277): warning C4244: '=': conversion from 'long double' to 'float', possible loss of data
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\rmr_windows.cpp(278): warning C4244: '=': conversion from 'long double' to 'float', possible loss of data
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\rmr_windows.cpp(293): warning C4244: '=': conversion from 'long double' to 'float', possible loss of data
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\rmr_windows.cpp(308): warning C4244: '=': conversion from 'long double' to 'float', possible loss of data
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\rmr_windows.cpp(309): warning C4244: '=': conversion from 'long double' to 'float', possible loss of data
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\rmr_windows.cpp(315): warning C4244: '=': conversion from 'long double' to 'float', possible loss of data
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\rmr_windows.cpp(318): warning C4244: '+=': conversion from 'long double' to 'float', possible loss of data
+x:\dropbox\fei\rmr\rmr2019\rmr_windows\rmr_windows\rmr_windows.cpp(319): warning C4244: '+=': conversion from 'long double' to 'float', possible loss of data
   RMR_windows.vcxproj -> X:\Dropbox\FEI\RMR\RMR2019\RMR_windows\Debug\RMR_windows.exe

@@ -82,8 +82,21 @@ public:
 
 	void set_command(std::string command)
 	{
+		this->command_old = this->command;
 		this->command = command;
 	}
+	std::string get_command()
+	{
+	
+		return command;
+	}
+
+	void command_reset()
+	{
+		command = command_old;
+	}
+
+
 
 	std::thread robotthreadHandle; // handle na vlakno
 	
@@ -146,7 +159,7 @@ private:
 	RobotRegulator regulator;
 	
 	std::string command;
-
+	std::string command_old;
 	
 	const long double tickToMeter = 0.000085292090497737556558; // [m/tick]
 	const long double d = 0.23;

@@ -13,6 +13,8 @@ Point homogen_transformation(LaserData lidar_measurement, Position robot_positio
 
 int Mapa::addPoint(Point P)
 {
+	
+
 	Matrix_position XY = Mapa::point2indices(P);
 	if (XY.X >= 0 && XY.X < cols&&XY.Y >= 0 && XY.Y < rows)
 	{

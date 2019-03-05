@@ -14,16 +14,20 @@ int main()
 
 	while (1)
 	{
+
 		std::getline(std::cin, command);
+		
 	 if (command == "go")
-		{
+	{
 		float x, y;
 		std::cin >> x;
 		std::cin >> y;
 		robot1.addPoint(Position(x, y));
-		command = "auto";
-		}
-
+		robot1.command_reset();
+		
+		
+	 }
+	 else if(command!="")
 		robot1.set_command(command);
 		
 	}
@@ -42,10 +46,10 @@ mapa(100, 100, -5.0, 5.0, -5.0, 5.0)
 	//std::cin >> ipaddress;
 	
 	path.push(Position(0.0, 0.0));
-	path.push(Position(0.0, 1.0));
-	path.push(Position(1.0, 1.0));
-	path.push(Position(1.0, 0.0));
-	path.push(Position(0.0, 0.0));
+	//path.push(Position(0.0, 1.0));
+	//path.push(Position(1.0, 1.0));
+	//path.push(Position(1.0, 0.0));
+	//path.push(Position(0.0, 0.0));
 	
 	start_threads();
 
@@ -162,14 +166,14 @@ void RobotControll::processThisRobot()
 		{
 		
 			mapa.saveMap("file.txt");
-			command = "";
+			command_reset();
 		}
 
 		else if (command == "load")
 		{
 
 			mapa.loadMap("file.txt");
-			command = "";
+			command_reset();
 		}
 
 		int filter_steps = 5;
@@ -205,7 +209,12 @@ void RobotControll::build_map()
 {
 	for(int i = 0; i<copyOfLaserData.numberOfScans; i++)
 	{
-		mapa.addPoint(homogen_transformation(copyOfLaserData.Data[i], actual_position));
+		if (copyOfLaserData.Data[i].scanDistance > 0.1*1000)
+		{
+			if (copyOfLaserData.Data[i].scanDistance<0.65*1000 || copyOfLaserData.Data[i].scanDistance>0.75*1000)
+				mapa.addPoint(homogen_transformation(copyOfLaserData.Data[i], actual_position));
+		}
+		
 	}
 }
 
