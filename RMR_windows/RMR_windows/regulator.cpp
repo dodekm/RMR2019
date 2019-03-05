@@ -5,15 +5,17 @@
 void RobotRegulator::regulate(Position robot_position, Position desired_position)
 {
 
-	translation_output = -translation_gain * ((robot_position.coordinates.X - desired_position.coordinates.X)*cos(robot_position.alfa) + (robot_position.coordinates.Y - desired_position.coordinates.Y)*sin(robot_position.alfa));
+	output.translation_speed = -translation_gain * ((robot_position.coordinates.X - desired_position.coordinates.X)*cos(robot_position.alfa) + (robot_position.coordinates.Y - desired_position.coordinates.Y)*sin(robot_position.alfa));
 
-	translation_output = 10*sign(translation_output)*sqrt(abs(translation_output));
+	if(square_root_speed_enable==true)
+		output.translation_speed = square_root_gain*sign(output.translation_speed)*sqrt(abs(output.translation_speed));
+	
 	alfa = atan2((robot_position.coordinates.Y - desired_position.coordinates.Y), (robot_position.coordinates.X - desired_position.coordinates.X));
 
-	x_error = -cos(alfa - robot_position.alfa)*sign(translation_output);
-	y_error = -sin(alfa - robot_position.alfa)*sign(translation_output);
+	x_error = -cos(alfa - robot_position.alfa)*sign(output.translation_speed);
+	y_error = -sin(alfa - robot_position.alfa)*sign(output.translation_speed);
 	delta = atan2(y_error, x_error);
-	rotation_output = rotation_gain / delta * sign(translation_output);
+	output.radius = rotation_gain / delta * sign(output.translation_speed);
 
 	saturate_radius();
 	saturate();

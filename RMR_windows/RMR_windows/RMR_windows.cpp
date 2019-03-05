@@ -23,11 +23,11 @@ int main()
 		std::cin >> x;
 		std::cin >> y;
 		robot1.addPoint(Position(x, y));
-		robot1.command_reset();
+		
 		
 		
 	 }
-	 else if(command!="")
+	 else  if(command!="")
 		robot1.set_command(command);
 		
 	}
@@ -36,11 +36,31 @@ int main()
 	robot1.laserthreadHandle.std::thread::join();
 }
 
+void odometry_init(Odometry* odometria)
+{
+
+	odometria->wheel_distance_right = 0;
+	odometria->wheel_distance_left = 0;
+	odometria->wheel_last_distance_right = 0;
+	odometria->wheel_last_distance_left = 0;
+	odometria->delta_alfa = 0;
+	odometria->delta_l = 0;
+	odometria->delta_l_left = 0;
+	odometria->delta_l_right = 0;
+	odometria->position = Position{ 0,0,0 };
+
+
+}
+
 
 RobotControll::RobotControll():
 regulator(200, 100),
 mapa(100, 100, -5.0, 5.0, -5.0, 5.0)
 {
+	command = "stop";
+	command_old = "stop";
+	odometria_using = &odometria_3;
+
 	WinSock_setup();
 	//std::cout << "Zadaj IP adresu:" << std::endl;
 	//std::cin >> ipaddress;
@@ -88,73 +108,58 @@ void RobotControll::processThisRobot()
 	}
 
 
-	if (datacounter % 10 == 0)
+	if (datacounter % modulo_print == 0)
 	{
 		system("cls");
+		printData();
+	
+	}
+
+	if (datacounter % modulo_odometry == 0)
+	{
+		
 		encoders_process();
 		odometry_forward_euler(&(odometria_1));
 		odometry_backward_euler(&(odometria_2));
 		odometry_trapezoidal_rule(&(odometria_3));
 		odometry_curved(&(odometria_4));
-
-		actual_position = odometria_3.position;
 		
-		std::cout << "Processing Robot" << std::endl;
-		std::cout << "EncoderDataLeft=" << robotdata.EncoderLeft << "tick" << std::endl;
-		std::cout << "EncoderDataRight=" << robotdata.EncoderRight << "tick" << std::endl;
-
-		std::cout << "EncoderRealLeft=" << encL.encoder_real_value << "tick" << std::endl;
-		std::cout << "EncoderRealRight=" << encR.encoder_real_value << "tick" << std::endl;
-
-		std::cout << "Position X_trapezoidal=" << odometria_3.position.coordinates.X << "m" << std::endl;
-		std::cout << "Position Y_trapezoidal=" << odometria_3.position.coordinates.Y << "m" << std::endl;
-		std::cout << "Angle_trapezoidal=" << (odometria_3.position.alfa * 180 / PI) << "deg." << std::endl;
-
-		std::cout << "vt=" << regulator.getTranslation_output() << "mm/s" << std::endl;
-		std::cout << "R=" << regulator.getRotation_output() << "mm" << std::endl;
+		actual_position = odometria_using->position;
 		
-	
 	}
 
-	if (datacounter % 5 == 0)
+	if (datacounter % modulo_drive == 0)
 	{
 		if (command == "stop")
 		{
-			motors_working_speed = 0;
-			motors_working_radius = 0;
+			motors_speed.translation_speed=0;
+				motors_speed.radius = max_radius;
+			
 		}
 
 		else if (command == "forward")
 		{
-			motors_working_speed = 100;
-			motors_working_radius = 0;
+			motors_speed.translation_speed=150;
+			motors_speed.radius = max_radius;
 		}
 		else if (command == "back")
 		{
-			motors_working_speed = -100;
-			motors_working_radius = 0;
+			motors_speed.translation_speed=-150;
+			motors_speed.radius = max_radius;
 		}
 		else if (command == "left")
 		{
-			motors_working_speed = 10;
-			motors_working_radius = 10;
+			motors_speed.translation_speed=10;
+			motors_speed.radius = 10;
+			
 		}
 		else if (command == "right")
 		{
-			motors_working_speed = 10;
-			motors_working_radius = -10;
-
+			
+			motors_speed.translation_speed=10;
+			motors_speed.radius = -10;
 		}
-		else if (command == "leftfw")
-		{
-			motors_working_speed = 100;
-			motors_working_radius = -500;
-		}
-		else if (command == "rightfw")
-		{
-			motors_working_speed = 100;
-			motors_working_radius = 500;
-		}
+		
 
 		else if (command == "auto")
 		{
@@ -171,18 +176,65 @@ void RobotControll::processThisRobot()
 
 		else if (command == "load")
 		{
-
 			mapa.loadMap("file.txt");
 			command_reset();
 		}
 
+		else if (command == "reset")
+		{
+			reset_robot();
+			
+		}
+
 		int filter_steps = 5;
-		move_arc(filter.new_speed(motors_working_speed,filter_steps), motors_working_radius);
-		//move_arc(motors_working_speed, motors_working_radius);
+		move_arc(filter.new_speed(motors_speed.translation_speed,filter_steps), motors_speed.radius);
+		
 
 	}
 
 	datacounter++;
+}
+
+void RobotControll::reset_robot()
+{
+
+	
+	while (!path.empty())
+	{
+		path.pop();
+	}
+	encoder_init_values(&encL, robotdata.EncoderLeft);
+	encoder_init_values(&encR, robotdata.EncoderRight);
+	odometry_init(odometria_using);
+	motors_speed.translation_speed = 0;
+	motors_speed.radius = max_radius;
+	command == "stop";
+}
+
+void RobotControll::printData()
+{
+
+	std::cout << "Processing Robot" << std::endl;
+	std::cout << "EncoderDataLeft=" << robotdata.EncoderLeft << "tick" << std::endl;
+	std::cout << "EncoderDataRight=" << robotdata.EncoderRight << "tick" << std::endl;
+
+	std::cout << "EncoderRealLeft=" << encL.encoder_real_value << "tick" << std::endl;
+	std::cout << "EncoderRealRight=" << encR.encoder_real_value << "tick" << std::endl;
+
+	std::cout << "Position X_trapezoidal=" << odometria_3.position.coordinates.X << "m" << std::endl;
+	std::cout << "Position Y_trapezoidal=" << odometria_3.position.coordinates.Y << "m" << std::endl;
+	std::cout << "Angle_trapezoidal=" << (odometria_3.position.alfa * 180 / PI) << "deg." << std::endl;
+
+	std::cout << "Mode=" << command << std::endl;
+
+
+	std::cout << "Position X_wanted=" << wanted_position.coordinates.X << "m" << std::endl;
+	std::cout << "Position Y_wanted=" << wanted_position.coordinates.Y << "m" << std::endl;
+
+	std::cout << "vt=" << regulator.getTranslation_output() << "mm/s" << std::endl;
+	std::cout << "R=" << regulator.getRotation_output() << "mm" << std::endl;
+
+
 }
 
 
@@ -191,12 +243,11 @@ void RobotControll::automode()
 	if (!isRegulated())
 	{
 		regulator.regulate(actual_position, wanted_position);
-		motors_working_speed = regulator.getTranslation_output();
-		motors_working_radius = regulator.getRotation_output();
+		motors_speed = regulator.output;
 	}
-	else if (isRegulated())
+	else 
 	{
-		motors_working_speed = 0;
+		motors_speed.translation_speed = 0;
 		if (!path.empty())
 		{
 			wanted_position = path.front();

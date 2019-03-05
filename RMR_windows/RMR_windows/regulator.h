@@ -4,6 +4,13 @@
 
 int sign(float x);
 
+typedef struct robotSpeed
+{
+	float translation_speed;
+	float radius;
+	
+};
+
 class RobotRegulator
 {
 public:
@@ -18,52 +25,62 @@ public:
 		this->rotation_gain = rotation_gain;
 	}
 
+
+
 	~RobotRegulator()
 	{
 
 	}
+
+
 	void regulate(Position robot_position, Position desired_position);
 
 
 
 	float getTranslation_output()
 	{
-		return translation_output;
+		return output.translation_speed;
 	}
 
 	float getRotation_output()
 	{
-		return rotation_output;
+		return output.radius;
 	}
+
 	float position_deadzone = 0.05;
+	bool square_root_speed_enable=true;
+	float square_root_gain = 15;
+
+	robotSpeed output;
 
 private:
 	float translation_gain;
 	float rotation_gain;
-	float translation_output;
-	float rotation_output;
+
+	
 	float x_error;
 	float y_error;
 	float delta;
 	float alfa;
+	
 
 	void saturate_radius()
 	{
-		if (abs(rotation_output) > max_radius)
-			rotation_output = sign(rotation_output)*max_radius;
+		if (abs(output.radius) > max_radius)
+			output.radius = sign(output.radius)*max_radius;
 		
 	}
 
 	void saturate()
 	{
-		if (translation_output > max_speed)
+		if (output.translation_speed > max_speed)
 		{
-			translation_output = max_speed;
+			output.translation_speed = max_speed;
 		}
 
-		else if (translation_output < -max_speed)
+		else if (output.translation_speed < -max_speed)
 		{
-			translation_output = -max_speed;
+			output.translation_speed = -max_speed;
 		}
 	}
 

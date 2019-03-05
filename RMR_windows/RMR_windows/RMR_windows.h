@@ -36,13 +36,13 @@ typedef struct Odometry
 	Position position;
 }Odometry;
 
+void odometry_init(Odometry* odometria);
 
 
 class RobotControll
 {
 public:
 	
-
 	RobotControll();
 	~RobotControll();
 	void WinSock_setup();
@@ -62,6 +62,8 @@ public:
 	void automode();
 	void build_map();
 
+	void printData();
+	void reset_robot();
 	
 	void move_arc(int mmpersec, int radius);
 	void forward(int);
@@ -132,11 +134,15 @@ public:
 private:
 
 	LaserMeasurement copyOfLaserData;
-	std::string ipaddress= "192.168.1.13";
+	std::string ipaddress= "192.168.1.11";
 	CKobuki robot;
 	TKobukiData robotdata;
 	
-	int datacounter=0;
+	unsigned int datacounter=0;
+	int modulo_print = 50;
+	int modulo_odometry = 10;
+	int modulo_drive = 5;
+
 	
 	Encoder encL;
 	Encoder encR;
@@ -144,10 +150,10 @@ private:
 	Odometry odometria_2;
 	Odometry odometria_3;
 	Odometry odometria_4;
-
-	int motors_working_speed = 0; 
-	int motors_working_radius = 0;
+	Odometry* odometria_using;
 	
+	
+	robotSpeed motors_speed{ 0,0 };
 	
 	Position actual_position;
 	Position wanted_position;

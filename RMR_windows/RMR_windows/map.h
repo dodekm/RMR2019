@@ -8,13 +8,13 @@
 #include <new> 
 
 
-#define lidar_angle_offset 0.0
 #define map_max_size 500
 
 enum
 {
 	cell_free,
-	cell_obstacle
+	cell_obstacle,
+	cell_robot
 }cell_content;
 
 typedef struct Matrix_position
@@ -53,8 +53,9 @@ public:
 		this->y_lim[0] = y_low;
 		this->y_lim[1] = y_high;
 
-		saveMap("file.txt");
+		
 		//loadMap("file.txt");
+		//saveMap("file.txt");
 	}
 	
 	~Mapa()
