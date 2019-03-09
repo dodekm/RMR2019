@@ -222,7 +222,7 @@ void RobotControll::reset_robot()
 void RobotControll::printData()
 {
 
-	std::cout << "Processing Robot" << std::endl;
+	
 	std::cout << "EncoderDataLeft=" << robotdata.EncoderLeft << "tick" << std::endl;
 	std::cout << "EncoderDataRight=" << robotdata.EncoderRight << "tick" << std::endl;
 
