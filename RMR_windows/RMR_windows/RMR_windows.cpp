@@ -22,7 +22,7 @@ int main()
 		float x, y;
 		std::cin >> x;
 		std::cin >> y;
-		robot1.addPoint(Position(x, y));
+		robot1.addPoint(RobotPosition(x, y));
 		
 		
 		
@@ -47,13 +47,15 @@ void odometry_init(Odometry* odometria)
 	odometria->delta_l = 0;
 	odometria->delta_l_left = 0;
 	odometria->delta_l_right = 0;
-	odometria->position = Position{ 0,0,0 };
+	odometria->position = RobotPosition{0,0};
 
 
 }
 
 
 RobotControll::RobotControll():
+
+	
 regulator(200, 100),
 mapa(100, 100, -5.0, 5.0, -5.0, 5.0)
 {
@@ -78,7 +80,7 @@ mapa(100, 100, -5.0, 5.0, -5.0, 5.0)
 		ipaddress=str;
 	}
 
-	path.push(Position(0.0, 0.0));
+	path.push(RobotPosition(0.0, 0.0));
 	start_threads();
 
 }
@@ -131,7 +133,7 @@ void RobotControll::processThisRobot()
 		odometry_backward_euler(&(odometria_2));
 		odometry_trapezoidal_rule(&(odometria_3));
 		odometry_curved(&(odometria_4));
-		
+
 		actual_position = odometria_using->position;
 		
 	}
@@ -141,7 +143,7 @@ void RobotControll::processThisRobot()
 		if (command == "stop")
 		{
 			motors_speed.translation_speed=0;
-				motors_speed.radius = max_radius;
+			motors_speed.radius = max_radius;
 			
 		}
 
@@ -194,9 +196,7 @@ void RobotControll::processThisRobot()
 			
 		}
 
-		int filter_steps = 5;
-		move_arc(filter.new_speed(motors_speed.translation_speed,filter_steps), motors_speed.radius);
-		
+		move_arc(filter.set_speed((int)round(motors_speed.translation_speed),speed_filter_steps), (int)round(motors_speed.radius));
 
 	}
 
@@ -205,8 +205,6 @@ void RobotControll::processThisRobot()
 
 void RobotControll::reset_robot()
 {
-
-	
 	while (!path.empty())
 	{
 		path.pop();
@@ -221,8 +219,6 @@ void RobotControll::reset_robot()
 
 void RobotControll::printData()
 {
-
-	
 	std::cout << "EncoderDataLeft=" << robotdata.EncoderLeft << "tick" << std::endl;
 	std::cout << "EncoderDataRight=" << robotdata.EncoderRight << "tick" << std::endl;
 
@@ -248,7 +244,7 @@ void RobotControll::printData()
 
 void RobotControll::automode()
 {
-	if (!isRegulated())
+	if (!regulator.isRegulated(actual_position, wanted_position))
 	{
 		regulator.regulate(actual_position, wanted_position);
 		motors_speed = regulator.output;
@@ -269,7 +265,7 @@ void RobotControll::build_map()
 	for(int i = 0; i<copyOfLaserData.numberOfScans; i++)
 	{
 				if(lidar_check_measure(copyOfLaserData.Data[i]))
-				mapa.addPoint(homogen_transformation(copyOfLaserData.Data[i], actual_position));
+				mapa.addPoint(lidar_measure_2_point(copyOfLaserData.Data[i], actual_position));
 	}
 }
 

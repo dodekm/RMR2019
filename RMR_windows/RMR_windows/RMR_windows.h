@@ -33,7 +33,7 @@ typedef struct Odometry
 	float delta_l=0;
 	float delta_l_left = 0;
 	float delta_l_right = 0;
-	Position position;
+	RobotPosition position;
 }Odometry;
 
 void odometry_init(Odometry* odometria);
@@ -72,12 +72,9 @@ public:
 	void right(double);
 	void stop();
 	
-	int isRegulated()
-	{
-		return (PointsDistance(actual_position.coordinates, wanted_position.coordinates) < regulator.position_deadzone);
-	}
+	
 
-	void addPoint(Position P)
+	void addPoint(RobotPosition P)
 	{
 		path.push(P);
 	}
@@ -89,7 +86,6 @@ public:
 	}
 	std::string get_command()
 	{
-	
 		return command;
 	}
 
@@ -116,10 +112,6 @@ public:
 		return;
 	}
 
-
-	
-
-
 private:
 
 	//veci na broadcast laser
@@ -145,7 +137,6 @@ private:
 	int modulo_odometry = 10;
 	int modulo_drive = 5;
 
-	
 	Encoder encL;
 	Encoder encR;
 	Odometry odometria_1;
@@ -157,12 +148,13 @@ private:
 	
 	robotSpeed motors_speed{ 0,0 };
 	
-	Position actual_position;
-	Position wanted_position;
-	std::queue <Position> path;
+	RobotPosition actual_position;
+	RobotPosition wanted_position;
+	std::queue <RobotPosition> path;
 
-
+	int speed_filter_steps = 10;
 	Speed_filter filter;
+
 	Mapa mapa;
 	RobotRegulator regulator;
 	

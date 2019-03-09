@@ -1,7 +1,7 @@
 #pragma once
 #include "points.h"
 #include "rplidar.h"
-#include <math.h>
+#include <cmath>
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -19,11 +19,11 @@ enum
 
 typedef struct Matrix_position
 {
-	int X, Y;
+	unsigned int X, Y;
 }Matrix_position;
 
 
-Point homogen_transformation(LaserData lidar_measurement, Position robot_position);
+Point lidar_measure_2_point(LaserData lidar_measurement, RobotPosition robot_position);
 float deg2rad(float);
 float rad2deg(float);
 

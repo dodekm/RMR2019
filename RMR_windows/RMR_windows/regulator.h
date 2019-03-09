@@ -2,13 +2,12 @@
 #define max_speed  250
 #define max_radius  65534/2
 
-int sign(float x);
+template <typename T>int sign(T x);
 
 typedef struct robotSpeed
 {
 	float translation_speed;
 	float radius;
-	
 };
 
 class RobotRegulator
@@ -32,9 +31,8 @@ public:
 
 	}
 
-
-	void regulate(Position robot_position, Position desired_position);
-
+	void regulate(RobotPosition current_position, RobotPosition desired_position);
+	int isRegulated(RobotPosition current_position, RobotPosition desired_position);
 
 
 	float getTranslation_output()
@@ -57,12 +55,7 @@ private:
 	float translation_gain;
 	float rotation_gain;
 
-	
-	float x_error;
-	float y_error;
-	float delta;
-	float alfa;
-	
+	Point error;
 
 	void saturate_radius()
 	{
@@ -71,17 +64,10 @@ private:
 		
 	}
 
-	void saturate()
+	void saturate_speed()
 	{
-		if (output.translation_speed > max_speed)
-		{
-			output.translation_speed = max_speed;
-		}
-
-		else if (output.translation_speed < -max_speed)
-		{
-			output.translation_speed = -max_speed;
-		}
+		if (abs(output.translation_speed) > max_speed)
+			output.translation_speed = sign(output.translation_speed)*max_speed;
 	}
 
 };

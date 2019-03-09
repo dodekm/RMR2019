@@ -7,6 +7,10 @@ float PointsDistance(Point a, Point b)
 {
 	return sqrt((a.X - b.X)*(a.X - b.X) + (a.Y - b.Y)*(a.Y - b.Y));
 }
+float PointLength(Point a)
+{
+	return sqrt((a.X)*(a.X) + (a.Y)*(a.Y));
+}
 
 float PointAngle(Point p)
 {
@@ -14,7 +18,7 @@ float PointAngle(Point p)
 }
 
 
-Point PointFromAngle(float angle, float length)
+Point polar2point(float angle, float length)
 {
 	Point p;
 	p.X = length * cos(angle);

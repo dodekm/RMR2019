@@ -14,10 +14,8 @@ public:
 	{
 
 	}
-	int new_speed(int desired_speed, int n_steps);
+	int set_speed(int desired_speed, int n_steps);
 	int step();
-
-
 
 private:
 

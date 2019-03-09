@@ -2,19 +2,17 @@
 #include "pch.h"
 
 
-Point homogen_transformation(LaserData lidar_measurement, Position robot_position)
+Point lidar_measure_2_point(LaserData lidar_measurement, RobotPosition robot_position)
 {
 	Point P;
 	P.X = robot_position.coordinates.X + lidar_measurement.scanDistance/1000*cos(-deg2rad(lidar_measurement.scanAngle) + robot_position.alfa);
 	P.Y = robot_position.coordinates.Y + lidar_measurement.scanDistance/1000*sin(-deg2rad(lidar_measurement.scanAngle) + robot_position.alfa);
-
 	return P;
 }
 
 int Mapa::addPoint(Point P)
 {
-	
-	Matrix_position XY = Mapa::point2indices(P);
+	Matrix_position XY = point2indices(P);
 	if (XY.X >= 0 && XY.X < cols&&XY.Y >= 0 && XY.Y < rows)
 	{
 		if (cells[XY.X][XY.Y] == cell_obstacle)
@@ -62,8 +60,7 @@ void Mapa::loadMap(std::string filename)
 		return;
 
 	char str[map_max_size];
-	
-	
+
 	Matrix_position i{0,0};
 	int j;
 

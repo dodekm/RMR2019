@@ -2,28 +2,34 @@
 #include "pch.h"
 
 
-void RobotRegulator::regulate(Position robot_position, Position desired_position)
+void RobotRegulator::regulate(RobotPosition current_position, RobotPosition desired_position)
 {
-
-	output.translation_speed = -translation_gain * ((robot_position.coordinates.X - desired_position.coordinates.X)*cos(robot_position.alfa) + (robot_position.coordinates.Y - desired_position.coordinates.Y)*sin(robot_position.alfa));
+	float delta;
+	float alfa;
+	output.translation_speed = -translation_gain * ((current_position.coordinates.X - desired_position.coordinates.X)*cos(current_position.alfa) + (current_position.coordinates.Y - desired_position.coordinates.Y)*sin(current_position.alfa));
 
 	if(square_root_speed_enable==true)
 		output.translation_speed = square_root_gain*sign(output.translation_speed)*sqrt(abs(output.translation_speed));
 	
-	alfa = atan2((robot_position.coordinates.Y - desired_position.coordinates.Y), (robot_position.coordinates.X - desired_position.coordinates.X));
+	alfa = atan2((current_position.coordinates.Y - desired_position.coordinates.Y), (current_position.coordinates.X - desired_position.coordinates.X));
 
-	x_error = -cos(alfa - robot_position.alfa)*sign(output.translation_speed);
-	y_error = -sin(alfa - robot_position.alfa)*sign(output.translation_speed);
-	delta = atan2(y_error, x_error);
+	error.X = -cos(alfa - current_position.alfa)*sign(output.translation_speed);
+	error.Y = -sin(alfa - current_position.alfa)*sign(output.translation_speed);
+	
+	delta = PointAngle(error);
 	output.radius = rotation_gain / delta * sign(output.translation_speed);
 
 	saturate_radius();
-	saturate();
+	saturate_speed();
+}
+
+int RobotRegulator::isRegulated(RobotPosition current_position, RobotPosition desired_position)
+{
+	return (PointsDistance(current_position.coordinates, desired_position.coordinates) < position_deadzone);
 }
 
 
-
-int sign(float x)
+template <typename T>int sign(T x)
 {
 	return (((x) < 0) ? -1 : ((x) > 0));
 }

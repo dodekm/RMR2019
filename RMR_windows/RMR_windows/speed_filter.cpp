@@ -3,7 +3,7 @@
 
 
 
-int Speed_filter::new_speed(int desired_speed, int n_steps)
+int Speed_filter::set_speed(int desired_speed, int n_steps)
 {
 	if (desired_speed != this->desired_speed)
 	{

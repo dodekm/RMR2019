@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 
 typedef struct Point
 {
@@ -8,35 +9,37 @@ typedef struct Point
 
 
 float PointsDistance(Point a, Point b);
+float PointAngle(Point p);
+float PointLength(Point a);
+Point polar2point(float angle, float length);
 
-
-class Position
+class RobotPosition
 {
 public:
 	Point coordinates;
 	float alfa;
 
-	Position()
+	RobotPosition()
 	{
 		alfa = 0.0;
 		coordinates = { 0.0,0.0 };
 	}
 
-	Position(float X, float Y, float alfa)
+	RobotPosition(float X, float Y, float alfa)
 	{
 		coordinates.X = X;
 		coordinates.Y = Y;
 		this->alfa = alfa;
 	}
 
-	Position(float X, float Y)
+	RobotPosition(float X, float Y)
 	{
 		coordinates.X = X;
 		coordinates.Y = Y;
-		alfa = 0.0;
+		alfa = 0;
 	}
 
-	~Position()
+	~RobotPosition()
 	{
 	
 	}
