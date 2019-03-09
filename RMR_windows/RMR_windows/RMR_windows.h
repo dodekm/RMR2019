@@ -117,6 +117,11 @@ public:
 	}
 
 
+	
+
+
+private:
+
 	//veci na broadcast laser
 	struct sockaddr_in las_si_me, las_si_other, las_si_posli;
 
@@ -129,9 +134,6 @@ public:
 	SOCKET rob_s;
 	int	rob_recv_len;
 	int rob_slen;
-
-
-private:
 
 	LaserMeasurement copyOfLaserData;
 	std::string ipaddress= "192.168.1.11";

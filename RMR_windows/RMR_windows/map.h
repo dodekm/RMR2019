@@ -84,8 +84,17 @@ private:
 	{
 		Matrix_position XY;
 		XY.X = (int)round(cols * (P.X - x_lim[0]) / (x_lim[1] - x_lim[0]));
-		XY.Y = (int)round(cols * (P.Y - y_lim[0]) / (y_lim[1] - y_lim[0]));
+		XY.Y = (int)round(rows * (P.Y - y_lim[0]) / (y_lim[1] - y_lim[0]));
 		return XY;
+	}
+
+
+	Point  indices2point( Matrix_position XY)
+	{
+		Point P;
+		P.X = (x_lim[1] - x_lim[0])*XY.X / cols + x_lim[0];
+		P.Y = (y_lim[1] - y_lim[0])*XY.Y / rows + y_lim[0];
+		return P;
 	}
 	
 

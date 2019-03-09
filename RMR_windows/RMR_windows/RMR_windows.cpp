@@ -59,18 +59,26 @@ mapa(100, 100, -5.0, 5.0, -5.0, 5.0)
 {
 	command = "stop";
 	command_old = "stop";
+	
+	odometry_init(&odometria_1);
+	odometry_init(&odometria_2);
+	odometry_init(&odometria_3);
+	odometry_init(&odometria_4);
+
 	odometria_using = &odometria_3;
 
 	WinSock_setup();
-	//std::cout << "Zadaj IP adresu:" << std::endl;
-	//std::cin >> ipaddress;
+	std::cout << "Zadaj IP adresu:" << std::endl;
 	
+	{
+		std::string str;
+		std::cin >> str;
+
+		if (str.length()==12)
+		ipaddress=str;
+	}
+
 	path.push(Position(0.0, 0.0));
-	//path.push(Position(0.0, 1.0));
-	//path.push(Position(1.0, 1.0));
-	//path.push(Position(1.0, 0.0));
-	//path.push(Position(0.0, 0.0));
-	
 	start_threads();
 
 }
@@ -260,12 +268,8 @@ void RobotControll::build_map()
 {
 	for(int i = 0; i<copyOfLaserData.numberOfScans; i++)
 	{
-		if (copyOfLaserData.Data[i].scanDistance > 0.1*1000)
-		{
-			if (copyOfLaserData.Data[i].scanDistance<0.65*1000 || copyOfLaserData.Data[i].scanDistance>0.75*1000)
+				if(lidar_check_measure(copyOfLaserData.Data[i]))
 				mapa.addPoint(homogen_transformation(copyOfLaserData.Data[i], actual_position));
-		}
-		
 	}
 }
 
