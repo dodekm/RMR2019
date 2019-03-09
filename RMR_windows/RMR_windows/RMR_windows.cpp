@@ -233,7 +233,7 @@ void RobotControll::printData()
 	std::cout << "Position Y_trapezoidal=" << odometria_3.position.coordinates.Y << "m" << std::endl;
 	std::cout << "Angle_trapezoidal=" << (odometria_3.position.alfa * 180 / PI) << "deg." << std::endl;
 
-	std::cout << "Mode=" << command << std::endl;
+	std::cout << "Robot_Mode=" << command << std::endl;
 
 
 	std::cout << "Position X_wanted=" << wanted_position.coordinates.X << "m" << std::endl;
