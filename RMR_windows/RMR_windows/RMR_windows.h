@@ -150,12 +150,17 @@ private:
 	
 	RobotPosition actual_position;
 	RobotPosition wanted_position;
+	Point start;
+	Point target;
+
 	std::queue <RobotPosition> path;
 
 	int speed_filter_steps = 10;
 	Speed_filter filter;
 
 	Mapa mapa;
+	Mapa mapa_flood_fill;
+
 	RobotRegulator regulator;
 	
 	std::string command;

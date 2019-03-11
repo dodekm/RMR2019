@@ -5,6 +5,17 @@ typedef struct Point
 {
 	float X = 0.0;
 	float Y = 0.0;
+
+	Point operator +(const Point& other)
+	{
+		return Point{X+other.X,Y+other.Y};
+	}
+
+	Point operator-(const Point& other)
+	{
+		return Point{ X - other.X,Y - other.Y };
+	}
+
 }Point;
 
 

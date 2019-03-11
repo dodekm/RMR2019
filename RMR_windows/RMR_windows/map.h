@@ -6,21 +6,47 @@
 #include <string>
 #include <sstream>
 #include <new> 
+#include <queue>
 
 
 #define map_max_size 500
+
+#define floodfill_priority_X 0
+#define floodfill_priority_Y 1
+
 
 enum
 {
 	cell_free,
 	cell_obstacle,
-	cell_robot
+	cell_finish,
+	cell_start =-1
+	
 }cell_content;
 
 typedef struct Matrix_position
 {
-	unsigned int X, Y;
+	int X, Y;
+
+	bool operator==(const Matrix_position& other)
+	{
+		return (X==other.X&&Y==other.Y);
+	}
+
+	Matrix_position operator +(const Matrix_position& other)
+	{
+		return Matrix_position{ X + other.X,Y + other.Y };
+	}
+
+	Matrix_position operator -(const Matrix_position& other)
+	{
+		return Matrix_position{ X - other.X,Y - other.Y };
+	}
+
 }Matrix_position;
+
+
+
 
 
 Point lidar_measure_2_point(LaserData lidar_measurement, RobotPosition robot_position);
@@ -37,14 +63,14 @@ public:
 	
 	}
 	
-	Mapa(int rows,int cols, float  x_low,float x_high,float y_low,float y_high)
+	Mapa(int rows,int cols, float  x_low,float x_high,float y_low,float y_high,std::string filename)
 	{
-		cells = new int*[rows];
+		cells_data = new int*[rows];
 		for (int i = 0; i < rows; ++i) 
 		{
-			cells[i] = new int[cols];
+			cells_data[i] = new int[cols];
 			for (int j = 0; j < cols; j++)
-				cells[i][j] = cell_free;
+				cells_data[i][j] = cell_free;
 		}
 		this->cols = cols;
 		this->rows = rows;
@@ -54,20 +80,44 @@ public:
 		this->y_lim[1] = y_high;
 
 		
-		//loadMap("file.txt");
+		//loadMap(filename);
 		//saveMap("file.txt");
 	}
 	
+	Mapa(const Mapa& source)
+	{
+	
+		cols = source.cols;
+		rows = source.rows;
+		x_lim[0] = source.x_lim[0];
+		x_lim[1] = source.x_lim[1];
+		y_lim[0] = source.y_lim[0];
+		y_lim[1] = source.y_lim[1];
+
+		cells_data = new int*[rows];
+		for (int i = 0; i < rows; ++i)
+		{
+			cells_data[i] = new int[cols];
+			for (int j = 0; j < cols; j++)
+				cells_data[i][j] = source.cells_data[i][j];
+		}
+
+	}
+
 	~Mapa()
 	{
 		for (int i = 0; i < rows; ++i) {
-			delete[] cells[i];
+			delete[] cells_data[i];
 		}
-		delete[] cells;
+		delete[] cells_data;
 	
 	}
-	
-	int addPoint(Point P);
+
+	void FloodFill_fill(Point start, Point target);
+	std::queue <RobotPosition> FloodFill_find_path(Point start, Point target,int priority);
+
+	int assert_matrix_indices(Matrix_position XY);
+	int addObstacle(Point P);
 
 	void saveMap(std::string filename);
 
@@ -76,10 +126,11 @@ public:
 private:
 	int cols, rows;
 	float  x_lim[2], y_lim[2];
-	int** cells;
+	int** cells_data;
 	
 
-	
+
+
 	Matrix_position point2indices(Point P)
 	{
 		Matrix_position XY;
@@ -89,7 +140,7 @@ private:
 	}
 
 
-	Point  indices2point( Matrix_position XY)
+	Point indices2point( Matrix_position XY)
 	{
 		Point P;
 		P.X = (x_lim[1] - x_lim[0])*XY.X / cols + x_lim[0];

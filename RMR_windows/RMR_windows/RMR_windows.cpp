@@ -53,11 +53,12 @@ void odometry_init(Odometry* odometria)
 }
 
 
-RobotControll::RobotControll():
+RobotControll::RobotControll() :
 
-	
-regulator(200, 100),
-mapa(100, 100, -5.0, 5.0, -5.0, 5.0)
+
+	regulator(200, 100),
+	mapa(20, 20, -5.0, 5.0, -5.0, 5.0,"file2.txt")
+
 {
 	command = "stop";
 	command_old = "stop";
@@ -68,6 +69,9 @@ mapa(100, 100, -5.0, 5.0, -5.0, 5.0)
 	odometry_init(&odometria_4);
 
 	odometria_using = &odometria_3;
+
+	start = Point{ 0, 0 };
+	target = Point{ 4, 3 };
 
 	WinSock_setup();
 	std::cout << "Zadaj IP adresu:" << std::endl;
@@ -81,6 +85,11 @@ mapa(100, 100, -5.0, 5.0, -5.0, 5.0)
 	}
 
 	path.push(RobotPosition(0.0, 0.0));
+
+	mapa_flood_fill = mapa;
+	mapa_flood_fill.FloodFill_fill(start, target);
+	mapa_flood_fill.saveMap("floodfill.txt");
+
 	start_threads();
 
 }
@@ -190,6 +199,13 @@ void RobotControll::processThisRobot()
 			command_reset();
 		}
 
+		else if (command == "find")
+		{
+			mapa_flood_fill = mapa;
+			mapa_flood_fill.FloodFill_fill(start, target);
+			command_reset();
+		}
+
 		else if (command == "reset")
 		{
 			reset_robot();
@@ -265,7 +281,7 @@ void RobotControll::build_map()
 	for(int i = 0; i<copyOfLaserData.numberOfScans; i++)
 	{
 				if(lidar_check_measure(copyOfLaserData.Data[i]))
-				mapa.addPoint(lidar_measure_2_point(copyOfLaserData.Data[i], actual_position));
+				mapa.addObstacle(lidar_measure_2_point(copyOfLaserData.Data[i], actual_position));
 	}
 }
 
