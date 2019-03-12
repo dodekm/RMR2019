@@ -33,6 +33,13 @@ typedef struct Matrix_position
 		return (X==other.X&&Y==other.Y);
 	}
 
+	void operator=(const Matrix_position& other)
+	{
+		X = other.X;
+		Y = other.Y;
+	}
+	
+
 	Matrix_position operator +(const Matrix_position& other)
 	{
 		return Matrix_position{ X + other.X,Y + other.Y };
@@ -44,9 +51,6 @@ typedef struct Matrix_position
 	}
 
 }Matrix_position;
-
-
-
 
 
 Point lidar_measure_2_point(LaserData lidar_measurement, RobotPosition robot_position);
@@ -79,10 +83,36 @@ public:
 		this->y_lim[0] = y_low;
 		this->y_lim[1] = y_high;
 
-		
 		//loadMap(filename);
-		//saveMap("file.txt");
+		//saveMap(filename);
 	}
+
+
+	void  operator=(const Mapa& source)
+	{
+		
+		cols = source.cols;
+		rows = source.rows;
+		x_lim[0] = source.x_lim[0];
+		x_lim[1] = source.x_lim[1];
+		y_lim[0] = source.y_lim[0];
+		y_lim[1] = source.y_lim[1];
+
+		cells_data = new int*[rows];
+		for (int i = 0; i < rows; ++i)
+		{
+			cells_data[i] = new int[cols];
+			for (int j = 0; j < cols; j++)
+				cells_data[i][j] = source.cells_data[i][j];
+		}
+		
+	}
+
+	int& operator[](Matrix_position position)
+	{
+		return (cells_data[position.Y][position.X]);
+	}
+
 	
 	Mapa(const Mapa& source)
 	{
@@ -113,6 +143,8 @@ public:
 	
 	}
 
+	
+
 	void FloodFill_fill(Point start, Point target);
 	std::queue <RobotPosition> FloodFill_find_path(Point start, Point target,int priority);
 
@@ -124,12 +156,11 @@ public:
 	void loadMap(std::string filename);
 
 private:
+
 	int cols, rows;
 	float  x_lim[2], y_lim[2];
 	int** cells_data;
 	
-
-
 
 	Matrix_position point2indices(Point P)
 	{

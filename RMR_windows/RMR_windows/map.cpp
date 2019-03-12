@@ -21,9 +21,11 @@ int Mapa::addObstacle(Point P)
 	Matrix_position XY = point2indices(P);
 	if (assert_matrix_indices(XY))
 	{
-		if (cells_data[XY.X][XY.Y] == cell_obstacle)
+		if ((*this)[XY] == cell_obstacle)
 			return 0;
-		cells_data[XY.X][XY.Y] = cell_obstacle;
+		(*this)[XY] = cell_obstacle;
+
+		(*this)[XY] = cell_obstacle;
 		return 1;
 	}
 	return -1;
@@ -37,11 +39,10 @@ void Mapa::saveMap(std::string filename)
 	file.open(filename,std::ios::out|std::ios::trunc);
 	if (!file.is_open())
 		return;
-	
-	//file << '[';
-	for (int i = 0; i < cols; i++)
+
+	for (int i = 0; i < rows; i++)
 	{
-		for (int j = 0; j < rows; j++)
+		for (int j = 0; j < cols; j++)
 		{
 			file << cells_data[i][j];
 			if (j  < rows-1)
@@ -54,7 +55,6 @@ void Mapa::saveMap(std::string filename)
 		}
 		
 	}
-	//file << ']';
 	file.flush();
 	file.close();
 }
@@ -104,25 +104,24 @@ void Mapa::FloodFill_fill(Point start, Point target)
 	if (!(assert_matrix_indices(target_indices) && assert_matrix_indices(start_indices)))
 		return;
 
-	cells_data[target_indices.Y][target_indices.X] = cell_finish;
-	cells_data[start_indices.Y][start_indices.X] = cell_start;
+	(*this)[target_indices] = cell_finish;
+	(*this)[start_indices] = cell_start;
 
 	Matrix_position working_cell = target_indices;
 
 	std::queue<Matrix_position> points_to_evaluate;
 
+	std::vector<Matrix_position> offset;
+	offset.push_back(Matrix_position{ -1,0 });
+	offset.push_back(Matrix_position{ 1,0 });
+	offset.push_back(Matrix_position{ 0,-1 });
+	offset.push_back(Matrix_position{ 0, 1 });
 	
 	while (!(working_cell==start_indices))
 	{
 
 		if (assert_matrix_indices(working_cell))
 		{
-
-			std::vector<Matrix_position> offset;
-			offset.push_back(Matrix_position{ -1,0 });
-			offset.push_back(Matrix_position{  1,0 });
-			offset.push_back(Matrix_position{ 0,-1 });
-			offset.push_back(Matrix_position{ 0, 1 });
 
 			for (int i = 0; i < offset.size();i++)
 
@@ -138,13 +137,12 @@ void Mapa::FloodFill_fill(Point start, Point target)
 						break;
 					}
 					
-					else if (cells_data[new_position.Y][new_position.X] == cell_free)
+					else if ((*this)[new_position] == cell_free)
 					{
-						cells_data[new_position.Y][new_position.X] = cells_data[working_cell.Y][working_cell.X] + 1;
+						(*this)[new_position] = (*this)[working_cell] + 1;
 						points_to_evaluate.push(new_position);
 						
 					}
-				
 
 				}
 			}
@@ -160,7 +158,7 @@ void Mapa::FloodFill_fill(Point start, Point target)
 }
 
 
-std::queue <RobotPosition>  Mapa::FloodFill_find_path(Point start, Point target,int priority)
+std::queue <RobotPosition> Mapa::FloodFill_find_path(Point start, Point target, int priority)
 {
 	std::queue <RobotPosition> path;
 
@@ -169,21 +167,69 @@ std::queue <RobotPosition>  Mapa::FloodFill_find_path(Point start, Point target,
 
 	if (!(assert_matrix_indices(target_indices) && assert_matrix_indices(start_indices)))
 		return std::queue<RobotPosition>();
-	if(cells_data[target_indices.Y][target_indices.X] != cell_finish)
+	if (cells_data[target_indices.Y][target_indices.X] != cell_finish)
 		return std::queue<RobotPosition>();
-	cells_data[start_indices.Y][start_indices.X] != cell_start;
-		return std::queue<RobotPosition>();
+	if(cells_data[start_indices.Y][start_indices.X] != cell_start)
+	return std::queue<RobotPosition>();
 
-		Matrix_position working_cell = start_indices;
+	Matrix_position working_cell = start_indices;
+	Matrix_position working_cell_old = start_indices;
 
-		while (!(working_cell == target_indices))
+	std::vector<Matrix_position> offset;
+	offset.push_back(Matrix_position{ -1,0 });
+	offset.push_back(Matrix_position{ 1,0 });
+	offset.push_back(Matrix_position{ 0,-1 });
+	offset.push_back(Matrix_position{ 0, 1 });
+
+	
+	Matrix_position difference = { 0,0 };
+	Matrix_position difference_old = { 0,0 };
+
+	while (!(working_cell == target_indices))
+	{
+		int minvalue = INT32_MAX;
+		Matrix_position chosen_cell = {0,0};
+		Matrix_position direction = {0,0};
+	
+
+		for (int i = 0; i < offset.size(); i++)
+
 		{
+			Matrix_position new_position = working_cell + offset[i];
 
+			if (assert_matrix_indices(new_position))
+			{
 
+				if ((*this)[new_position]> 1)
+				{
+					if ((*this)[new_position] < minvalue)
+					{
+						direction = new_position;
+						minvalue = (*this)[new_position];
+					}
+
+				}
+
+			}
 		}
 
+			working_cell = direction;
+			difference = working_cell - working_cell_old;
+			Matrix_position second_order_difference = difference - difference_old;
+			
 
-
+			if (!(difference_old == Matrix_position{ 0,0 }))
+			{
+				if (!(second_order_difference == Matrix_position{ 0,0 }))
+				{
+					path.push(RobotPosition(indices2point(working_cell)));
+				}
+				
+			}
+			working_cell_old = working_cell;
+			difference_old = difference;
+	}
+	path.push(RobotPosition(indices2point(target_indices)));
 	return path;
 }
 

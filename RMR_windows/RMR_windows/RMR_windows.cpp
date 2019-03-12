@@ -24,7 +24,7 @@ int main()
 		std::cin >> y;
 		robot1.addPoint(RobotPosition(x, y));
 		
-		
+		robot1.set_start_target(robot1.get_position().coordinates, Point{ x,y });
 		
 	 }
 	 else  if(command!="")
@@ -56,8 +56,9 @@ void odometry_init(Odometry* odometria)
 RobotControll::RobotControll() :
 
 
-	regulator(200, 100),
-	mapa(20, 20, -5.0, 5.0, -5.0, 5.0,"file2.txt")
+	//regulator(200, 100),
+	regulator(500, 1),
+	mapa(100, 100, -10.0, 10.0, -10.0, 10.0,"file.txt")
 
 {
 	command = "stop";
@@ -69,9 +70,6 @@ RobotControll::RobotControll() :
 	odometry_init(&odometria_4);
 
 	odometria_using = &odometria_3;
-
-	start = Point{ 0, 0 };
-	target = Point{ 4, 3 };
 
 	WinSock_setup();
 	std::cout << "Zadaj IP adresu:" << std::endl;
@@ -86,9 +84,14 @@ RobotControll::RobotControll() :
 
 	path.push(RobotPosition(0.0, 0.0));
 
-	mapa_flood_fill = mapa;
+	start = Point{ 0, 0 };
+	target = Point{ 4, 3 };
+
+	mapa_flood_fill=mapa;
 	mapa_flood_fill.FloodFill_fill(start, target);
 	mapa_flood_fill.saveMap("floodfill.txt");
+	mapa_flood_fill.FloodFill_find_path(start, target,floodfill_priority_X);
+	
 
 	start_threads();
 
@@ -155,28 +158,27 @@ void RobotControll::processThisRobot()
 			motors_speed.radius = max_radius;
 			
 		}
-
 		else if (command == "forward")
 		{
-			motors_speed.translation_speed=150;
+			motors_speed.translation_speed=200;
 			motors_speed.radius = max_radius;
 		}
 		else if (command == "back")
 		{
-			motors_speed.translation_speed=-150;
+			motors_speed.translation_speed=-200;
 			motors_speed.radius = max_radius;
 		}
 		else if (command == "left")
 		{
-			motors_speed.translation_speed=10;
-			motors_speed.radius = 10;
+			motors_speed.translation_speed=20;
+			motors_speed.radius = d*100;
 			
 		}
 		else if (command == "right")
 		{
 			
-			motors_speed.translation_speed=10;
-			motors_speed.radius = -10;
+			motors_speed.translation_speed=20;
+			motors_speed.radius = -d*100;
 		}
 		
 
@@ -203,6 +205,8 @@ void RobotControll::processThisRobot()
 		{
 			mapa_flood_fill = mapa;
 			mapa_flood_fill.FloodFill_fill(start, target);
+			mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_X);
+			mapa_flood_fill.saveMap("floodfill.txt");
 			command_reset();
 		}
 
@@ -233,6 +237,18 @@ void RobotControll::reset_robot()
 	command == "stop";
 }
 
+void RobotControll::set_start_target(Point start, Point target)
+{
+	this->start = start;
+	this->target = target;
+}
+
+
+RobotPosition RobotControll::get_position()
+{
+	return actual_position;
+}
+
 void RobotControll::printData()
 {
 	std::cout << "EncoderDataLeft=" << robotdata.EncoderLeft << "tick" << std::endl;
@@ -244,6 +260,10 @@ void RobotControll::printData()
 	std::cout << "Position X_trapezoidal=" << odometria_3.position.coordinates.X << "m" << std::endl;
 	std::cout << "Position Y_trapezoidal=" << odometria_3.position.coordinates.Y << "m" << std::endl;
 	std::cout << "Angle_trapezoidal=" << (odometria_3.position.alfa * 180 / PI) << "deg." << std::endl;
+
+	std::cout << "Position X_curved=" << odometria_4.position.coordinates.X << "m" << std::endl;
+	std::cout << "Position Y_curved=" << odometria_4.position.coordinates.Y << "m" << std::endl;
+	std::cout << "Angle_curved=" << (odometria_4.position.alfa * 180 / PI) << "deg." << std::endl;
 
 	std::cout << "Robot_Mode=" << command << std::endl;
 
@@ -315,6 +335,7 @@ void RobotControll::odometry_backward_euler(Odometry* odometria)
 
 }
 
+
 void RobotControll::odometry_forward_euler(Odometry* odometria)
 {
 	odometria->wheel_distance_left = encL.encoder_real_value*tickToMeter;
@@ -383,7 +404,7 @@ void RobotControll::odometry_curved(Odometry* odometria)
 	if (abs(odometria->delta_l_right - odometria->delta_l_left) > arc_line_switch_treshold)
 	{
 		odometria->position.coordinates.X += (d*(odometria->delta_l_left + odometria->delta_l_right) / (odometria->delta_l_right - odometria->delta_l_left) / 2 * (sin(odometria->position.alfa + odometria->delta_alfa) - sin(odometria->position.alfa)));
-		odometria->position.coordinates.Y += (d*(odometria->delta_l_left + odometria->delta_l_right) / (odometria->delta_l_right - odometria->delta_l_left) / 2 * (cos(odometria->position.alfa + odometria->delta_alfa) - cos(odometria->position.alfa)));
+		odometria->position.coordinates.Y -= (d*(odometria->delta_l_left + odometria->delta_l_right) / (odometria->delta_l_right - odometria->delta_l_left) / 2 * (cos(odometria->position.alfa + odometria->delta_alfa) - cos(odometria->position.alfa)));
 	}
 	else
 	{
@@ -405,6 +426,8 @@ void RobotControll::processThisLidar(LaserMeasurement &laserData)
 {
 	std::cout << "Processing Lidar" << std::endl;
 	memcpy(&copyOfLaserData, &laserData, sizeof(LaserMeasurement));
+	
+	if (motors_speed.translation_speed<20.0)
 	build_map();
 }
 

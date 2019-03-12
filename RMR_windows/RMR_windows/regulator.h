@@ -1,6 +1,12 @@
 #pragma once
-#define max_speed  250
+ 
+#include <cmath>
+
+#define max_speed  350
+#define min_speed  30
+
 #define max_radius  65534/2
+#define min_radius  350
 
 template <typename T>int sign(T x);
 
@@ -46,14 +52,13 @@ public:
 	}
 
 	float position_deadzone = 0.05;
-	bool square_root_speed_enable=true;
-	float square_root_gain = 15;
 
 	robotSpeed output;
 
 private:
 	float translation_gain;
 	float rotation_gain;
+	float gamma = 0.5;
 
 	Point error;
 
@@ -61,13 +66,28 @@ private:
 	{
 		if (abs(output.radius) > max_radius)
 			output.radius = sign(output.radius)*max_radius;
+
+		if (abs(output.radius) < min_radius)
+			output.radius = sign(output.radius)*min_radius;
 		
 	}
+
 
 	void saturate_speed()
 	{
 		if (abs(output.translation_speed) > max_speed)
 			output.translation_speed = sign(output.translation_speed)*max_speed;
+
+		if (abs(output.translation_speed) < min_speed)
+			output.translation_speed = 0;
+
 	}
+
+	void nonlinear_power_function()
+	{
+		float x = abs(output.translation_speed/max_speed);
+		output.translation_speed = max_speed * (pow(x, gamma))*sign(output.translation_speed);
+	}
+
 
 };

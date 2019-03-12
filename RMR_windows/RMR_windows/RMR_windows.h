@@ -19,8 +19,9 @@
 #include "encoder.h"
 #include "map.h"
 
+
 #define encoder_max_value  65535 
-#define arc_line_switch_treshold 0.01
+#define arc_line_switch_treshold 0.0001
 
 
 typedef struct Odometry
@@ -72,8 +73,8 @@ public:
 	void right(double);
 	void stop();
 	
-	
-
+	void set_start_target(Point start, Point target);
+	RobotPosition get_position();
 	void addPoint(RobotPosition P)
 	{
 		path.push(P);
@@ -128,7 +129,7 @@ private:
 	int rob_slen;
 
 	LaserMeasurement copyOfLaserData;
-	std::string ipaddress= "192.168.1.11";
+	std::string ipaddress= "192.168.1.15";
 	CKobuki robot;
 	TKobukiData robotdata;
 	

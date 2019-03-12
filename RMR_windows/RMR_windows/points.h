@@ -50,6 +50,13 @@ public:
 		alfa = 0;
 	}
 
+	RobotPosition(Point P)
+	{
+		coordinates.X = P.X;
+		coordinates.Y = P.Y;
+		alfa = 0;
+	}
+
 	~RobotPosition()
 	{
 	

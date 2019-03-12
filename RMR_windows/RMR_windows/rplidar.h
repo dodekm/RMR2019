@@ -3,8 +3,8 @@
 
 
 #define lidar_treshold_max 5000
-#define lidar_treshold_min 200
-#define lidar_treshold_quality 0.1
+#define lidar_treshold_min 300
+#define lidar_treshold_quality 10
 
 typedef struct
 {
