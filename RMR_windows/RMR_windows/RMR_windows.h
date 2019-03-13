@@ -19,6 +19,7 @@
 #include "encoder.h"
 #include "map.h"
 
+#define debug 
 
 #define encoder_max_value  65535 
 #define arc_line_switch_treshold 0.0001

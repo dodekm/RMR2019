@@ -96,7 +96,7 @@ void Mapa::loadMap(std::string filename)
 
 
 }
-void Mapa::FloodFill_fill(Point start, Point target)
+void Mapa::FloodFill_fill(Point start, Point target,bool diagonal=false)
 {
 	Matrix_position target_indices = point2indices(target);
 	Matrix_position start_indices = point2indices(start);
@@ -112,12 +112,24 @@ void Mapa::FloodFill_fill(Point start, Point target)
 	std::queue<Matrix_position> points_to_evaluate;
 
 	std::vector<Matrix_position> offset;
+
 	offset.push_back(Matrix_position{ -1,0 });
 	offset.push_back(Matrix_position{ 1,0 });
 	offset.push_back(Matrix_position{ 0,-1 });
 	offset.push_back(Matrix_position{ 0, 1 });
+
+	if (diagonal == true)
+	{
+
+		offset.push_back(Matrix_position{ 1, 1 });
+		offset.push_back(Matrix_position{ -1, -1 });
+		offset.push_back(Matrix_position{ 1, -1 });
+		offset.push_back(Matrix_position{ -1, 1 });
+	}
 	
-	while (!(working_cell==start_indices))
+
+
+	while (working_cell!=start_indices)
 	{
 
 		if (assert_matrix_indices(working_cell))
@@ -158,34 +170,49 @@ void Mapa::FloodFill_fill(Point start, Point target)
 }
 
 
-std::queue <RobotPosition> Mapa::FloodFill_find_path(Point start, Point target, int priority)
+void Mapa::FloodFill_find_path(Point start, Point target, floodfill_priority priority, std::queue <RobotPosition> path)
 {
-	std::queue <RobotPosition> path;
+#ifdef debug
+	Mapa mapa_to_save = (*this);
+#endif
 
 	Matrix_position target_indices = point2indices(target);
 	Matrix_position start_indices = point2indices(start);
 
 	if (!(assert_matrix_indices(target_indices) && assert_matrix_indices(start_indices)))
-		return std::queue<RobotPosition>();
+		return;
 	if (cells_data[target_indices.Y][target_indices.X] != cell_finish)
-		return std::queue<RobotPosition>();
+		return;
 	if(cells_data[start_indices.Y][start_indices.X] != cell_start)
-	return std::queue<RobotPosition>();
+		return;
 
 	Matrix_position working_cell = start_indices;
 	Matrix_position working_cell_old = start_indices;
 
 	std::vector<Matrix_position> offset;
-	offset.push_back(Matrix_position{ -1,0 });
-	offset.push_back(Matrix_position{ 1,0 });
-	offset.push_back(Matrix_position{ 0,-1 });
-	offset.push_back(Matrix_position{ 0, 1 });
 
+
+	if (priority == floodfill_priority_X)
+	{
+		offset.push_back(Matrix_position{ 0,-1 });
+		offset.push_back(Matrix_position{ 0, 1 });
+		offset.push_back(Matrix_position{ -1,0 });
+		offset.push_back(Matrix_position{ 1,0 });
+		
+	}
+
+	else if (priority == floodfill_priority_Y)
+	{
+		offset.push_back(Matrix_position{ -1,0 });
+		offset.push_back(Matrix_position{ 1,0 });
+		offset.push_back(Matrix_position{ 0,-1 });
+		offset.push_back(Matrix_position{ 0, 1 });
+	}
 	
 	Matrix_position difference = { 0,0 };
 	Matrix_position difference_old = { 0,0 };
 
-	while (!(working_cell == target_indices))
+	while (working_cell != target_indices)
 	{
 		int minvalue = INT32_MAX;
 		Matrix_position chosen_cell = {0,0};
@@ -200,9 +227,9 @@ std::queue <RobotPosition> Mapa::FloodFill_find_path(Point start, Point target, 
 			if (assert_matrix_indices(new_position))
 			{
 
-				if ((*this)[new_position]> 1)
+				if ((*this)[new_position]> cell_obstacle)
 				{
-					if ((*this)[new_position] < minvalue)
+					if ((*this)[new_position] <= minvalue)
 					{
 						direction = new_position;
 						minvalue = (*this)[new_position];
@@ -217,20 +244,32 @@ std::queue <RobotPosition> Mapa::FloodFill_find_path(Point start, Point target, 
 			difference = working_cell - working_cell_old;
 			Matrix_position second_order_difference = difference - difference_old;
 			
+			#ifdef debug
+			mapa_to_save[working_cell] = cell_path;
+			#endif
 
-			if (!(difference_old == Matrix_position{ 0,0 }))
+			if (difference_old != Matrix_position{ 0,0 })
 			{
-				if (!(second_order_difference == Matrix_position{ 0,0 }))
+				if (second_order_difference != Matrix_position{ 0,0 })
 				{
 					path.push(RobotPosition(indices2point(working_cell)));
+				#ifdef debug
+					mapa_to_save[working_cell] = cell_breakpoint;
+				#endif
 				}
 				
 			}
 			working_cell_old = working_cell;
 			difference_old = difference;
 	}
+	
+#ifdef debug
+	mapa_to_save.saveMap("path.txt");
+#endif 
+
+	
 	path.push(RobotPosition(indices2point(target_indices)));
-	return path;
+
 }
 
 float deg2rad(float deg)

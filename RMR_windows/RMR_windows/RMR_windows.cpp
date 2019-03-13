@@ -7,7 +7,7 @@
 
 int main()
 {
-	std::cout << "APP START" << std::endl;
+	
 	RobotControll robot1;
 
 	std::string command;
@@ -55,11 +55,8 @@ void odometry_init(Odometry* odometria)
 
 RobotControll::RobotControll() :
 
-
-	//regulator(200, 100),
 	regulator(500, 1),
-	mapa(100, 100, -10.0, 10.0, -10.0, 10.0,"file.txt")
-
+	mapa(100, 100, -10.0, 10.0, -10.0, 10.0,"file2.txt")
 {
 	command = "stop";
 	command_old = "stop";
@@ -84,17 +81,16 @@ RobotControll::RobotControll() :
 
 	path.push(RobotPosition(0.0, 0.0));
 
-	start = Point{ 0, 0 };
-	target = Point{ 4, 3 };
+	start = Point{ -2, -1 };
+	target = Point{ -7, 7 };
 
 	mapa_flood_fill=mapa;
-	mapa_flood_fill.FloodFill_fill(start, target);
+	mapa_flood_fill.FloodFill_fill(start, target,true);
 	mapa_flood_fill.saveMap("floodfill.txt");
-	mapa_flood_fill.FloodFill_find_path(start, target,floodfill_priority_X);
-	
+	mapa_flood_fill.FloodFill_find_path(start, target,floodfill_priority_Y,path); 
 
 	start_threads();
-
+	
 }
 
 
@@ -204,8 +200,8 @@ void RobotControll::processThisRobot()
 		else if (command == "find")
 		{
 			mapa_flood_fill = mapa;
-			mapa_flood_fill.FloodFill_fill(start, target);
-			mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_X);
+			mapa_flood_fill.FloodFill_fill(start, target,true);
+			mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_X,path);
 			mapa_flood_fill.saveMap("floodfill.txt");
 			command_reset();
 		}

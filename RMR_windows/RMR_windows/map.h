@@ -14,15 +14,19 @@
 #define floodfill_priority_X 0
 #define floodfill_priority_Y 1
 
+typedef int  floodfill_priority;
 
-enum
+typedef enum
 {
 	cell_free,
 	cell_obstacle,
 	cell_finish,
-	cell_start =-1
+	cell_start = -1,
+	cell_path = -2,
+	cell_breakpoint=-3
 	
 }cell_content;
+
 
 typedef struct Matrix_position
 {
@@ -31,6 +35,11 @@ typedef struct Matrix_position
 	bool operator==(const Matrix_position& other)
 	{
 		return (X==other.X&&Y==other.Y);
+	}
+
+	bool operator!=(const Matrix_position& other)
+	{
+		return !((*this)==other);
 	}
 
 	void operator=(const Matrix_position& other)
@@ -83,7 +92,11 @@ public:
 		this->y_lim[0] = y_low;
 		this->y_lim[1] = y_high;
 
-		//loadMap(filename);
+		if (filename.empty())
+			return;
+		
+		loadMap(filename);
+		
 		//saveMap(filename);
 	}
 
@@ -108,7 +121,7 @@ public:
 		
 	}
 
-	int& operator[](Matrix_position position)
+	auto& operator[](Matrix_position position)
 	{
 		return (cells_data[position.Y][position.X]);
 	}
@@ -143,10 +156,8 @@ public:
 	
 	}
 
-	
-
-	void FloodFill_fill(Point start, Point target);
-	std::queue <RobotPosition> FloodFill_find_path(Point start, Point target,int priority);
+	void FloodFill_fill(Point start, Point target,bool diagonal);
+	void FloodFill_find_path(Point start, Point target, floodfill_priority priority, std::queue <RobotPosition> path);
 
 	int assert_matrix_indices(Matrix_position XY);
 	int addObstacle(Point P);

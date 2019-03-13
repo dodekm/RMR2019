@@ -102,7 +102,7 @@ class CKobuki
 public:
 	CKobuki() { 
 
-		std::cout << "kobuki_constructed" << std::endl;
+		
 
 	};
 	 virtual ~CKobuki() { 
