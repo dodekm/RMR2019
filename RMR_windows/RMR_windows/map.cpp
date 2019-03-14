@@ -1,6 +1,7 @@
 #include "map.h"
 #include "pch.h"
 
+using namespace std;
 
 Point lidar_measure_2_point(LaserData lidar_measurement, RobotPosition robot_position)
 {
@@ -8,6 +9,22 @@ Point lidar_measure_2_point(LaserData lidar_measurement, RobotPosition robot_pos
 	P.X = robot_position.coordinates.X + lidar_measurement.scanDistance/1000*cos(-deg2rad(lidar_measurement.scanAngle) + robot_position.alfa);
 	P.Y = robot_position.coordinates.Y + lidar_measurement.scanDistance/1000*sin(-deg2rad(lidar_measurement.scanAngle) + robot_position.alfa);
 	return P;
+}
+
+
+vector<string> split(const string& str, const string& delim)
+{
+	vector<string> tokens;
+	size_t prev = 0, pos = 0;
+	do
+	{
+		pos = str.find(delim, prev);
+		if (pos == string::npos) pos = str.length();
+		string token = str.substr(prev, pos - prev);
+		if (!token.empty()) tokens.push_back(token);
+		prev = pos + delim.length();
+	} while (pos < str.length() && prev < str.length());
+	return tokens;
 }
 
 int Mapa::assert_matrix_indices(Matrix_position XY)
@@ -35,17 +52,19 @@ int Mapa::addObstacle(Point P)
 
 void Mapa::saveMap(std::string filename)
 {
-	std::fstream file;
-	file.open(filename,std::ios::out|std::ios::trunc);
+	fstream file;
+	file.open(filename,ios::out|ios::trunc);
 	if (!file.is_open())
 		return;
 
-	for (int i = 0; i < rows; i++)
+	Matrix_position i;
+
+	for (i.Y = 0; i.Y < rows; i.Y++)
 	{
-		for (int j = 0; j < cols; j++)
+		for (i.X = 0; i.X < cols; i.X++)
 		{
-			file << cells_data[i][j];
-			if (j  < rows-1)
+			file << (*this)[i];
+			if (i.X  < rows-1)
 				file << ',';
 			else
 			{
@@ -62,40 +81,34 @@ void Mapa::saveMap(std::string filename)
 void Mapa::loadMap(std::string filename)
 {
 
-	std::fstream file;
-	file.open(filename, std::ios::in);
+	fstream file;
+	file.open(filename, ios::in);
 	if (!file.is_open())
 		return;
 
-	char str[map_max_size];
+	Matrix_position i{ 0,0 };
+	std::string str;
 
-	Matrix_position i{0,0};
-	int j;
-
-	while (i.Y<rows&&file.getline(str, map_max_size))
+	while (i.Y < rows&&getline(file, str))
 	{
-		i.X = 0;
-		j = 0;
-		while (i.X<cols&&str[j]!=';')
-		{
-			if (str[j] == ',')
-				i.X++;
-			
-			else if(isdigit(str[j]))
-			{
-				cells_data[i.Y][i.X] = std::atoi(str + j);
-			}
-			j++;
-		}
-		i.Y++;
-		
+			vector<string>data=split(str,",");
 
-	}
+			i.X = 0;
+			while (i.X < cols&&i.X<data.size())
+			{
+				(*this)[i] = atoi(data.at(i.X).c_str());
+			i.X++;
+			}
 		
+		i.Y++;
+	}
+
 	file.close();
 
 
 }
+
+
 void Mapa::FloodFill_fill(Point start, Point target,bool diagonal=false)
 {
 	Matrix_position target_indices = point2indices(target);
@@ -140,14 +153,10 @@ void Mapa::FloodFill_fill(Point start, Point target,bool diagonal=false)
 			{
 				Matrix_position new_position = working_cell+offset[i];
 				
-				
 				if (assert_matrix_indices(new_position))
 				{
 					if (new_position==start_indices)
-					{
 						points_to_evaluate.push(new_position);
-						break;
-					}
 					
 					else if ((*this)[new_position] == cell_free)
 					{
@@ -155,7 +164,7 @@ void Mapa::FloodFill_fill(Point start, Point target,bool diagonal=false)
 						points_to_evaluate.push(new_position);
 						
 					}
-
+					
 				}
 			}
 
@@ -231,9 +240,14 @@ void Mapa::FloodFill_find_path(Point start, Point target, floodfill_priority pri
 				{
 					if ((*this)[new_position] <= minvalue)
 					{
-						direction = new_position;
-						minvalue = (*this)[new_position];
+						//if ((*this)[new_position + offset[i]] != cell_obstacle)
+						{
+							direction = new_position;
+							minvalue = (*this)[new_position];
+						}
 					}
+
+					
 
 				}
 
@@ -281,3 +295,5 @@ float rad2deg(float rad)
 {
 	return rad / PI * 180;
 }
+
+

@@ -42,6 +42,9 @@
     <ClInclude Include="map.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="odometry.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -69,6 +72,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="rplidar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="odometry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

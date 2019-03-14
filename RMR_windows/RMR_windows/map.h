@@ -7,9 +7,7 @@
 #include <sstream>
 #include <new> 
 #include <queue>
-
-
-#define map_max_size 500
+#include <vector>
 
 #define floodfill_priority_X 0
 #define floodfill_priority_Y 1
@@ -28,9 +26,20 @@ typedef enum
 }cell_content;
 
 
-typedef struct Matrix_position
+class Matrix_position
 {
-	int X, Y;
+	public:
+		int X, Y;
+
+		Matrix_position()
+		{}
+		~Matrix_position()
+		{}
+		Matrix_position(int X,int Y)
+		{
+			this->X = X;
+			this->Y = Y;
+		}
 
 	bool operator==(const Matrix_position& other)
 	{
@@ -58,8 +67,10 @@ typedef struct Matrix_position
 	{
 		return Matrix_position{ X - other.X,Y - other.Y };
 	}
+	private:
+	
 
-}Matrix_position;
+};
 
 
 Point lidar_measure_2_point(LaserData lidar_measurement, RobotPosition robot_position);

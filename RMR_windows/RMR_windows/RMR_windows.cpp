@@ -36,21 +36,7 @@ int main()
 	robot1.laserthreadHandle.std::thread::join();
 }
 
-void odometry_init(Odometry* odometria)
-{
 
-	odometria->wheel_distance_right = 0;
-	odometria->wheel_distance_left = 0;
-	odometria->wheel_last_distance_right = 0;
-	odometria->wheel_last_distance_left = 0;
-	odometria->delta_alfa = 0;
-	odometria->delta_l = 0;
-	odometria->delta_l_left = 0;
-	odometria->delta_l_right = 0;
-	odometria->position = RobotPosition{0,0};
-
-
-}
 
 
 RobotControll::RobotControll() :
@@ -61,11 +47,6 @@ RobotControll::RobotControll() :
 	command = "stop";
 	command_old = "stop";
 	
-	odometry_init(&odometria_1);
-	odometry_init(&odometria_2);
-	odometry_init(&odometria_3);
-	odometry_init(&odometria_4);
-
 	odometria_using = &odometria_3;
 
 	WinSock_setup();
@@ -82,7 +63,9 @@ RobotControll::RobotControll() :
 	path.push(RobotPosition(0.0, 0.0));
 
 	start = Point{ -2, -1 };
-	target = Point{ -7, 7 };
+	target = Point{ 7, 7 };
+	//start = Point{ -8, -8 };
+	//target = Point{ 7, 7 };
 
 	mapa_flood_fill=mapa;
 	mapa_flood_fill.FloodFill_fill(start, target,true);
@@ -137,13 +120,12 @@ void RobotControll::processThisRobot()
 	{
 		
 		encoders_process();
-		odometry_forward_euler(&(odometria_1));
-		odometry_backward_euler(&(odometria_2));
-		odometry_trapezoidal_rule(&(odometria_3));
-		odometry_curved(&(odometria_4));
-
+		odometria_1.odometry_forward_euler(encL ,encR);
+		odometria_2.odometry_backward_euler(encL, encR);
+		odometria_3.odometry_trapezoidal_rule(encL, encR);
+		odometria_4.odometry_curved(encL, encR);
 		actual_position = odometria_using->position;
-		
+	
 	}
 
 	if (datacounter % modulo_drive == 0)
@@ -227,7 +209,7 @@ void RobotControll::reset_robot()
 	}
 	encoder_init_values(&encL, robotdata.EncoderLeft);
 	encoder_init_values(&encR, robotdata.EncoderRight);
-	odometry_init(odometria_using);
+	odometria_using->odometry_init();
 	motors_speed.translation_speed = 0;
 	motors_speed.radius = max_radius;
 	command == "stop";
@@ -307,115 +289,6 @@ void RobotControll::encoders_process()
 	encoder_process(&encR, robotdata.EncoderRight);
 
 }
-
-void RobotControll::odometry_backward_euler(Odometry* odometria)
-{
-	odometria->wheel_distance_left = encL.encoder_real_value*tickToMeter;
-	odometria->wheel_distance_right = encR.encoder_real_value*tickToMeter;
-
-
-	odometria->delta_l_left = odometria->wheel_distance_left - odometria->wheel_last_distance_left;
-	odometria->delta_l_right = odometria->wheel_distance_right - odometria->wheel_last_distance_right;
-
-
-	odometria->delta_l = (odometria->delta_l_left + odometria->delta_l_right) / 2;
-
-	odometria->position.coordinates.X += odometria->delta_l * cos(odometria->position.alfa);
-	odometria->position.coordinates.Y += odometria->delta_l * sin(odometria->position.alfa);
-
-	odometria->delta_alfa = -(odometria->delta_l_left - odometria->delta_l_right) / d;
-	odometria->position.alfa += odometria->delta_alfa;
-
-	odometria->wheel_last_distance_left = odometria->wheel_distance_left;
-	odometria->wheel_last_distance_right = odometria->wheel_distance_right;
-
-}
-
-
-void RobotControll::odometry_forward_euler(Odometry* odometria)
-{
-	odometria->wheel_distance_left = encL.encoder_real_value*tickToMeter;
-	odometria->wheel_distance_right = encR.encoder_real_value*tickToMeter;
-
-	odometria->position.coordinates.X += odometria->delta_l * cos(odometria->position.alfa);
-	odometria->position.coordinates.Y += odometria->delta_l * sin(odometria->position.alfa);
-
-	odometria->position.alfa += odometria->delta_alfa;
-
-	odometria->delta_l_left = odometria->wheel_distance_left - odometria->wheel_last_distance_left;
-	odometria->delta_l_right = odometria->wheel_distance_right - odometria->wheel_last_distance_right;
-
-
-	odometria->delta_l = (odometria->delta_l_left + odometria->delta_l_right) / 2;
-	odometria->delta_alfa = -(odometria->delta_l_left - odometria->delta_l_right) / d;
-
-
-	odometria->wheel_last_distance_left = odometria->wheel_distance_left;
-	odometria->wheel_last_distance_right = odometria->wheel_distance_right;
-
-}
-
-
-void RobotControll::odometry_trapezoidal_rule(Odometry* odometria)
-{
-	odometria->wheel_distance_left = encL.encoder_real_value*tickToMeter;
-	odometria->wheel_distance_right = encR.encoder_real_value*tickToMeter;
-
-
-	odometria->delta_l_left = odometria->wheel_distance_left - odometria->wheel_last_distance_left;
-	odometria->delta_l_right = odometria->wheel_distance_right - odometria->wheel_last_distance_right;
-
-	float delta_l_old = odometria->delta_l;
-	float delta_alfa_old = odometria->delta_alfa;
-
-
-	odometria->delta_l = (odometria->delta_l_left + odometria->delta_l_right) / 2;
-	odometria->position.coordinates.X += ((odometria->delta_l + delta_l_old) / 2) * cos(odometria->position.alfa);
-	odometria->position.coordinates.Y += ((odometria->delta_l + delta_l_old) / 2)* sin(odometria->position.alfa);
-
-
-	odometria->delta_alfa = -(odometria->delta_l_left - odometria->delta_l_right) / d;
-	odometria->position.alfa += ((odometria->delta_alfa + delta_alfa_old) / 2);
-
-
-	odometria->wheel_last_distance_left = odometria->wheel_distance_left;
-	odometria->wheel_last_distance_right = odometria->wheel_distance_right;
-
-}
-
-
-
-
-void RobotControll::odometry_curved(Odometry* odometria)
-{
-
-	odometria->wheel_distance_left = encL.encoder_real_value*tickToMeter;
-	odometria->wheel_distance_right = encR.encoder_real_value*tickToMeter;
-
-	odometria->delta_l_left = odometria->wheel_distance_left - odometria->wheel_last_distance_left;
-	odometria->delta_l_right = odometria->wheel_distance_right - odometria->wheel_last_distance_right;
-	odometria->delta_l = (odometria->delta_l_left + odometria->delta_l_right)/2;
-
-	odometria->delta_alfa = -(odometria->delta_l_left - odometria->delta_l_right) / d;
-	if (abs(odometria->delta_l_right - odometria->delta_l_left) > arc_line_switch_treshold)
-	{
-		odometria->position.coordinates.X += (d*(odometria->delta_l_left + odometria->delta_l_right) / (odometria->delta_l_right - odometria->delta_l_left) / 2 * (sin(odometria->position.alfa + odometria->delta_alfa) - sin(odometria->position.alfa)));
-		odometria->position.coordinates.Y -= (d*(odometria->delta_l_left + odometria->delta_l_right) / (odometria->delta_l_right - odometria->delta_l_left) / 2 * (cos(odometria->position.alfa + odometria->delta_alfa) - cos(odometria->position.alfa)));
-	}
-	else
-	{
-		odometria->position.coordinates.X += odometria->delta_l * cos(odometria->position.alfa);
-		odometria->position.coordinates.Y += odometria->delta_l * sin(odometria->position.alfa);
-	}
-
-
-	odometria->position.alfa += odometria->delta_alfa;
-
-	odometria->wheel_last_distance_left = odometria->wheel_distance_left;
-	odometria->wheel_last_distance_right = odometria->wheel_distance_right;
-
-}
-
 
 
 void RobotControll::processThisLidar(LaserMeasurement &laserData)

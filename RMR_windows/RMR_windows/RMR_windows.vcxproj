@@ -154,6 +154,7 @@
     <ClInclude Include="CKobuki.h" />
     <ClInclude Include="encoder.h" />
     <ClInclude Include="map.h" />
+    <ClInclude Include="odometry.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="points.h" />
     <ClInclude Include="regulator.h" />
@@ -165,6 +166,7 @@
     <ClCompile Include="CKobuki.cpp" />
     <ClCompile Include="encoder.cpp" />
     <ClCompile Include="map.cpp" />
+    <ClCompile Include="odometry.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

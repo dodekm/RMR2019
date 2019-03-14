@@ -13,6 +13,7 @@
 #include "RMR_windows.h"
 #include "CKobuki.h"
 #include "rplidar.h"
+#include "odometry.h"
 #include "points.h"
 #include "encoder.h"
 #include "regulator.h"

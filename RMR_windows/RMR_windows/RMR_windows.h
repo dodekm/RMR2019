@@ -18,27 +18,17 @@
 #include "regulator.h"
 #include "encoder.h"
 #include "map.h"
+#include "odometry.h"
 
 #define debug 
 
 #define encoder_max_value  65535 
 #define arc_line_switch_treshold 0.0001
+#define tickToMeter  0.000085292090497737556558
+#define d  0.23
 
 
-typedef struct Odometry
-{
-	float wheel_distance_right=0;
-	float wheel_distance_left=0;
-	float wheel_last_distance_right=0;
-	float wheel_last_distance_left=0;
-	float delta_alfa=0;
-	float delta_l=0;
-	float delta_l_left = 0;
-	float delta_l_right = 0;
-	RobotPosition position;
-}Odometry;
 
-void odometry_init(Odometry* odometria);
 
 
 class RobotControll
@@ -51,12 +41,6 @@ public:
 	void robotprocess();
 	void laserprocess();
 	void encoders_process();
-
-	void odometry_backward_euler(Odometry*);
-	void odometry_forward_euler(Odometry*);
-	void odometry_trapezoidal_rule(Odometry*);
-	void odometry_curved(Odometry*);
-	
 
 	void processThisLidar(LaserMeasurement &laserData);
 	void processThisRobot();
@@ -166,11 +150,7 @@ private:
 	RobotRegulator regulator;
 	
 	std::string command;
-	std::string command_old;
-	
-	const long double tickToMeter = 0.000085292090497737556558; // [m/tick]
-	const long double d = 0.23;
-	
+	std::string command_old;	
 
 };
 
