@@ -5,7 +5,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include <new> 
+#include <new>  
 #include <queue>
 #include <vector>
 
@@ -87,7 +87,7 @@ public:
 	
 	}
 	
-	Mapa(int rows,int cols, float  x_low,float x_high,float y_low,float y_high,std::string filename)
+	Mapa(int rows,int cols, float  x_low,float x_high,float y_low,float y_high,std::string filename="")
 	{
 		cells_data = new int*[rows];
 		for (int i = 0; i < rows; ++i) 
@@ -138,7 +138,7 @@ public:
 	}
 
 	
-	Mapa(const Mapa& source)
+	Mapa(const Mapa& source,bool copy=true)
 	{
 	
 		cols = source.cols;
@@ -153,14 +153,18 @@ public:
 		{
 			cells_data[i] = new int[cols];
 			for (int j = 0; j < cols; j++)
+				if(copy==true)
 				cells_data[i][j] = source.cells_data[i][j];
+				else
+				cells_data[i][j] = cell_free;
 		}
 
 	}
 
 	~Mapa()
 	{
-		for (int i = 0; i < rows; ++i) {
+		
+		for (int i = 0; i < rows; i++) {
 			delete[] cells_data[i];
 		}
 		delete[] cells_data;
@@ -174,6 +178,8 @@ public:
 	int addObstacle(Point P);
 
 	void saveMap(std::string filename);
+
+	void clearMap();
 
 	void loadMap(std::string filename);
 

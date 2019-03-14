@@ -41,8 +41,8 @@ int main()
 
 RobotControll::RobotControll() :
 
-	regulator(500, 1),
-	mapa(100, 100, -10.0, 10.0, -10.0, 10.0,"file2.txt")
+	regulator(300, 0.5),
+	mapa(100, 100, -5.0, 5, -5.0, 5.0,"file2.txt")
 {
 	command = "stop";
 	command_old = "stop";
@@ -61,12 +61,22 @@ RobotControll::RobotControll() :
 	}
 
 	path.push(RobotPosition(0.0, 0.0));
-
+	/*
+	path.push(RobotPosition(0.001, 1.001));
+	
+	path.push(RobotPosition(0.0, 1.0));
+	path.push(RobotPosition(1.0, 1.0));
+	path.push(RobotPosition(1.0, 0.0));
+	path.push(RobotPosition(0.0, 0.0));
+	path.push(RobotPosition(1.0, 1.0));
+	path.push(RobotPosition(0.0, 0.0));
+	*/
 	start = Point{ -2, -1 };
 	target = Point{ 7, 7 };
 	//start = Point{ -8, -8 };
 	//target = Point{ 7, 7 };
-
+	
+	Mapa mapa_flood_fill;
 	mapa_flood_fill=mapa;
 	mapa_flood_fill.FloodFill_fill(start, target,true);
 	mapa_flood_fill.saveMap("floodfill.txt");
@@ -181,6 +191,7 @@ void RobotControll::processThisRobot()
 
 		else if (command == "find")
 		{
+			Mapa mapa_flood_fill;
 			mapa_flood_fill = mapa;
 			mapa_flood_fill.FloodFill_fill(start, target,true);
 			mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_X,path);
@@ -188,10 +199,19 @@ void RobotControll::processThisRobot()
 			command_reset();
 		}
 
+
 		else if (command == "reset")
 		{
 			reset_robot();
 			
+		}
+
+		else if (command == "clear")
+		{
+			
+			mapa.clearMap();
+			command_reset();
+
 		}
 
 		move_arc(filter.set_speed((int)round(motors_speed.translation_speed),speed_filter_steps), (int)round(motors_speed.radius));
@@ -296,7 +316,7 @@ void RobotControll::processThisLidar(LaserMeasurement &laserData)
 	std::cout << "Processing Lidar" << std::endl;
 	memcpy(&copyOfLaserData, &laserData, sizeof(LaserMeasurement));
 	
-	if (motors_speed.translation_speed<20.0)
+	if (motors_speed.translation_speed<min_speed)
 	build_map();
 }
 

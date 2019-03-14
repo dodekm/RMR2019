@@ -114,7 +114,7 @@ private:
 	int rob_slen;
 
 	LaserMeasurement copyOfLaserData;
-	std::string ipaddress= "192.168.1.15";
+	std::string ipaddress= "192.168.1.13";
 	CKobuki robot;
 	TKobukiData robotdata;
 	
@@ -145,7 +145,7 @@ private:
 	Speed_filter filter;
 
 	Mapa mapa;
-	Mapa mapa_flood_fill;
+	
 
 	RobotRegulator regulator;
 	

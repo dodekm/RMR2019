@@ -7,10 +7,9 @@ Point lidar_measure_2_point(LaserData lidar_measurement, RobotPosition robot_pos
 {
 	Point P;
 	P.X = robot_position.coordinates.X + lidar_measurement.scanDistance/1000*cos(-deg2rad(lidar_measurement.scanAngle) + robot_position.alfa);
-	P.Y = robot_position.coordinates.Y + lidar_measurement.scanDistance/1000*sin(-deg2rad(lidar_measurement.scanAngle) + robot_position.alfa);
+	P.Y = robot_position.coordinates.Y + lidar_measurement.scanDistance/1000*sin(+deg2rad(lidar_measurement.scanAngle) + robot_position.alfa);
 	return P;
 }
-
 
 vector<string> split(const string& str, const string& delim)
 {
@@ -92,7 +91,6 @@ void Mapa::loadMap(std::string filename)
 	while (i.Y < rows&&getline(file, str))
 	{
 			vector<string>data=split(str,",");
-
 			i.X = 0;
 			while (i.X < cols&&i.X<data.size())
 			{
@@ -105,6 +103,20 @@ void Mapa::loadMap(std::string filename)
 
 	file.close();
 
+
+}
+
+void Mapa::clearMap()
+{
+
+	for (int i = 0; i < rows; ++i)
+	{
+		
+		for (int j = 0; j < cols; j++)
+		{
+			cells_data[i][j] = cell_free;
+		}
+	}
 
 }
 

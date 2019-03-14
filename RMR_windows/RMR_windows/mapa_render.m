@@ -1,11 +1,12 @@
 %M=importdata('map.txt',',')
 clear all;
-close all;
+%close all;
 %filename='floodfill.txt'
 %filename='map.txt'
-filename='path.txt'
+%filename='path.txt'
 %filename='file2.txt'
 %filename='bludisko.txt'
+filename='file.txt'
 
 cell_breakpoint=-3;
 cell_path=-2;

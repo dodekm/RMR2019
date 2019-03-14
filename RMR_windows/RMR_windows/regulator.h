@@ -2,11 +2,12 @@
  
 #include <cmath>
 
-#define max_speed  350
-#define min_speed  30
+#define max_speed  400
+#define min_speed  20
 
 #define max_radius  65534/2
-#define min_radius  350
+#define min_radius  100
+
 
 template <typename T>int sign(T x);
 
@@ -58,8 +59,10 @@ public:
 private:
 	float translation_gain;
 	float rotation_gain;
-	float gamma = 0.5;
+	float gamma = 0.3;
 
+
+	float delta;
 	Point error;
 
 	void saturate_radius()
@@ -89,5 +92,18 @@ private:
 		output.translation_speed = max_speed * (pow(x, gamma))*sign(output.translation_speed);
 	}
 
+
+	void singulatiry_correct(Point current_position, Point desired_position)
+	{
+		if (abs(output.translation_speed) < min_speed)
+		{
+			if (PointLength(desired_position - current_position)>position_deadzone)
+			{
+				output.translation_speed = sign(output.translation_speed)*min_speed * 2;
+				std::cout << "singularity" << std::endl;
+
+			}
+		}
+	}
 
 };
