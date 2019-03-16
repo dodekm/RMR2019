@@ -43,7 +43,7 @@ RobotControll::RobotControll() :
 
 	regulator(300, 0.5),
 	mapa(100, 100, -5.0, 5, -5.0, 5.0,"file2.txt")
-	//mapa(100, 100, -5.0, 5, -5.0, 5.0)
+	
 {
 	command = "stop";
 	command_old = "stop";
@@ -62,16 +62,7 @@ RobotControll::RobotControll() :
 	}
 
 	path.push(RobotPosition(0.0, 0.0));
-	/*
-	path.push(RobotPosition(0.001, 1.001));
 	
-	path.push(RobotPosition(0.0, 1.0));
-	path.push(RobotPosition(1.0, 1.0));
-	path.push(RobotPosition(1.0, 0.0));
-	path.push(RobotPosition(0.0, 0.0));
-	path.push(RobotPosition(1.0, 1.0));
-	path.push(RobotPosition(0.0, 0.0));
-	*/
 	start = Point{ -0.5, -0.5 };
 	target = Point{ 4, 4 };
 	//start = Point{ -8, -8 };
@@ -302,10 +293,11 @@ void RobotControll::build_map()
 	{
 		if (lidar_check_measure(copyOfLaserData.Data[i]))
 		{
-			mapa.addPoint(lidar_measure_2_point(copyOfLaserData.Data[i], actual_position));
+			//mapa.addPoint(lidar_measure_2_point(copyOfLaserData.Data[i], actual_position));
 			histogram.addPointToHistogram(lidar_measure_2_point(copyOfLaserData.Data[i], actual_position));
 		}
 	}
+	mapa.buildFromHistogram(histogram, 5);
 }
 
 void RobotControll::encoders_process()
