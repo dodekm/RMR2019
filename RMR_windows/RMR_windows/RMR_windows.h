@@ -118,7 +118,9 @@ private:
 	CKobuki robot;
 	TKobukiData robotdata;
 	
-	unsigned int datacounter=0;
+	unsigned long datacounter=0;
+	unsigned long lidar_measure_counters = 0;
+
 	int modulo_print = 50;
 	int modulo_odometry = 10;
 	int modulo_drive = 5;
@@ -130,7 +132,6 @@ private:
 	Odometry odometria_3;
 	Odometry odometria_4;
 	Odometry* odometria_using;
-	
 	
 	robotSpeed motors_speed{ 0,0 };
 	
@@ -146,7 +147,6 @@ private:
 
 	Mapa mapa;
 	
-
 	RobotRegulator regulator;
 	
 	std::string command;

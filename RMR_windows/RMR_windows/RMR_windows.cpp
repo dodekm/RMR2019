@@ -43,6 +43,7 @@ RobotControll::RobotControll() :
 
 	regulator(300, 0.5),
 	mapa(100, 100, -5.0, 5, -5.0, 5.0,"file2.txt")
+	//mapa(100, 100, -5.0, 5, -5.0, 5.0)
 {
 	command = "stop";
 	command_old = "stop";
@@ -71,8 +72,8 @@ RobotControll::RobotControll() :
 	path.push(RobotPosition(1.0, 1.0));
 	path.push(RobotPosition(0.0, 0.0));
 	*/
-	start = Point{ -2, -1 };
-	target = Point{ 7, 7 };
+	start = Point{ -0.5, -0.5 };
+	target = Point{ 4, 4 };
 	//start = Point{ -8, -8 };
 	//target = Point{ 7, 7 };
 	
@@ -80,7 +81,7 @@ RobotControll::RobotControll() :
 	mapa_flood_fill=mapa;
 	mapa_flood_fill.FloodFill_fill(start, target,true);
 	mapa_flood_fill.saveMap("floodfill.txt");
-	mapa_flood_fill.FloodFill_find_path(start, target,floodfill_priority_Y,path); 
+	mapa_flood_fill.FloodFill_find_path(start, target,floodfill_priority_Y,path,true); 
 
 	start_threads();
 	
@@ -194,7 +195,7 @@ void RobotControll::processThisRobot()
 			Mapa mapa_flood_fill;
 			mapa_flood_fill = mapa;
 			mapa_flood_fill.FloodFill_fill(start, target,true);
-			mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_X,path);
+			mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_X,path,true);
 			mapa_flood_fill.saveMap("floodfill.txt");
 			command_reset();
 		}
@@ -265,13 +266,11 @@ void RobotControll::printData()
 
 	std::cout << "Robot_Mode=" << command << std::endl;
 
-
 	std::cout << "Position X_wanted=" << wanted_position.coordinates.X << "m" << std::endl;
 	std::cout << "Position Y_wanted=" << wanted_position.coordinates.Y << "m" << std::endl;
 
 	std::cout << "vt=" << regulator.getTranslation_output() << "mm/s" << std::endl;
 	std::cout << "R=" << regulator.getRotation_output() << "mm" << std::endl;
-
 
 }
 
@@ -296,10 +295,16 @@ void RobotControll::automode()
 
 void RobotControll::build_map()
 {
+	Mapa histogram(mapa,false);
+	lidar_measure_counters += copyOfLaserData.numberOfScans;
+
 	for(int i = 0; i<copyOfLaserData.numberOfScans; i++)
 	{
-				if(lidar_check_measure(copyOfLaserData.Data[i]))
-				mapa.addObstacle(lidar_measure_2_point(copyOfLaserData.Data[i], actual_position));
+		if (lidar_check_measure(copyOfLaserData.Data[i]))
+		{
+			mapa.addPoint(lidar_measure_2_point(copyOfLaserData.Data[i], actual_position));
+			histogram.addPointToHistogram(lidar_measure_2_point(copyOfLaserData.Data[i], actual_position));
+		}
 	}
 }
 
@@ -313,7 +318,7 @@ void RobotControll::encoders_process()
 
 void RobotControll::processThisLidar(LaserMeasurement &laserData)
 {
-	std::cout << "Processing Lidar" << std::endl;
+	
 	memcpy(&copyOfLaserData, &laserData, sizeof(LaserMeasurement));
 	
 	if (motors_speed.translation_speed<min_speed)

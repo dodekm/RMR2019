@@ -9,8 +9,10 @@
 #include <queue>
 #include <vector>
 
+
 #define floodfill_priority_X 0
 #define floodfill_priority_Y 1
+#define floodfill_priority_diagonal 2
 
 typedef int  floodfill_priority;
 
@@ -172,10 +174,12 @@ public:
 	}
 
 	void FloodFill_fill(Point start, Point target,bool diagonal);
-	void FloodFill_find_path(Point start, Point target, floodfill_priority priority, std::queue <RobotPosition> path);
+	void FloodFill_find_path(Point start, Point target, floodfill_priority priority, std::queue <RobotPosition> path,bool diagonal);
 
 	int assert_matrix_indices(Matrix_position XY);
-	int addObstacle(Point P);
+	int addPoint(Point P);
+	void addPointToHistogram(Point P);
+	void buildFromHistogram(Mapa& histogram, int treshold);
 
 	void saveMap(std::string filename);
 

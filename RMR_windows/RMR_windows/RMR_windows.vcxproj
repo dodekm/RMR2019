@@ -154,6 +154,7 @@
     <ClInclude Include="CKobuki.h" />
     <ClInclude Include="encoder.h" />
     <ClInclude Include="map.h" />
+    <ClInclude Include="misc.h" />
     <ClInclude Include="odometry.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="points.h" />

@@ -18,4 +18,7 @@
 #include "encoder.h"
 #include "regulator.h"
 #include "map.h"
+#include "speed_filter.h"
+
+
 #endif //PCH_H

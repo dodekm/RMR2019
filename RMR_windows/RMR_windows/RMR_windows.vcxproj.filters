@@ -45,6 +45,9 @@
     <ClInclude Include="odometry.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="misc.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
