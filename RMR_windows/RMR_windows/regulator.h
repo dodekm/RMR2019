@@ -38,8 +38,8 @@ public:
 
 	}
 
-	void regulate(RobotPosition current_position, RobotPosition desired_position);
-	int isRegulated(RobotPosition current_position, RobotPosition desired_position);
+	void regulate(RobotPosition& current_position, RobotPosition& desired_position);
+	int isRegulated(RobotPosition& current_position, RobotPosition& desired_position);
 
 
 	float getTranslation_output()

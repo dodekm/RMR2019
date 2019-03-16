@@ -2,7 +2,7 @@
 #include "pch.h"
 
 
-void RobotRegulator::regulate(RobotPosition current_position, RobotPosition desired_position)
+void RobotRegulator::regulate(RobotPosition& current_position, RobotPosition& desired_position)
 {
 	float alfa;
 	output.translation_speed = -translation_gain * ((current_position.coordinates.X - desired_position.coordinates.X)*cos(current_position.alfa) + (current_position.coordinates.Y - desired_position.coordinates.Y)*sin(current_position.alfa));
@@ -20,7 +20,7 @@ void RobotRegulator::regulate(RobotPosition current_position, RobotPosition desi
 	nonlinear_power_function();
 }
 
-int RobotRegulator::isRegulated(RobotPosition current_position, RobotPosition desired_position)
+int RobotRegulator::isRegulated(RobotPosition& current_position, RobotPosition& desired_position)
 {
 	return (PointsDistance(current_position.coordinates, desired_position.coordinates) < position_deadzone);
 }

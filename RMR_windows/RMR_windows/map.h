@@ -174,9 +174,13 @@ public:
 	}
 
 	void FloodFill_fill(Point start, Point target,bool diagonal);
-	void FloodFill_find_path(Point start, Point target, floodfill_priority priority, std::queue <RobotPosition> path,bool diagonal);
+	void FloodFill_find_path(Point start, Point target, floodfill_priority priority, std::queue <RobotPosition> path,bool diagonal,int window_size);
 
+	
 	int assert_matrix_indices(Matrix_position XY);
+	int check_close_obstacle(Matrix_position XY,int window_size);
+
+
 	int addPoint(Point P);
 	void addPointToHistogram(Point P);
 	void buildFromHistogram(Mapa& histogram, int treshold);

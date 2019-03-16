@@ -164,9 +164,6 @@ void Mapa::FloodFill_fill(Point start, Point target, bool diagonal = false)
 	offset.push_back(Matrix_position{ 0,-1 });
 	offset.push_back(Matrix_position{ 0, 1 });
 
-	
-
-
 
 	while (working_cell != start_indices)
 	{
@@ -205,7 +202,7 @@ void Mapa::FloodFill_fill(Point start, Point target, bool diagonal = false)
 }
 
 
-void Mapa::FloodFill_find_path(Point start, Point target, floodfill_priority priority, std::queue <RobotPosition> path,bool diagonal=false)
+void Mapa::FloodFill_find_path(Point start, Point target, floodfill_priority priority, std::queue <RobotPosition> path,bool diagonal=false,int window_size=3)
 {
 #ifdef debug
 	Mapa mapa_to_save = (*this);
@@ -225,9 +222,7 @@ void Mapa::FloodFill_find_path(Point start, Point target, floodfill_priority pri
 
 	Matrix_position working_cell = start_indices;
 	
-
 	std::vector<Matrix_position> offset;
-
 
 	if (priority == floodfill_priority_X)
 	{
@@ -253,12 +248,12 @@ void Mapa::FloodFill_find_path(Point start, Point target, floodfill_priority pri
 		offset.push_back(Matrix_position{ 1,-1 });
 	}
 
+	Matrix_position working_cell_prev = Matrix_position(-1, -1);
 	while (working_cell != target_indices)
 	{
 		int minvalue = INT32_MAX;
 		Matrix_position chosen_cell = { 0,0 };
 		Matrix_position direction = { 0,0 };
-
 
 		for (int i = 0; i < offset.size(); i++)
 
@@ -272,16 +267,23 @@ void Mapa::FloodFill_find_path(Point start, Point target, floodfill_priority pri
 				{
 					if ((*this)[new_position] <= minvalue)
 					{
-						direction = new_position;
-						minvalue = (*this)[new_position];
+						if (this->check_close_obstacle(new_position,window_size))
+						{
+							if (new_position != working_cell_prev)
+							{
+								direction = new_position;
+								minvalue = (*this)[new_position];
+							}
+						}
 					}
 
 				}
 
 			}
 		}
-
+		working_cell_prev = working_cell;
 		working_cell = direction;
+		
 		trajectory.push_back(working_cell);
 	}
 
@@ -320,6 +322,26 @@ void Mapa::FloodFill_find_path(Point start, Point target, floodfill_priority pri
 
 	
 
+}
+
+int Mapa::check_close_obstacle(Matrix_position XY,int window_size=3)
+{
+
+	
+	Matrix_position offset;
+	for (offset.Y = -window_size+1; offset.Y < window_size; offset.Y++)
+	{
+		for (offset.X = -window_size + 1; offset.X < window_size; offset.X++)
+		{
+
+			if (assert_matrix_indices(XY + offset))
+			{
+				if ((*this)[XY + offset] == cell_obstacle)
+					return 0;
+			}
+		}
+	}
+	return 1;
 }
 
 float deg2rad(float deg)

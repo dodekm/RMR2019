@@ -7,14 +7,13 @@
 
 int main()
 {
-	
 	RobotControll robot1;
-
 	std::string command;
+	robot1.start_threads();
 
 	while (1)
 	{
-
+		
 		std::getline(std::cin, command);
 		
 	 if (command == "go")
@@ -22,18 +21,19 @@ int main()
 		float x, y;
 		std::cin >> x;
 		std::cin >> y;
-		robot1.addPoint(RobotPosition(x, y));
+		robot1.addPointToPath(RobotPosition(x, y));
 		
-		robot1.set_start_target(robot1.get_position().coordinates, Point{ x,y });
-		
+		robot1.set_target(Point{ x,y });
+		robot1.set_start(robot1.get_position().coordinates);
 	 }
 	 else  if(command!="")
 		robot1.set_command(command);
-		
+
 	}
 
 	robot1.robotthreadHandle.std::thread::join();
 	robot1.laserthreadHandle.std::thread::join();
+	robot1.guithreadHandle.std::thread::join();
 }
 
 
@@ -42,7 +42,7 @@ int main()
 RobotControll::RobotControll() :
 
 	regulator(300, 0.5),
-	mapa(100, 100, -5.0, 5, -5.0, 5.0,"file2.txt")
+	mapa(100, 100, -5.0, 5, -5.0, 5.0,"bludisko.txt")
 	
 {
 	command = "stop";
@@ -53,13 +53,12 @@ RobotControll::RobotControll() :
 	WinSock_setup();
 	std::cout << "Zadaj IP adresu:" << std::endl;
 	
-	{
 		std::string str;
 		std::cin >> str;
 
 		if (str.length()==12)
 		ipaddress=str;
-	}
+	
 
 	path.push(RobotPosition(0.0, 0.0));
 	
@@ -72,9 +71,8 @@ RobotControll::RobotControll() :
 	mapa_flood_fill=mapa;
 	mapa_flood_fill.FloodFill_fill(start, target,true);
 	mapa_flood_fill.saveMap("floodfill.txt");
-	mapa_flood_fill.FloodFill_find_path(start, target,floodfill_priority_Y,path,true); 
+	mapa_flood_fill.FloodFill_find_path(start, target,floodfill_priority_Y,path,true,3); 
 
-	start_threads();
 	
 }
 
@@ -114,7 +112,8 @@ void RobotControll::processThisRobot()
 	if (datacounter % modulo_print == 0)
 	{
 		system("cls");
-		printData();
+		//printData(std::cout);
+		std::cout << (*this);
 	
 	}
 
@@ -186,7 +185,7 @@ void RobotControll::processThisRobot()
 			Mapa mapa_flood_fill;
 			mapa_flood_fill = mapa;
 			mapa_flood_fill.FloodFill_fill(start, target,true);
-			mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_X,path,true);
+			mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_X,path,true,3);
 			mapa_flood_fill.saveMap("floodfill.txt");
 			command_reset();
 		}
@@ -204,6 +203,10 @@ void RobotControll::processThisRobot()
 			mapa.clearMap();
 			command_reset();
 
+		}
+		else
+		{
+			command_reset();
 		}
 
 		move_arc(filter.set_speed((int)round(motors_speed.translation_speed),speed_filter_steps), (int)round(motors_speed.radius));
@@ -227,9 +230,30 @@ void RobotControll::reset_robot()
 	command == "stop";
 }
 
-void RobotControll::set_start_target(Point start, Point target)
+void RobotControll::set_command(std::string command)
+{
+	this->command_old = this->command;
+	this->command = command;
+}
+std::string RobotControll::get_command()
+{
+	return command;
+}
+
+void RobotControll::command_reset()
+{
+	command = command_old;
+}
+
+
+void RobotControll::set_start(Point start)
 {
 	this->start = start;
+	
+}
+
+void RobotControll::set_target(Point target)
+{
 	this->target = target;
 }
 
@@ -239,29 +263,60 @@ RobotPosition RobotControll::get_position()
 	return actual_position;
 }
 
-void RobotControll::printData()
+RobotPosition RobotControll::get_wanted_position()
 {
-	std::cout << "EncoderDataLeft=" << robotdata.EncoderLeft << "tick" << std::endl;
-	std::cout << "EncoderDataRight=" << robotdata.EncoderRight << "tick" << std::endl;
+	return wanted_position;
+}
 
-	std::cout << "EncoderRealLeft=" << encL.encoder_real_value << "tick" << std::endl;
-	std::cout << "EncoderRealRight=" << encR.encoder_real_value << "tick" << std::endl;
 
-	std::cout << "Position X_trapezoidal=" << odometria_3.position.coordinates.X << "m" << std::endl;
-	std::cout << "Position Y_trapezoidal=" << odometria_3.position.coordinates.Y << "m" << std::endl;
-	std::cout << "Angle_trapezoidal=" << (odometria_3.position.alfa * 180 / PI) << "deg." << std::endl;
+robotSpeed RobotControll::get_motors_speed()
+{
+	return motors_speed;
+}
 
-	std::cout << "Position X_curved=" << odometria_4.position.coordinates.X << "m" << std::endl;
-	std::cout << "Position Y_curved=" << odometria_4.position.coordinates.Y << "m" << std::endl;
-	std::cout << "Angle_curved=" << (odometria_4.position.alfa * 180 / PI) << "deg." << std::endl;
+Point RobotControll::get_target_point()
+{
+	return target;
+}
+Point RobotControll::get_starting_point()
+{
+	return start;
+}
+std::vector<RobotPosition> RobotControll::get_path()
+{
+	std::vector<RobotPosition>trajectory;
+	for (int i = 0; i < path.size();i++)
+	{
+		//trajectory.push_back(path[]);
+	}
+	return trajectory;
+}
 
-	std::cout << "Robot_Mode=" << command << std::endl;
 
-	std::cout << "Position X_wanted=" << wanted_position.coordinates.X << "m" << std::endl;
-	std::cout << "Position Y_wanted=" << wanted_position.coordinates.Y << "m" << std::endl;
 
-	std::cout << "vt=" << regulator.getTranslation_output() << "mm/s" << std::endl;
-	std::cout << "R=" << regulator.getRotation_output() << "mm" << std::endl;
+void RobotControll::printData(std::ostream& stream)
+{
+	stream << "EncoderDataLeft=" << robotdata.EncoderLeft << "tick" << std::endl;
+	stream << "EncoderDataRight=" << robotdata.EncoderRight << "tick" << std::endl;
+
+	stream << "EncoderRealLeft=" << encL.encoder_real_value << "tick" << std::endl;
+	stream << "EncoderRealRight=" << encR.encoder_real_value << "tick" << std::endl;
+
+	stream << "Position X_trapezoidal=" << odometria_3.position.coordinates.X << "m" << std::endl;
+	stream << "Position Y_trapezoidal=" << odometria_3.position.coordinates.Y << "m" << std::endl;
+	stream << "Angle_trapezoidal=" << (odometria_3.position.alfa * 180 / PI) << "deg." << std::endl;
+
+	stream << "Position X_curved=" << odometria_4.position.coordinates.X << "m" << std::endl;
+	stream << "Position Y_curved=" << odometria_4.position.coordinates.Y << "m" << std::endl;
+	stream << "Angle_curved=" << (odometria_4.position.alfa * 180 / PI) << "deg." << std::endl;
+
+	stream << "Robot_Mode=" << command << std::endl;
+
+	stream << "Position X_wanted=" << wanted_position.coordinates.X << "m" << std::endl;
+	stream << "Position Y_wanted=" << wanted_position.coordinates.Y << "m" << std::endl;
+
+	stream << "vt=" << regulator.getTranslation_output() << "mm/s" << std::endl;
+	stream << "R=" << regulator.getRotation_output() << "mm" << std::endl;
 
 }
 
@@ -287,18 +342,18 @@ void RobotControll::automode()
 void RobotControll::build_map()
 {
 	Mapa histogram(mapa,false);
-	lidar_measure_counters += copyOfLaserData.numberOfScans;
+	lidar_measure_counter += copyOfLaserData.numberOfScans;
 
 	for(int i = 0; i<copyOfLaserData.numberOfScans; i++)
 	{
 		if (lidar_check_measure(copyOfLaserData.Data[i]))
 		{
-			//mapa.addPoint(lidar_measure_2_point(copyOfLaserData.Data[i], actual_position));
 			histogram.addPointToHistogram(lidar_measure_2_point(copyOfLaserData.Data[i], actual_position));
 		}
 	}
 	mapa.buildFromHistogram(histogram, 5);
 }
+
 
 void RobotControll::encoders_process()
 {
@@ -326,7 +381,8 @@ void RobotControll::start_threads()
 	std::cout << "Thread1 Started" << std::endl;
 	laserthreadHandle = std::thread(laserUDPVlakno, (void *)this);
 	std::cout << "Thread2 Started" << std::endl;
-
+	guithreadHandle = std::thread(GUI_Vlakno, (void *)this);
+	std::cout << "Thread3 Started" << std::endl;
 }
 
 

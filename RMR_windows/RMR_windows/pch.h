@@ -19,6 +19,6 @@
 #include "regulator.h"
 #include "map.h"
 #include "speed_filter.h"
-
+#include "gui.h"
 
 #endif //PCH_H

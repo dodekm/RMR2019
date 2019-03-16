@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="CKobuki.h" />
     <ClInclude Include="encoder.h" />
+    <ClInclude Include="gui.h" />
     <ClInclude Include="map.h" />
     <ClInclude Include="misc.h" />
     <ClInclude Include="odometry.h" />
@@ -166,6 +167,7 @@
   <ItemGroup>
     <ClCompile Include="CKobuki.cpp" />
     <ClCompile Include="encoder.cpp" />
+    <ClCompile Include="gui.cpp" />
     <ClCompile Include="map.cpp" />
     <ClCompile Include="odometry.cpp" />
     <ClCompile Include="pch.cpp">

@@ -10,9 +10,11 @@
 #include<chrono>
 #include<stdlib.h>
 #include <queue> 
+#include <ostream>
 
 #include "CKobuki.h"
 #include "rplidar.h"
+#include "gui.h"
 #include "points.h"
 #include "speed_filter.h"
 #include "regulator.h"
@@ -28,15 +30,35 @@
 #define d  0.23
 
 
-
-
-
 class RobotControll
 {
 public:
 	
 	RobotControll();
 	~RobotControll();
+
+	///Interface
+	void set_start(Point start);
+	void set_target(Point target);
+	RobotPosition get_position();
+	RobotPosition get_wanted_position();
+	robotSpeed get_motors_speed();
+	Point get_target_point();
+	Point get_starting_point();
+	std::vector<RobotPosition>get_path();
+	void set_command(std::string command);
+	std::string get_command();
+	void command_reset();
+	
+
+	friend std::ostream& operator<<(std::ostream& stream, RobotControll& robot)
+	{
+		robot.printData(stream);
+		return stream;
+	}
+	///
+
+
 	void WinSock_setup();
 	void robotprocess();
 	void laserprocess();
@@ -48,7 +70,7 @@ public:
 	void automode();
 	void build_map();
 
-	void printData();
+	void printData(std::ostream& stream);
 	void reset_robot();
 	
 	void move_arc(int mmpersec, int radius);
@@ -58,39 +80,24 @@ public:
 	void right(double);
 	void stop();
 	
-	void set_start_target(Point start, Point target);
-	RobotPosition get_position();
-	void addPoint(RobotPosition P)
+	
+
+	void addPointToPath(RobotPosition P)
 	{
 		path.push(P);
 	}
 
-	void set_command(std::string command)
-	{
-		this->command_old = this->command;
-		this->command = command;
-	}
-	std::string get_command()
-	{
-		return command;
-	}
-
-	void command_reset()
-	{
-		command = command_old;
-	}
-
-
-
-	std::thread robotthreadHandle; // handle na vlakno
 	
+	std::thread robotthreadHandle; 
+	std::thread laserthreadHandle; 
+	std::thread guithreadHandle;
+
 	static void robotUDPVlakno(void *param)
 	{
 		((RobotControll*)param)->robotprocess();
 		return;
 	}
 	
-	std::thread laserthreadHandle; // handle na vlakno
 	
 	static void laserUDPVlakno(void *param)
 	{
@@ -98,7 +105,12 @@ public:
 		return;
 	}
 
+
+
+
+
 private:
+
 
 	//veci na broadcast laser
 	struct sockaddr_in las_si_me, las_si_other, las_si_posli;
@@ -115,11 +127,12 @@ private:
 
 	LaserMeasurement copyOfLaserData;
 	std::string ipaddress= "192.168.1.13";
+	
 	CKobuki robot;
 	TKobukiData robotdata;
 	
 	unsigned long datacounter=0;
-	unsigned long lidar_measure_counters = 0;
+	unsigned long lidar_measure_counter = 0;
 
 	int modulo_print = 50;
 	int modulo_odometry = 10;
