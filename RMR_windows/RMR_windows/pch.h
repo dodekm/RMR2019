@@ -9,16 +9,4 @@
 #ifndef PCH_H
 #define PCH_H
 
-// TODO: add headers that you want to pre-compile here
-#include "RMR_windows.h"
-#include "CKobuki.h"
-#include "rplidar.h"
-#include "odometry.h"
-#include "points.h"
-#include "encoder.h"
-#include "regulator.h"
-#include "map.h"
-#include "speed_filter.h"
-#include "gui.h"
-
 #endif //PCH_H

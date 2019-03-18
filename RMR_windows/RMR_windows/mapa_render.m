@@ -54,7 +54,4 @@ end
 imagesc(M);
 
 end
-%%
-[lines,board,hist,result] = maze(50,50,[50,50],[0 0],0,0)
-M=board;
-spy(M)
+

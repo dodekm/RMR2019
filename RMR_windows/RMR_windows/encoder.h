@@ -1,4 +1,7 @@
 #pragma once
+#include <cstdint>
+
+#define encoder_max_value  65535 
 
 
 typedef struct  Encoder

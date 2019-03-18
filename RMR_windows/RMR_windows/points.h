@@ -1,33 +1,33 @@
 #pragma once
 #include <cmath>
 
-typedef struct Point
+typedef struct Point_
 {
 	float X = 0.0;
 	float Y = 0.0;
 
-	Point operator +(const Point& other)
+	Point_ operator +(const Point_& other)
 	{
-		return Point{X+other.X,Y+other.Y};
+		return Point_{X+other.X,Y+other.Y};
 	}
 
-	Point operator-(const Point& other)
+	Point_ operator-(const Point_& other)
 	{
-		return Point{ X - other.X,Y - other.Y };
+		return Point_{ X - other.X,Y - other.Y };
 	}
 
-}Point;
+}Point_;
 
 
-float PointsDistance(Point a, Point b);
-float PointAngle(Point p);
-float PointLength(Point a);
-Point polar2point(float angle, float length);
+float PointsDistance(Point_ a, Point_ b);
+float PointAngle(Point_ p);
+float PointLength(Point_ a);
+Point_ polar2point(float angle, float length);
 
 class RobotPosition
 {
 public:
-	Point coordinates;
+	Point_ coordinates;
 	float alfa;
 
 	RobotPosition()
@@ -50,7 +50,7 @@ public:
 		alfa = 0;
 	}
 
-	RobotPosition(Point P)
+	RobotPosition(Point_ P)
 	{
 		coordinates.X = P.X;
 		coordinates.Y = P.Y;

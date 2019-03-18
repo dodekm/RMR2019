@@ -3,6 +3,11 @@
 #include "points.h"
 #include "encoder.h"
 
+#define tickToMeter  0.000085292090497737556558
+#define d  0.23
+
+#define arc_line_switch_treshold 0.0001
+
 class Odometry
 {
 private:

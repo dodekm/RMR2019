@@ -1,6 +1,8 @@
 #pragma once
- 
+
 #include <cmath>
+
+#include "points.h"
 
 #define max_speed  400
 #define min_speed  20
@@ -8,6 +10,7 @@
 #define max_radius  65534/2
 #define min_radius  100
 
+#define singularity_product  2
 
 template <typename T>int sign(T x);
 
@@ -60,30 +63,32 @@ private:
 	float translation_gain;
 	float rotation_gain;
 	float gamma = 0.3;
-
-
 	float delta;
-	Point error;
+	Point_ error;
 
 	void saturate_radius()
 	{
 		if (abs(output.radius) > max_radius)
+		{
 			output.radius = sign(output.radius)*max_radius;
-
+		}
 		if (abs(output.radius) < min_radius)
+		{
 			output.radius = sign(output.radius)*min_radius;
-		
+		}
 	}
 
 
 	void saturate_speed()
 	{
 		if (abs(output.translation_speed) > max_speed)
+		{
 			output.translation_speed = sign(output.translation_speed)*max_speed;
-
+		}
 		if (abs(output.translation_speed) < min_speed)
+		{
 			output.translation_speed = 0;
-
+		}
 	}
 
 	void nonlinear_power_function()
@@ -93,14 +98,13 @@ private:
 	}
 
 
-	void singulatiry_correct(Point current_position, Point desired_position)
+	void singulatiry_correct(Point_ current_position, Point_ desired_position)
 	{
 		if (abs(output.translation_speed) < min_speed)
 		{
 			if (PointLength(desired_position - current_position)>position_deadzone)
 			{
-				output.translation_speed = sign(output.translation_speed)*min_speed * 2;
-				std::cout << "singularity" << std::endl;
+				output.translation_speed = sign(output.translation_speed)*min_speed * singularity_product;
 
 			}
 		}

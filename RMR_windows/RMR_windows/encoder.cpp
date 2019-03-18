@@ -1,6 +1,5 @@
-#include "encoder.h"
 #include "pch.h"
-
+#include "encoder.h"
 
 void encoder_init_values(Encoder* enc, uint16_t data)
 {

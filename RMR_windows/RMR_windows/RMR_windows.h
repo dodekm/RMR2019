@@ -1,33 +1,29 @@
 #pragma once
-#pragma comment(lib, "ws2_32.lib")
+
+
+#define _USE_MATH_DEFINES
+
 #include<iostream>
 #include <windows.h>
 #include <winsock.h>
 
-#include<thread>
 #include<vector>
-#include<string>
-#include<chrono>
-#include<stdlib.h>
 #include <queue> 
+#include<string>
 #include <ostream>
-
+#include<thread>
 #include "CKobuki.h"
 #include "rplidar.h"
-#include "gui.h"
 #include "points.h"
 #include "speed_filter.h"
 #include "regulator.h"
 #include "encoder.h"
 #include "map.h"
 #include "odometry.h"
+#include "gui.h"
 
 #define debug 
 
-#define encoder_max_value  65535 
-#define arc_line_switch_treshold 0.0001
-#define tickToMeter  0.000085292090497737556558
-#define d  0.23
 
 
 class RobotControll
@@ -38,17 +34,19 @@ public:
 	~RobotControll();
 
 	///Interface
-	void set_start(Point start);
-	void set_target(Point target);
+	void set_start(Point_ start);
+	void set_target(Point_ target);
 	RobotPosition get_position();
 	RobotPosition get_wanted_position();
 	robotSpeed get_motors_speed();
-	Point get_target_point();
-	Point get_starting_point();
+	Point_ get_target_point();
+	Point_ get_starting_point();
 	std::vector<RobotPosition>get_path();
 	void set_command(std::string command);
 	std::string get_command();
 	void command_reset();
+	void addPointToPath(RobotPosition P);
+	Mapa getMap();
 	
 
 	friend std::ostream& operator<<(std::ostream& stream, RobotControll& robot)
@@ -56,9 +54,7 @@ public:
 		robot.printData(stream);
 		return stream;
 	}
-	///
-
-
+	
 	void WinSock_setup();
 	void robotprocess();
 	void laserprocess();
@@ -81,16 +77,10 @@ public:
 	void stop();
 	
 	
-
-	void addPointToPath(RobotPosition P)
-	{
-		path.push(P);
-	}
-
-	
 	std::thread robotthreadHandle; 
 	std::thread laserthreadHandle; 
 	std::thread guithreadHandle;
+
 
 	static void robotUDPVlakno(void *param)
 	{
@@ -104,9 +94,6 @@ public:
 		((RobotControll*)param)->laserprocess();
 		return;
 	}
-
-
-
 
 
 private:
@@ -150,8 +137,8 @@ private:
 	
 	RobotPosition actual_position;
 	RobotPosition wanted_position;
-	Point start;
-	Point target;
+	Point_ start;
+	Point_ target;
 
 	std::queue <RobotPosition> path;
 

@@ -1,5 +1,7 @@
+#include "pch.h"
+
 #include "CKobuki.h"
-#include"pch.h"
+
 
 int CKobuki::checkChecksum(unsigned char * data)
 {//najprv hlavicku

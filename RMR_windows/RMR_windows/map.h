@@ -1,14 +1,16 @@
 #pragma once
+#define _USE_MATH_DEFINES
+
 #include "points.h"
 #include "rplidar.h"
-#include <cmath>
+
 #include <fstream>
 #include <string>
 #include <sstream>
 #include <new>  
 #include <queue>
 #include <vector>
-
+#include <cmath>
 
 #define floodfill_priority_X 0
 #define floodfill_priority_Y 1
@@ -75,7 +77,7 @@ class Matrix_position
 };
 
 
-Point lidar_measure_2_point(LaserData lidar_measurement, RobotPosition robot_position);
+Point_ lidar_measure_2_point(LaserData lidar_measurement, RobotPosition robot_position);
 float deg2rad(float);
 float rad2deg(float);
 
@@ -155,10 +157,14 @@ public:
 		{
 			cells_data[i] = new int[cols];
 			for (int j = 0; j < cols; j++)
-				if(copy==true)
-				cells_data[i][j] = source.cells_data[i][j];
+				if (copy == true)
+				{
+					cells_data[i][j] = source.cells_data[i][j];
+				}
 				else
-				cells_data[i][j] = cell_free;
+				{
+					cells_data[i][j] = cell_free;
+				}
 		}
 
 	}
@@ -173,16 +179,16 @@ public:
 	
 	}
 
-	void FloodFill_fill(Point start, Point target,bool diagonal);
-	void FloodFill_find_path(Point start, Point target, floodfill_priority priority, std::queue <RobotPosition> path,bool diagonal,int window_size);
+	void FloodFill_fill(Point_ start, Point_ target,bool diagonal);
+	void FloodFill_find_path(Point_ start, Point_ target, floodfill_priority priority, std::queue <RobotPosition> path,bool diagonal,int window_size);
 
 	
 	int assert_matrix_indices(Matrix_position XY);
 	int check_close_obstacle(Matrix_position XY,int window_size);
 
 
-	int addPoint(Point P);
-	void addPointToHistogram(Point P);
+	int addPoint(Point_ P);
+	void addPointToHistogram(Point_ P);
 	void buildFromHistogram(Mapa& histogram, int treshold);
 
 	void saveMap(std::string filename);
@@ -198,7 +204,7 @@ private:
 	int** cells_data;
 	
 
-	Matrix_position point2indices(Point P)
+	Matrix_position point2indices(Point_ P)
 	{
 		Matrix_position XY;
 		XY.X = (int)round(cols * (P.X - x_lim[0]) / (x_lim[1] - x_lim[0]));
@@ -207,9 +213,9 @@ private:
 	}
 
 
-	Point indices2point( Matrix_position XY)
+	Point_ indices2point( Matrix_position XY)
 	{
-		Point P;
+		Point_ P;
 		P.X = (x_lim[1] - x_lim[0])*XY.X / cols + x_lim[0];
 		P.Y = (y_lim[1] - y_lim[0])*XY.Y / rows + y_lim[0];
 		return P;

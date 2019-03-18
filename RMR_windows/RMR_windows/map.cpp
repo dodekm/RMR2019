@@ -1,13 +1,13 @@
-#include "map.h"
 #include "pch.h"
 
+#include "map.h"
 #include "misc.h"
 
 using namespace std;
 
-Point lidar_measure_2_point(LaserData lidar_measurement, RobotPosition robot_position)
+Point_ lidar_measure_2_point(LaserData lidar_measurement, RobotPosition robot_position)
 {
-	Point P;
+	Point_ P;
 	P.X = robot_position.coordinates.X + lidar_measurement.scanDistance / 1000 * cos(-deg2rad(lidar_measurement.scanAngle) + robot_position.alfa);
 	P.Y = robot_position.coordinates.Y + lidar_measurement.scanDistance / 1000 * sin(+deg2rad(lidar_measurement.scanAngle) + robot_position.alfa);
 	return P;
@@ -20,7 +20,7 @@ int Mapa::assert_matrix_indices(Matrix_position XY)
 }
 
 
-int Mapa::addPoint(Point P)
+int Mapa::addPoint(Point_ P)
 {
 	Matrix_position XY = point2indices(P);
 	if (assert_matrix_indices(XY))
@@ -28,7 +28,6 @@ int Mapa::addPoint(Point P)
 		if ((*this)[XY] == cell_obstacle)
 			return 0;
 		(*this)[XY] = cell_obstacle;
-
 		return 1;
 	}
 	return -1;
@@ -36,7 +35,7 @@ int Mapa::addPoint(Point P)
 
 }
 
-void Mapa::addPointToHistogram(Point P)
+void Mapa::addPointToHistogram(Point_ P)
 {
 	Matrix_position XY = point2indices(P);
 	if (assert_matrix_indices(XY))
@@ -54,8 +53,11 @@ void Mapa::buildFromHistogram(Mapa& histogram,int treshold)
 		
 		for (i.X = 0; i.X < cols; i.X++)
 		{
-			if(histogram[i]>treshold)
-			(*this)[i] = cell_obstacle;
+			if (histogram[i] > treshold)
+			{
+				(*this)[i] = cell_obstacle;
+			}
+		
 		}
 	}
 
@@ -133,7 +135,7 @@ void Mapa::clearMap()
 }
 
 
-void Mapa::FloodFill_fill(Point start, Point target, bool diagonal = false)
+void Mapa::FloodFill_fill(Point_ start, Point_ target, bool diagonal = false)
 {
 	Matrix_position target_indices = point2indices(target);
 	Matrix_position start_indices = point2indices(start);
@@ -179,8 +181,9 @@ void Mapa::FloodFill_fill(Point start, Point target, bool diagonal = false)
 				if (assert_matrix_indices(new_position))
 				{
 					if (new_position == start_indices)
+					{
 						points_to_evaluate.push(new_position);
-
+					}
 					else if ((*this)[new_position] == cell_free)
 					{
 						(*this)[new_position] = (*this)[working_cell] + 1;
@@ -202,7 +205,7 @@ void Mapa::FloodFill_fill(Point start, Point target, bool diagonal = false)
 }
 
 
-void Mapa::FloodFill_find_path(Point start, Point target, floodfill_priority priority, std::queue <RobotPosition> path,bool diagonal=false,int window_size=3)
+void Mapa::FloodFill_find_path(Point_ start, Point_ target, floodfill_priority priority, std::queue <RobotPosition> path,bool diagonal=false,int window_size=3)
 {
 #ifdef debug
 	Mapa mapa_to_save = (*this);
@@ -346,12 +349,13 @@ int Mapa::check_close_obstacle(Matrix_position XY,int window_size=3)
 
 float deg2rad(float deg)
 {
-	return deg / 180 * PI;
+	return deg / 180 * M_PI;
 }
 
 float rad2deg(float rad)
 {
-	return rad / PI * 180;
+	return rad / M_PI * 180;
+	
 }
 
 

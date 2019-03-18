@@ -8,8 +8,9 @@
 int main()
 {
 	RobotControll robot1;
-	std::string command;
 	robot1.start_threads();
+	std::string command;
+	
 
 	while (1)
 	{
@@ -23,12 +24,13 @@ int main()
 		std::cin >> y;
 		robot1.addPointToPath(RobotPosition(x, y));
 		
-		robot1.set_target(Point{ x,y });
+		robot1.set_target(Point_{ x,y });
 		robot1.set_start(robot1.get_position().coordinates);
 	 }
-	 else  if(command!="")
-		robot1.set_command(command);
-
+	 else  if (command != "")
+	 {
+		 robot1.set_command(command);
+	 }
 	}
 
 	robot1.robotthreadHandle.std::thread::join();
@@ -42,8 +44,7 @@ int main()
 RobotControll::RobotControll() :
 
 	regulator(300, 0.5),
-	mapa(100, 100, -5.0, 5, -5.0, 5.0,"bludisko.txt")
-	
+	mapa(100, 100, -5.0, 5, -5.0, 5.0,"bludisko.txt")	
 {
 	command = "stop";
 	command_old = "stop";
@@ -57,13 +58,14 @@ RobotControll::RobotControll() :
 		std::cin >> str;
 
 		if (str.length()==12)
-		ipaddress=str;
-	
+		{
+			ipaddress = str;
+		}
 
 	path.push(RobotPosition(0.0, 0.0));
 	
-	start = Point{ -0.5, -0.5 };
-	target = Point{ 4, 4 };
+	start = Point_{ -0.5, -0.5 };
+	target = Point_{ 4, 4 };
 	//start = Point{ -8, -8 };
 	//target = Point{ 7, 7 };
 	
@@ -87,8 +89,6 @@ void RobotControll::WinSock_setup()
 	WORD wVersionRequested;
 	WSADATA wsaData;
 	int err;
-
-	/* Use the MAKEWORD(lowbyte, highbyte) macro declared in Windef.h */
 	wVersionRequested = MAKEWORD(2, 2);
 
 	err = WSAStartup(wVersionRequested, &wsaData);
@@ -112,7 +112,6 @@ void RobotControll::processThisRobot()
 	if (datacounter % modulo_print == 0)
 	{
 		system("cls");
-		//printData(std::cout);
 		std::cout << (*this);
 	
 	}
@@ -230,6 +229,11 @@ void RobotControll::reset_robot()
 	command == "stop";
 }
 
+void RobotControll::addPointToPath(RobotPosition P)
+{
+	path.push(P);
+}
+
 void RobotControll::set_command(std::string command)
 {
 	this->command_old = this->command;
@@ -246,13 +250,13 @@ void RobotControll::command_reset()
 }
 
 
-void RobotControll::set_start(Point start)
+void RobotControll::set_start(Point_ start)
 {
 	this->start = start;
 	
 }
 
-void RobotControll::set_target(Point target)
+void RobotControll::set_target(Point_ target)
 {
 	this->target = target;
 }
@@ -274,11 +278,11 @@ robotSpeed RobotControll::get_motors_speed()
 	return motors_speed;
 }
 
-Point RobotControll::get_target_point()
+Point_ RobotControll::get_target_point()
 {
 	return target;
 }
-Point RobotControll::get_starting_point()
+Point_ RobotControll::get_starting_point()
 {
 	return start;
 }
@@ -290,6 +294,11 @@ std::vector<RobotPosition> RobotControll::get_path()
 		//trajectory.push_back(path[]);
 	}
 	return trajectory;
+}
+
+Mapa RobotControll::getMap()
+{
+	return mapa;
 }
 
 
@@ -304,11 +313,11 @@ void RobotControll::printData(std::ostream& stream)
 
 	stream << "Position X_trapezoidal=" << odometria_3.position.coordinates.X << "m" << std::endl;
 	stream << "Position Y_trapezoidal=" << odometria_3.position.coordinates.Y << "m" << std::endl;
-	stream << "Angle_trapezoidal=" << (odometria_3.position.alfa * 180 / PI) << "deg." << std::endl;
+	stream << "Angle_trapezoidal=" << (odometria_3.position.alfa * 180 / M_PI) << "deg." << std::endl;
 
 	stream << "Position X_curved=" << odometria_4.position.coordinates.X << "m" << std::endl;
 	stream << "Position Y_curved=" << odometria_4.position.coordinates.Y << "m" << std::endl;
-	stream << "Angle_curved=" << (odometria_4.position.alfa * 180 / PI) << "deg." << std::endl;
+	stream << "Angle_curved=" << (odometria_4.position.alfa * 180 / M_PI) << "deg." << std::endl;
 
 	stream << "Robot_Mode=" << command << std::endl;
 
@@ -368,8 +377,10 @@ void RobotControll::processThisLidar(LaserMeasurement &laserData)
 	
 	memcpy(&copyOfLaserData, &laserData, sizeof(LaserMeasurement));
 	
-	if (motors_speed.translation_speed<min_speed)
-	build_map();
+	if (motors_speed.translation_speed < min_speed)
+	{
+		build_map();
+	}
 }
 
 
@@ -382,7 +393,8 @@ void RobotControll::start_threads()
 	laserthreadHandle = std::thread(laserUDPVlakno, (void *)this);
 	std::cout << "Thread2 Started" << std::endl;
 	guithreadHandle = std::thread(GUI_Vlakno, (void *)this);
-	std::cout << "Thread3 Started" << std::endl;
+	std::cout << "Thread2 Started" << std::endl;
+
 }
 
 
@@ -526,8 +538,9 @@ void RobotControll::robotprocess()
 
 	int result = bind(rob_s, (struct sockaddr*)&rob_si_me, sizeof(rob_si_me));
 	if (result == SOCKET_ERROR)
+	{
 		std::cout << "robot connect error" << std::endl;
-
+	}
 	std::vector<unsigned char> mess = robot.setDefaultPID();
 	if (sendto(rob_s, (char*)mess.data(), sizeof(char)*mess.size(), 0, (struct sockaddr*) &rob_si_posli, rob_slen) == -1)
 	{
