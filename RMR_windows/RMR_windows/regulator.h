@@ -4,11 +4,11 @@
 
 #include "points.h"
 
-#define max_speed  400
+#define max_speed  250
 #define min_speed  20
 
 #define max_radius  65534/2
-#define min_radius  100
+#define min_radius  70
 
 #define singularity_product  2
 

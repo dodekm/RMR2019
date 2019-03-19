@@ -12,6 +12,8 @@ int lidar_check_measure(LaserData measure)
 	{
 		return 0;
 	}
+	
+
 	else
 		return 1;
 }

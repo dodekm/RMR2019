@@ -5,6 +5,7 @@
 #include "RMR_windows.h"
 
 
+
 int main()
 {
 	RobotControll robot1;
@@ -43,8 +44,9 @@ int main()
 
 RobotControll::RobotControll() :
 
-	regulator(300, 0.5),
-	mapa(100, 100, -5.0, 5, -5.0, 5.0,"bludisko.txt")	
+	regulator(200, 0.5),
+	mapa(100, 100, -5.0, 5, -5.0, 5.0,"file.txt"),
+	histogram(mapa,false)
 {
 	command = "stop";
 	command_old = "stop";
@@ -64,17 +66,12 @@ RobotControll::RobotControll() :
 
 	path.push(RobotPosition(0.0, 0.0));
 	
-	start = Point_{ -0.5, -0.5 };
-	target = Point_{ 4, 4 };
-	//start = Point{ -8, -8 };
-	//target = Point{ 7, 7 };
+	start = Point_{0, 0 };
+	target = Point_{ -2, -2 };
 	
-	Mapa mapa_flood_fill;
-	mapa_flood_fill=mapa;
-	mapa_flood_fill.FloodFill_fill(start, target,true);
-	mapa_flood_fill.saveMap("floodfill.txt");
-	mapa_flood_fill.FloodFill_find_path(start, target,floodfill_priority_Y,path,true,3); 
-
+	
+	
+	find_path();
 	
 }
 
@@ -148,15 +145,15 @@ void RobotControll::processThisRobot()
 		}
 		else if (command == "left")
 		{
-			motors_speed.translation_speed=20;
-			motors_speed.radius = d*100;
+			motors_speed.translation_speed=100;
+			motors_speed.radius = d*1000;
 			
 		}
 		else if (command == "right")
 		{
 			
-			motors_speed.translation_speed=20;
-			motors_speed.radius = -d*100;
+			motors_speed.translation_speed=100;
+			motors_speed.radius = -d*1000;
 		}
 		
 
@@ -181,11 +178,7 @@ void RobotControll::processThisRobot()
 
 		else if (command == "find")
 		{
-			Mapa mapa_flood_fill;
-			mapa_flood_fill = mapa;
-			mapa_flood_fill.FloodFill_fill(start, target,true);
-			mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_X,path,true,3);
-			mapa_flood_fill.saveMap("floodfill.txt");
+			find_path();
 			command_reset();
 		}
 
@@ -221,6 +214,8 @@ void RobotControll::reset_robot()
 	{
 		path.pop();
 	}
+	mapa.clearMap();
+	histogram.clearMap();
 	encoder_init_values(&encL, robotdata.EncoderLeft);
 	encoder_init_values(&encR, robotdata.EncoderRight);
 	odometria_using->odometry_init();
@@ -289,12 +284,18 @@ Point_ RobotControll::get_starting_point()
 std::vector<RobotPosition> RobotControll::get_path()
 {
 	std::vector<RobotPosition>trajectory;
-	for (int i = 0; i < path.size();i++)
+	
+	std::queue<RobotPosition>path_copy = path;
+
+	while (!path_copy.empty())
 	{
-		//trajectory.push_back(path[]);
+		trajectory.push_back(path_copy.front());
+		path_copy.pop();
 	}
 	return trajectory;
 }
+
+
 
 Mapa RobotControll::getMap()
 {
@@ -326,6 +327,7 @@ void RobotControll::printData(std::ostream& stream)
 
 	stream << "vt=" << regulator.getTranslation_output() << "mm/s" << std::endl;
 	stream << "R=" << regulator.getRotation_output() << "mm" << std::endl;
+	stream << "lidar_counter" << lidar_measure_counter << std::endl;
 
 }
 
@@ -350,17 +352,34 @@ void RobotControll::automode()
 
 void RobotControll::build_map()
 {
-	Mapa histogram(mapa,false);
-	lidar_measure_counter += copyOfLaserData.numberOfScans;
-
+	
 	for(int i = 0; i<copyOfLaserData.numberOfScans; i++)
 	{
 		if (lidar_check_measure(copyOfLaserData.Data[i]))
 		{
 			histogram.addPointToHistogram(lidar_measure_2_point(copyOfLaserData.Data[i], actual_position));
+			lidar_measure_counter++;
+		}
+		if (lidar_measure_counter % lidar_measure_modulo== 0)
+		{
+			lidar_measure_counter = 0;
+			mapa.buildFromHistogram(histogram, histogram_treshold);
+			histogram.clearMap();
 		}
 	}
-	mapa.buildFromHistogram(histogram, 5);
+	
+}
+
+void RobotControll::find_path()
+{
+	int window_size=3;
+	Mapa mapa_flood_fill(mapa,true);
+	mapa_flood_fill.FloodFill_fill(start, target, true);
+	mapa_flood_fill.saveMap("floodfill.txt");
+	Mapa map_with_path = mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_X, path, true, window_size);
+	map_with_path.saveMap("path.txt");
+	
+
 }
 
 
@@ -375,11 +394,15 @@ void RobotControll::encoders_process()
 void RobotControll::processThisLidar(LaserMeasurement &laserData)
 {
 	
-	memcpy(&copyOfLaserData, &laserData, sizeof(LaserMeasurement));
 	
-	if (motors_speed.translation_speed < min_speed)
+	if(command=="stop"&&motors_speed.translation_speed < min_speed&&motors_speed.radius>max_radius/10)
 	{
+		memcpy(&copyOfLaserData, &laserData, sizeof(LaserMeasurement));
 		build_map();
+	}
+	else
+	{
+		lidar_measure_counter = 1;
 	}
 }
 

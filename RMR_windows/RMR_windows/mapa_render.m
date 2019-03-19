@@ -1,10 +1,10 @@
 %M=importdata('map.txt',',')
 clear all;
-%close all;
+close all;
 %filename='floodfill.txt'
 %filename='map.txt'
 filename='path.txt'
-%filename='file2.txt'
+%filename='file5.txt'
 %filename='bludisko.txt'
 %filename='file.txt'
 
@@ -49,7 +49,7 @@ delete(hFH);
 paint_X=round(xy(:,1));
 paint_Y=round(xy(:,2));
 for i=1:length(paint_Y)
-M(paint_Y(i),paint_X(i))=cell_free;
+M(paint_Y(i),paint_X(i))=cell_obstacle;
 end
 imagesc(M);
 

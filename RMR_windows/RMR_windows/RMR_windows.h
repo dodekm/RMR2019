@@ -24,6 +24,8 @@
 
 #define debug 
 
+#define lidar_measure_modulo 5000
+#define histogram_treshold 20
 
 
 class RobotControll
@@ -65,6 +67,7 @@ public:
 	void start_threads();
 	void automode();
 	void build_map();
+	void find_path();
 
 	void printData(std::ostream& stream);
 	void reset_robot();
@@ -122,8 +125,9 @@ private:
 	unsigned long lidar_measure_counter = 0;
 
 	int modulo_print = 50;
-	int modulo_odometry = 10;
+	int modulo_odometry = 1;
 	int modulo_drive = 5;
+
 
 	Encoder encL;
 	Encoder encR;
@@ -146,7 +150,8 @@ private:
 	Speed_filter filter;
 
 	Mapa mapa;
-	
+	Mapa histogram;
+
 	RobotRegulator regulator;
 	
 	std::string command;

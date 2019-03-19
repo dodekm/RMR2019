@@ -9,7 +9,7 @@ Point_ lidar_measure_2_point(LaserData lidar_measurement, RobotPosition robot_po
 {
 	Point_ P;
 	P.X = robot_position.coordinates.X + lidar_measurement.scanDistance / 1000 * cos(-deg2rad(lidar_measurement.scanAngle) + robot_position.alfa);
-	P.Y = robot_position.coordinates.Y + lidar_measurement.scanDistance / 1000 * sin(+deg2rad(lidar_measurement.scanAngle) + robot_position.alfa);
+	P.Y = robot_position.coordinates.Y + lidar_measurement.scanDistance / 1000 * sin(-deg2rad(lidar_measurement.scanAngle) + robot_position.alfa);
 	return P;
 }
 
@@ -53,7 +53,8 @@ void Mapa::buildFromHistogram(Mapa& histogram,int treshold)
 		
 		for (i.X = 0; i.X < cols; i.X++)
 		{
-			if (histogram[i] > treshold)
+			
+			if ( histogram[i]> treshold)
 			{
 				(*this)[i] = cell_obstacle;
 			}
@@ -205,11 +206,10 @@ void Mapa::FloodFill_fill(Point_ start, Point_ target, bool diagonal = false)
 }
 
 
-void Mapa::FloodFill_find_path(Point_ start, Point_ target, floodfill_priority priority, std::queue <RobotPosition> path,bool diagonal=false,int window_size=3)
+Mapa Mapa::FloodFill_find_path(Point_ start, Point_ target, floodfill_priority priority, std::queue <RobotPosition>& path,bool diagonal=false,int window_size=3)
 {
-#ifdef debug
-	Mapa mapa_to_save = (*this);
-#endif
+
+	Mapa map_with_path = Mapa(*this,true);
 
 	std::vector<Matrix_position> trajectory;
 
@@ -217,11 +217,11 @@ void Mapa::FloodFill_find_path(Point_ start, Point_ target, floodfill_priority p
 	Matrix_position start_indices = point2indices(start);
 
 	if (!(assert_matrix_indices(target_indices) && assert_matrix_indices(start_indices)))
-		return;
+		return Mapa();
 	if (cells_data[target_indices.Y][target_indices.X] != cell_finish)
-		return;
+		return Mapa();
 	if (cells_data[start_indices.Y][start_indices.X] != cell_start)
-		return;
+		return Mapa();
 
 	Matrix_position working_cell = start_indices;
 	
@@ -301,29 +301,18 @@ void Mapa::FloodFill_find_path(Point_ start, Point_ target, floodfill_priority p
 		difference_forward= trajectory[i + 1] -working_cell ;
 		Matrix_position second_order_difference = difference_forward - difference_backward;
 
-#ifdef debug
-		mapa_to_save[working_cell] = cell_path;
-#endif
-
+		map_with_path[working_cell] = cell_path;
 		
 			if (second_order_difference != Matrix_position{ 0,0 })
 			{
 				path.push(RobotPosition(indices2point(working_cell)));
-#ifdef debug
-				mapa_to_save[working_cell] = cell_breakpoint;
-#endif
-			}
+				map_with_path[working_cell] = cell_breakpoint;
 
-		
+			}		
 	}
 
 	path.push(RobotPosition(indices2point(target_indices)));
-
-#ifdef debug
-	mapa_to_save.saveMap("path.txt");
-#endif 
-
-	
+	return map_with_path;
 
 }
 

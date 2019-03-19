@@ -3,7 +3,7 @@
 
 #include "points.h"
 #include "rplidar.h"
-
+#include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -11,6 +11,8 @@
 #include <queue>
 #include <vector>
 #include <cmath>
+
+
 
 #define floodfill_priority_X 0
 #define floodfill_priority_Y 1
@@ -93,13 +95,7 @@ public:
 	
 	Mapa(int rows,int cols, float  x_low,float x_high,float y_low,float y_high,std::string filename="")
 	{
-		cells_data = new int*[rows];
-		for (int i = 0; i < rows; ++i) 
-		{
-			cells_data[i] = new int[cols];
-			for (int j = 0; j < cols; j++)
-				cells_data[i][j] = cell_free;
-		}
+		
 		this->cols = cols;
 		this->rows = rows;
 		this->x_lim[0] = x_low;
@@ -107,38 +103,44 @@ public:
 		this->y_lim[0] = y_low;
 		this->y_lim[1] = y_high;
 
-		if (filename.empty())
-			return;
-		
+		allocate();
+
+		if (!filename.empty())
 		loadMap(filename);
 		
-		//saveMap(filename);
 	}
 
 
 	void  operator=(const Mapa& source)
 	{
-		
+		deallocate();
 		cols = source.cols;
 		rows = source.rows;
 		x_lim[0] = source.x_lim[0];
 		x_lim[1] = source.x_lim[1];
 		y_lim[0] = source.y_lim[0];
 		y_lim[1] = source.y_lim[1];
+		allocate();
 
-		cells_data = new int*[rows];
 		for (int i = 0; i < rows; ++i)
 		{
-			cells_data[i] = new int[cols];
+
 			for (int j = 0; j < cols; j++)
+			{
 				cells_data[i][j] = source.cells_data[i][j];
+			}
 		}
 		
 	}
 
 	auto& operator[](Matrix_position position)
 	{
-		return (cells_data[position.Y][position.X]);
+		if (cells_data != NULL && assert_matrix_indices(position))
+		{
+			return (cells_data[position.Y][position.X]);
+		}
+		
+		
 	}
 
 	
@@ -152,19 +154,18 @@ public:
 		y_lim[0] = source.y_lim[0];
 		y_lim[1] = source.y_lim[1];
 
-		cells_data = new int*[rows];
+		allocate();
+
 		for (int i = 0; i < rows; ++i)
 		{
-			cells_data[i] = new int[cols];
+			
 			for (int j = 0; j < cols; j++)
+			{
 				if (copy == true)
-				{
-					cells_data[i][j] = source.cells_data[i][j];
-				}
+				cells_data[i][j] = source.cells_data[i][j];
 				else
-				{
-					cells_data[i][j] = cell_free;
-				}
+				cells_data[i][j] = cell_free;
+			}
 		}
 
 	}
@@ -172,15 +173,14 @@ public:
 	~Mapa()
 	{
 		
-		for (int i = 0; i < rows; i++) {
-			delete[] cells_data[i];
-		}
-		delete[] cells_data;
+		deallocate();
 	
 	}
 
+	
+
 	void FloodFill_fill(Point_ start, Point_ target,bool diagonal);
-	void FloodFill_find_path(Point_ start, Point_ target, floodfill_priority priority, std::queue <RobotPosition> path,bool diagonal,int window_size);
+	Mapa FloodFill_find_path(Point_ start, Point_ target, floodfill_priority priority, std::queue <RobotPosition>& path,bool diagonal,int window_size);
 
 	
 	int assert_matrix_indices(Matrix_position XY);
@@ -203,6 +203,28 @@ private:
 	float  x_lim[2], y_lim[2];
 	int** cells_data;
 	
+	void allocate()
+	{
+		cells_data = new int*[rows];
+		for (int i = 0; i < rows; ++i)
+		{
+			cells_data[i] = new int[cols];
+			for (int j = 0; j < cols; j++)
+				cells_data[i][j] = cell_free;
+		}
+	}
+	void deallocate()
+	{
+		if (cells_data != NULL)
+		{
+
+			for (int i = 0; i < rows; i++) {
+				delete[] cells_data[i];
+			}
+			delete[] cells_data;
+		}
+	}
+
 
 	Matrix_position point2indices(Point_ P)
 	{
