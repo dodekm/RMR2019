@@ -1,4 +1,4 @@
-#include "pch.h"
+
 #include "gui.h"
 
 void GUI_Vlakno(void* param)

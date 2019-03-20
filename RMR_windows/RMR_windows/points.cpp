@@ -1,4 +1,4 @@
-#include "pch.h"
+
 #include "points.h"
 
 float PointsDistance(Point_ a, Point_ b)

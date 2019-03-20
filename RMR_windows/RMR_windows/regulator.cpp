@@ -1,4 +1,4 @@
-#include "pch.h"
+
 #include "regulator.h"
 
 void RobotRegulator::regulate(RobotPosition& current_position, RobotPosition& desired_position)

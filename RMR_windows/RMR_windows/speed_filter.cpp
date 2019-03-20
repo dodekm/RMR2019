@@ -1,4 +1,4 @@
-#include "pch.h"
+
 #include "speed_filter.h"
 
 int Speed_filter::set_speed(int desired_speed, int n_steps)

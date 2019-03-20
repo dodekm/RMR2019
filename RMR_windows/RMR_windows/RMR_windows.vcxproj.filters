@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CKobuki.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -53,9 +50,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="pch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="RMR_windows.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
