@@ -14,10 +14,10 @@
 
 
 
-#define floodfill_priority_X 0
-#define floodfill_priority_Y 1
-#define floodfill_priority_diagonal 2
-
+#define floodfill_priority_X 1
+#define floodfill_priority_Y 2
+#define floodfill_priority_diag 3
+#define max_iter 20000
 typedef int  floodfill_priority;
 
 typedef enum

@@ -1,6 +1,6 @@
 %M=importdata('map.txt',',')
 clear all;
-close all;
+%close all;
 %filename='floodfill.txt'
 %filename='map.txt'
 filename='path.txt'

@@ -64,10 +64,9 @@ RobotControll::RobotControll() :
 	path.push(RobotPosition(0.0, 0.0));
 	
 	start = Point_{0, 0 };
-	target = Point_{ -2, -2 };
+	target = Point_{ 3, 3 };
 	
-	
-	
+
 	find_path();
 	
 }
@@ -369,11 +368,11 @@ void RobotControll::build_map()
 
 void RobotControll::find_path()
 {
-	int window_size=3;
+	int window_size=1;
 	Mapa mapa_flood_fill(mapa,true);
 	mapa_flood_fill.FloodFill_fill(start, target, true);
 	mapa_flood_fill.saveMap("floodfill.txt");
-	Mapa map_with_path = mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_X, path, true, window_size);
+	Mapa map_with_path = mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_Y, path, true, window_size);
 	map_with_path.saveMap("path.txt");
 	
 

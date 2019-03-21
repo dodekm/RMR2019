@@ -45,20 +45,20 @@ void Mapa::addPointToHistogram(Point_ P)
 
 }
 
-void Mapa::buildFromHistogram(Mapa& histogram,int treshold)
+void Mapa::buildFromHistogram(Mapa& histogram, int treshold)
 {
 	Matrix_position i;
-	for ( i.Y = 0; i.Y < rows; i.Y++)
+	for (i.Y = 0; i.Y < rows; i.Y++)
 	{
-		
+
 		for (i.X = 0; i.X < cols; i.X++)
 		{
-			
-			if ( histogram[i]> treshold)
+
+			if (histogram[i] > treshold)
 			{
 				(*this)[i] = cell_obstacle;
 			}
-		
+
 		}
 	}
 
@@ -143,6 +143,8 @@ void Mapa::FloodFill_fill(Point_ start, Point_ target, bool diagonal = false)
 
 	if (!(assert_matrix_indices(target_indices) && assert_matrix_indices(start_indices)))
 		return;
+	if ((*this)[target_indices] == cell_obstacle || (*this)[start_indices] == cell_obstacle)
+		return;
 
 	(*this)[target_indices] = cell_finish;
 	(*this)[start_indices] = cell_start;
@@ -168,8 +170,13 @@ void Mapa::FloodFill_fill(Point_ start, Point_ target, bool diagonal = false)
 	offset.push_back(Matrix_position{ 0, 1 });
 
 
+	unsigned long iter = 0;
+
 	while (working_cell != start_indices)
 	{
+		if (iter > max_iter)
+			break;
+		iter++;
 
 		if (assert_matrix_indices(working_cell))
 		{
@@ -202,15 +209,14 @@ void Mapa::FloodFill_fill(Point_ start, Point_ target, bool diagonal = false)
 
 		}
 	}
-
+	std::cout <<"Iterations: "<< iter << endl;
 }
 
 
-Mapa Mapa::FloodFill_find_path(Point_ start, Point_ target, floodfill_priority priority, std::queue <RobotPosition>& path,bool diagonal=false,int window_size=3)
+Mapa Mapa::FloodFill_find_path(Point_ start, Point_ target, floodfill_priority priority, std::queue <RobotPosition>& path, bool diagonal = false, int window_size = 3)
 {
 
-	Mapa map_with_path = Mapa(*this,true);
-
+	Mapa map_with_path = Mapa(*this, true);
 	std::vector<Matrix_position> trajectory;
 
 	Matrix_position target_indices = point2indices(target);
@@ -224,8 +230,18 @@ Mapa Mapa::FloodFill_find_path(Point_ start, Point_ target, floodfill_priority p
 		return Mapa();
 
 	Matrix_position working_cell = start_indices;
-	
+
 	std::vector<Matrix_position> offset;
+
+	if (diagonal&&priority != floodfill_priority_diag)
+	{
+
+		offset.push_back(Matrix_position{ -1,-1 });
+		offset.push_back(Matrix_position{ 1,1 });
+		offset.push_back(Matrix_position{ -1,1 });
+		offset.push_back(Matrix_position{ 1,-1 });
+
+	}
 
 	if (priority == floodfill_priority_X)
 	{
@@ -236,30 +252,39 @@ Mapa Mapa::FloodFill_find_path(Point_ start, Point_ target, floodfill_priority p
 
 	}
 
-	else if (priority == floodfill_priority_Y)
+	else if (priority == floodfill_priority_Y || priority == floodfill_priority_diag)
 	{
 		offset.push_back(Matrix_position{ -1,0 });
 		offset.push_back(Matrix_position{ 1,0 });
 		offset.push_back(Matrix_position{ 0,-1 });
 		offset.push_back(Matrix_position{ 0, 1 });
 	}
-	if (diagonal)
+
+	if (diagonal&&priority == floodfill_priority_diag)
 	{
+
 		offset.push_back(Matrix_position{ -1,-1 });
 		offset.push_back(Matrix_position{ 1,1 });
 		offset.push_back(Matrix_position{ -1,1 });
 		offset.push_back(Matrix_position{ 1,-1 });
+
+
+
 	}
+
+	unsigned long iter = 0;
 
 	Matrix_position working_cell_prev = Matrix_position(-1, -1);
 	while (working_cell != target_indices)
 	{
+		if (iter > max_iter)
+			break;
+		iter++;
+
 		int minvalue = INT32_MAX;
-		Matrix_position chosen_cell = { 0,0 };
 		Matrix_position direction = { 0,0 };
-
+		Matrix_position gradient = { 0,0 };
 		for (int i = 0; i < offset.size(); i++)
-
 		{
 			Matrix_position new_position = working_cell + offset[i];
 
@@ -268,16 +293,33 @@ Mapa Mapa::FloodFill_find_path(Point_ start, Point_ target, floodfill_priority p
 
 				if ((*this)[new_position] > cell_obstacle)
 				{
-					if ((*this)[new_position] <= minvalue)
+					if (this->check_close_obstacle(new_position, window_size))
 					{
-						if (this->check_close_obstacle(new_position,window_size))
-						{
-							if (new_position != working_cell_prev)
+						
+							if ((*this)[new_position] <= minvalue)
 							{
-								direction = new_position;
-								minvalue = (*this)[new_position];
+								if ((*this)[new_position] == minvalue)
+								{
+									if (gradient == (new_position - working_cell) || gradient == Matrix_position{ 0,0 })
+									{
+										direction = new_position;
+										(*this)[new_position] = cell_path;
+									}
+									
+								}
+								else
+								{
+									direction = new_position;
+									minvalue = (*this)[new_position];
+									(*this)[new_position] = cell_path;
+								
+								}
+
+								
 							}
-						}
+							
+								
+						
 					}
 
 				}
@@ -286,29 +328,29 @@ Mapa Mapa::FloodFill_find_path(Point_ start, Point_ target, floodfill_priority p
 		}
 		working_cell_prev = working_cell;
 		working_cell = direction;
-		
+		gradient = working_cell - working_cell_prev;
 		trajectory.push_back(working_cell);
 	}
+	std::cout << "Iterations: " << iter << endl;
 
-	
 	Matrix_position difference_backward = { 0,0 };
 	Matrix_position difference_forward = { 0,0 };
 
-	for (int i = 1; i < trajectory.size()-1; i++)
+	for (int i = 1; i < trajectory.size() - 1; i++)
 	{
 		Matrix_position working_cell = trajectory[i];
-		difference_backward = working_cell - trajectory[i-1];
-		difference_forward= trajectory[i + 1] -working_cell ;
+		difference_backward = working_cell - trajectory[i - 1];
+		difference_forward = trajectory[i + 1] - working_cell;
 		Matrix_position second_order_difference = difference_forward - difference_backward;
 
 		map_with_path[working_cell] = cell_path;
-		
-			if (second_order_difference != Matrix_position{ 0,0 })
-			{
-				path.push(RobotPosition(indices2point(working_cell)));
-				map_with_path[working_cell] = cell_breakpoint;
 
-			}		
+		if (second_order_difference != Matrix_position{ 0,0 })
+		{
+			path.push(RobotPosition(indices2point(working_cell)));
+			map_with_path[working_cell] = cell_breakpoint;
+
+		}
 	}
 
 	path.push(RobotPosition(indices2point(target_indices)));
@@ -316,12 +358,12 @@ Mapa Mapa::FloodFill_find_path(Point_ start, Point_ target, floodfill_priority p
 
 }
 
-int Mapa::check_close_obstacle(Matrix_position XY,int window_size=3)
+int Mapa::check_close_obstacle(Matrix_position XY, int window_size = 3)
 {
 
-	
+
 	Matrix_position offset;
-	for (offset.Y = -window_size+1; offset.Y < window_size; offset.Y++)
+	for (offset.Y = -window_size + 1; offset.Y < window_size; offset.Y++)
 	{
 		for (offset.X = -window_size + 1; offset.X < window_size; offset.X++)
 		{
@@ -344,7 +386,7 @@ float deg2rad(float deg)
 float rad2deg(float rad)
 {
 	return rad / M_PI * 180;
-	
+
 }
 
 
