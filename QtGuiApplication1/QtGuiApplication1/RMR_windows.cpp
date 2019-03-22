@@ -3,46 +3,11 @@
 
 #include "RMR_windows.h"
 
-int main()
-{
-	RobotControll robot1;
-	robot1.start_threads();
-	std::string command;
-	
-
-	while (1)
-	{
-		
-		std::getline(std::cin, command);
-		
-	 if (command == "go")
-	{
-		float x, y;
-		std::cin >> x;
-		std::cin >> y;
-		robot1.addPointToPath(RobotPosition(x, y));
-		
-		robot1.set_target(Point{ x,y });
-		robot1.set_start(robot1.get_position().coordinates);
-	 }
-	 else  if (command != "")
-	 {
-		 robot1.set_command(command);
-	 }
-	}
-
-	robot1.robotthreadHandle.std::thread::join();
-	robot1.laserthreadHandle.std::thread::join();
-	robot1.guithreadHandle.std::thread::join();
-}
-
-
-
 
 RobotControll::RobotControll() :
 
 	regulator(200, 0.5),
-	mapa(100, 100, -5.0, 5, -5.0, 5.0,"file.txt"),
+	mapa(100, 100, -5.0, 5, -5.0, 5.0,""),
 	histogram(mapa,false)
 {
 	command = "stop";
@@ -51,23 +16,12 @@ RobotControll::RobotControll() :
 	odometria_using = &odometria_3;
 
 	WinSock_setup();
-	std::cout << "Zadaj IP adresu:" << std::endl;
 	
-		std::string str;
-		std::cin >> str;
-
-		if (str.length()==12)
-		{
-			ipaddress = str;
-		}
-
 	path.push(RobotPosition(0.0, 0.0));
 	
 	start = Point{0, 0 };
-	target = Point{ 3, -3 };
+	target = Point{ 0, 0 };
 	
-
-	find_path();
 	
 }
 
@@ -104,9 +58,13 @@ void RobotControll::processThisRobot()
 
 	if (datacounter % modulo_print == 0)
 	{
-		system("cls");
+		
 		std::cout << (*this);
-	
+
+		emit_map();
+		emit_odometry();
+
+		
 	}
 
 	if (datacounter % modulo_odometry == 0)
@@ -162,13 +120,13 @@ void RobotControll::processThisRobot()
 		else if (command == "save")
 		{
 		
-			mapa.saveMap("file.txt");
+			mapa.saveMap(filename);
 			command_reset();
 		}
 
 		else if (command == "load")
 		{
-			mapa.loadMap("file.txt");
+			mapa.loadMap(filename);
 			command_reset();
 		}
 
@@ -252,6 +210,17 @@ void RobotControll::set_target(Point target)
 	this->target = target;
 }
 
+void RobotControll::setip(std::string ip)
+{
+	ipaddress = ip;
+
+}
+
+void RobotControll::setfilename(std::string filename)
+{
+	this->filename = filename;
+}
+
 
 RobotPosition RobotControll::get_position()
 {
@@ -291,14 +260,10 @@ std::vector<RobotPosition> RobotControll::get_path()
 	return trajectory;
 }
 
-
-
 Mapa RobotControll::getMap()
 {
 	return mapa;
 }
-
-
 
 void RobotControll::printData(std::ostream& stream)
 {
@@ -375,7 +340,6 @@ void RobotControll::find_path()
 	Mapa map_with_path = mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_Y, path, true, window_size);
 	map_with_path.saveMap("path.txt");
 	
-
 }
 
 
@@ -406,14 +370,14 @@ void RobotControll::processThisLidar(LaserMeasurement &laserData)
 void RobotControll::start_threads()
 {
 
-
 	robotthreadHandle = std::thread(robotUDPVlakno, (void *)this);
 	std::cout << "Thread1 Started" << std::endl;
 	laserthreadHandle = std::thread(laserUDPVlakno, (void *)this);
 	std::cout << "Thread2 Started" << std::endl;
-	guithreadHandle = std::thread(GUI_Vlakno, (void *)this);
-	std::cout << "Thread2 Started" << std::endl;
-
+	
+	emit_map();
+	emit_odometry();
+	
 }
 
 
@@ -534,7 +498,7 @@ void RobotControll::laserprocess()
 /// toto je funkcia s nekonecnou sluckou,ktora cita data z robota (UDP komunikacia)
 void RobotControll::robotprocess()
 {
-
+	
 	std::cout << "running robotprocess" << std::endl;
 	if ((rob_s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 	{
@@ -578,6 +542,8 @@ void RobotControll::robotprocess()
 	std::cout << "Entering robot loop" << std::endl;
 	while (1)
 	{
+		
+
 		memset(buff, 0, 50000 * sizeof(char));
 		if ((rob_recv_len = recvfrom(rob_s, (char*)&buff, sizeof(char) * 50000, 0, (struct sockaddr *) &rob_si_other, &rob_slen)) == -1)
 		{
@@ -592,7 +558,7 @@ void RobotControll::robotprocess()
 			processThisRobot();
 		}
 
-
+		
 	}
 }
 

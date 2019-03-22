@@ -20,7 +20,6 @@
 #include "encoder.h"
 #include "map.h"
 #include "odometry.h"
-#include "gui.h"
 
 #define debug 
 
@@ -82,9 +81,25 @@ public:
 	
 	std::thread robotthreadHandle; 
 	std::thread laserthreadHandle; 
-	std::thread guithreadHandle;
+	
+	void setip(std::string ip);
+	void setfilename(std::string filename);
 
-
+	void* parent_ptr = NULL;
+	void(*parent_robot_update_callback)(void*)=NULL;
+	void(*parent_map_update_callback)(void*)=NULL;
+	
+	void emit_odometry()
+	{
+		if (parent_robot_update_callback)
+			parent_robot_update_callback(parent_ptr);
+	}
+	void emit_map()
+	{
+		if (parent_map_update_callback)
+			parent_map_update_callback(parent_ptr);
+	}
+	
 	static void robotUDPVlakno(void *param)
 	{
 		((RobotControll*)param)->robotprocess();
@@ -147,6 +162,7 @@ private:
 	std::queue <RobotPosition> path;
 
 	int speed_filter_steps = 10;
+	
 	Speed_filter filter;
 
 	Mapa mapa;
@@ -154,6 +170,7 @@ private:
 
 	RobotRegulator regulator;
 	
+	std::string filename="";
 	std::string command;
 	std::string command_old;	
 
