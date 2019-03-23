@@ -1,19 +1,5 @@
 #include "QtGuiApplication1.h"
 
-void robot_update_callback(void* ptr)
-{
-	RobotControll_QT* me = (RobotControll_QT*)ptr;
-	emit (me->odometry_update_sig(me->get_position()));
-}
-
-
-void map_update_callback(void* ptr)
-{
-	RobotControll_QT* me = (RobotControll_QT*)ptr;
-	emit me->map_update_sig(me->getMap());
-}
-
-
 
 QtGuiApplication1::QtGuiApplication1(QWidget *parent)
 	: QMainWindow(parent) 
@@ -126,17 +112,17 @@ void QtGuiApplication1::on_pushButton_save_map_clicked()
 
 void QtGuiApplication1::on_pushButton_go_clicked()
 {
-	emit push_point_to_path_sig();
+	//emit push_point_to_path_sig();
 }
 
 void QtGuiApplication1::on_spinBox_valueChanged(int arg1)
 {
-	emit target_point_set_sig(ui.spinBox->value(), ui.spinBox_2->value());
+	//emit target_point_set_sig(ui.spinBox->value(), ui.spinBox_2->value());
 }
 
 void QtGuiApplication1::on_spinBox_2_valueChanged(int arg1)
 {
-	emit target_point_set_sig(ui.spinBox->value(), ui.spinBox_2->value());
+	//emit target_point_set_sig(ui.spinBox->value(), ui.spinBox_2->value());
 }
 
 
@@ -154,7 +140,7 @@ void QtGuiApplication1::odometry_update(RobotPosition pos)
 	ui.lcdNumber_2->display(pos.coordinates.Y);
 	ui.lcdNumber_3->display(pos.alfa);
 }
-
+/*
 
 void RobotControll_QT::command_change(std::string command)
 {
@@ -185,3 +171,4 @@ void RobotControll_QT::robot_start_threads(void)
 }
 
 
+*/

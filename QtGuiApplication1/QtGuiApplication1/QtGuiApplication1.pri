@@ -14,10 +14,10 @@ HEADERS += ./CKobuki.h \
     ./odometry.h \
     ./points.h \
     ./regulator.h \
-    ./RMR_windows.h \
     ./rplidar.h \
     ./speed_filter.h \
-    ./QtGuiApplication1.h
+    ./QtGuiApplication1.h \
+    ./RMR_windows.h
 SOURCES += ./CKobuki.cpp \
     ./encoder.cpp \
     ./main.cpp \

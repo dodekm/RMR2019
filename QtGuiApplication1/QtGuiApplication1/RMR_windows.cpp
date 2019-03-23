@@ -61,10 +61,7 @@ void RobotControll::processThisRobot()
 		
 		std::cout << (*this);
 
-		emit_map();
-		emit_odometry();
 
-		
 	}
 
 	if (datacounter % modulo_odometry == 0)
@@ -77,6 +74,7 @@ void RobotControll::processThisRobot()
 		odometria_4.odometry_curved(encL, encR);
 		actual_position = odometria_using->position;
 	
+		emit odometry_update_sig(actual_position);
 	}
 
 	if (datacounter % modulo_drive == 0)
@@ -354,7 +352,8 @@ void RobotControll::encoders_process()
 void RobotControll::processThisLidar(LaserMeasurement &laserData)
 {
 	
-	
+	emit map_update_sig(mapa);
+
 	if(command=="stop"&&motors_speed.translation_speed < min_speed&&motors_speed.radius>max_radius/10)
 	{
 		memcpy(&copyOfLaserData, &laserData, sizeof(LaserMeasurement));
@@ -375,9 +374,7 @@ void RobotControll::start_threads()
 	laserthreadHandle = std::thread(laserUDPVlakno, (void *)this);
 	std::cout << "Thread2 Started" << std::endl;
 	
-	emit_map();
-	emit_odometry();
-	
+
 }
 
 
@@ -498,7 +495,8 @@ void RobotControll::laserprocess()
 /// toto je funkcia s nekonecnou sluckou,ktora cita data z robota (UDP komunikacia)
 void RobotControll::robotprocess()
 {
-	
+	processThisRobot();
+
 	std::cout << "running robotprocess" << std::endl;
 	if ((rob_s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 	{

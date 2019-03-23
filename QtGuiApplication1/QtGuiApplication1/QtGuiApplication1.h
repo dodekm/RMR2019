@@ -5,6 +5,8 @@
 
 #include "RMR_windows.h"
 
+
+
 class QtGuiApplication1 : public QMainWindow
 {
 	Q_OBJECT
@@ -72,37 +74,12 @@ public slots:
 signals:
 	void command_change_sig(std::string command);
 	void start_threads_sig(void);
-	void target_point_set_sig(int, int);
-	void push_point_to_path_sig(void);
+	
 
 private:
 	Ui::QtGuiApplication1Class ui;
 	Mapa map;
 	
-};
-
-
-class RobotControll_QT :public QObject, public RobotControll
-{
-	Q_OBJECT
-
-public:
-	Ui::QtGuiApplication1Class* ui;
-private:
-
-public slots:
-
-	void command_change(std::string command);
-	void target_point_set(int X,int Y);
-	void robot_start_threads();
-	void push_point_to_path(void);
-
-signals:
-
-	void map_update_sig(Mapa);
-	void odometry_update_sig(RobotPosition);
-
-
 };
 
 

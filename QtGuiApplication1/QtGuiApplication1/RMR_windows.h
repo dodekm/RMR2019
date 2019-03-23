@@ -1,7 +1,7 @@
 #pragma once
 
-
 #define _USE_MATH_DEFINES
+#include <Qobject>
 
 #include<iostream>
 #include <windows.h>
@@ -21,19 +21,27 @@
 #include "map.h"
 #include "odometry.h"
 
+
+
+
 #define debug 
 
 #define lidar_measure_modulo 5000
 #define histogram_treshold 20
 
 
-class RobotControll
+class RobotControll:public QObject
 {
-public:
-	
-	RobotControll();
-	~RobotControll();
+	Q_OBJECT
 
+
+signals:
+
+	void map_update_sig(Mapa);
+	void odometry_update_sig(RobotPosition);
+
+
+public slots:
 	///Interface
 	void set_start(Point start);
 	void set_target(Point target);
@@ -48,6 +56,15 @@ public:
 	void command_reset();
 	void addPointToPath(RobotPosition P);
 	Mapa getMap();
+	void start_threads();
+	void setip(std::string ip);
+	void setfilename(std::string filename);
+
+public:
+	
+	RobotControll();
+	~RobotControll();
+
 	
 
 	friend std::ostream& operator<<(std::ostream& stream, RobotControll& robot)
@@ -63,7 +80,7 @@ public:
 
 	void processThisLidar(LaserMeasurement &laserData);
 	void processThisRobot();
-	void start_threads();
+	
 	void automode();
 	void build_map();
 	void find_path();
@@ -82,23 +99,6 @@ public:
 	std::thread robotthreadHandle; 
 	std::thread laserthreadHandle; 
 	
-	void setip(std::string ip);
-	void setfilename(std::string filename);
-
-	void* parent_ptr = NULL;
-	void(*parent_robot_update_callback)(void*)=NULL;
-	void(*parent_map_update_callback)(void*)=NULL;
-	
-	void emit_odometry()
-	{
-		if (parent_robot_update_callback)
-			parent_robot_update_callback(parent_ptr);
-	}
-	void emit_map()
-	{
-		if (parent_map_update_callback)
-			parent_map_update_callback(parent_ptr);
-	}
 	
 	static void robotUDPVlakno(void *param)
 	{
