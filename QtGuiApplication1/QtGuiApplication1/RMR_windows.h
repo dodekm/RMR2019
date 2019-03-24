@@ -65,7 +65,7 @@ public:
 	RobotControll();
 	~RobotControll();
 
-	
+	QObject* gui;
 
 	friend std::ostream& operator<<(std::ostream& stream, RobotControll& robot)
 	{

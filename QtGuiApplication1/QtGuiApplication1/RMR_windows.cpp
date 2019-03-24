@@ -375,6 +375,8 @@ void RobotControll::start_threads()
 	std::cout << "Thread2 Started" << std::endl;
 	
 
+
+
 }
 
 
@@ -441,6 +443,9 @@ void RobotControll::stop() //stop
 /// toto je funkcia s nekonecnou sluckou,ktora cita data z lidaru (UDP komunikacia)
 void RobotControll::laserprocess()
 {
+
+	QObject::connect(this, SIGNAL(map_update_sig(Mapa)), gui, SLOT(map_update(Mapa)));
+
 	std::cout << "running laserprocess" << std::endl;
 
 
@@ -495,6 +500,7 @@ void RobotControll::laserprocess()
 /// toto je funkcia s nekonecnou sluckou,ktora cita data z robota (UDP komunikacia)
 void RobotControll::robotprocess()
 {
+	QObject::connect(this, SIGNAL(odometry_update_sig(RobotPosition)), gui, SLOT(odometry_update(RobotPosition)));
 	processThisRobot();
 
 	std::cout << "running robotprocess" << std::endl;
