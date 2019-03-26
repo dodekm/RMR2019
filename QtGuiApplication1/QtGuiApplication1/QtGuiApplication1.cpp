@@ -1,5 +1,7 @@
 #include "QtGuiApplication1.h"
 
+#include <QPainter>
+
 
 QtGuiApplication1::QtGuiApplication1(QWidget *parent)
 	: QMainWindow(parent) 
@@ -10,7 +12,24 @@ QtGuiApplication1::QtGuiApplication1(QWidget *parent)
 
 void QtGuiApplication1::on_startButton_clicked()
 {
-	emit start_threads_sig();
+
+
+
+	if (connection_status == false)
+	{
+		emit start_threads_sig();
+		ui.startButton->setText("Unconnect");
+	}
+	else
+	{
+		ui.startButton->setText("Connect");
+
+	}
+	connection_status = !connection_status;
+
+	emit setip_sig(ui.lineEdit->text().toStdString());
+	
+	
 }
 
 void QtGuiApplication1::on_pushButton_forward_clicked()
@@ -36,139 +55,154 @@ void QtGuiApplication1::on_pushButton_left_clicked()
 
 void QtGuiApplication1::on_pushButton_forward_pressed()
 {
-	emit command_change_sig("forward");
+	emit command_change_sig(robot_command::forward);
 }
 
 void QtGuiApplication1::on_pushButton_forward_released()
 {
-	emit command_change_sig("stop");
+	emit command_change_sig(robot_command::stop);
 }
 
 void QtGuiApplication1::on_pushButton_right_pressed()
 {
-	emit command_change_sig("right");
+	emit command_change_sig(robot_command::right);
 }
 
 void QtGuiApplication1::on_pushButton_right_released()
 {
-	emit command_change_sig("stop");
+	emit command_change_sig(robot_command::stop);
 }
 
 void QtGuiApplication1::on_pushButton_back_pressed()
 {
-	emit command_change_sig("back");
+	emit command_change_sig(robot_command::back);
 }
 
 void QtGuiApplication1::on_pushButton_back_released()
 {
-	emit command_change_sig("stop");
+	emit command_change_sig(robot_command::stop);
 }
 
 void QtGuiApplication1::on_pushButton_left_pressed()
 {
-	emit command_change_sig("left");
+	emit command_change_sig(robot_command::left);
 }
 
 void QtGuiApplication1::on_pushButton_left_released()
 {
-	emit command_change_sig("stop");
+	emit command_change_sig(robot_command::stop);
 }
 
 
 void QtGuiApplication1::on_pushButton_stop_clicked()
 {
-	emit command_change_sig("stop");
+	emit command_change_sig(robot_command::stop);
 }
 
 void QtGuiApplication1::on_pushButton_find_path_clicked()
 {
-	emit command_change_sig("find");
+	emit command_change_sig(robot_command::find);
 }
 
 void QtGuiApplication1::on_pushButton_reset_clicked()
 {
-	emit command_change_sig("reset");
+	emit command_change_sig(robot_command::reset);
 }
 
 void QtGuiApplication1::on_pushButton_auto_clicked()
 {
-	emit command_change_sig("auto");
+	emit command_change_sig(robot_command::automatic);
 }
 
 void QtGuiApplication1::on_pushButton_clear_map_clicked()
 {
-	emit command_change_sig("clear");
+	emit command_change_sig(robot_command::clear);
 }
 
 void QtGuiApplication1::on_pushButton_load_map_clicked()
 {
-	emit command_change_sig("load");
+	emit set_filename_sig(ui.lineEdit_2->text().toStdString());
+	emit command_change_sig(robot_command::load);
 }
 
 void QtGuiApplication1::on_pushButton_save_map_clicked()
 {
-	emit command_change_sig("save");
+	emit set_filename_sig(ui.lineEdit_2->text().toStdString());
+	emit command_change_sig(robot_command::save);
 }
 
 void QtGuiApplication1::on_pushButton_go_clicked()
 {
-	//emit push_point_to_path_sig();
+	emit addPointToPath_sig(RobotPosition((float)ui.spinBox->value(),(float)ui.spinBox_2->value()));
 }
 
 void QtGuiApplication1::on_spinBox_valueChanged(int arg1)
 {
-	//emit target_point_set_sig(ui.spinBox->value(), ui.spinBox_2->value());
+	emit set_target_sig(Point{ (float)ui.spinBox->value(),(float)ui.spinBox_2->value() });
 }
 
 void QtGuiApplication1::on_spinBox_2_valueChanged(int arg1)
 {
-	//emit target_point_set_sig(ui.spinBox->value(), ui.spinBox_2->value());
+	emit set_target_sig(Point{ (float)ui.spinBox->value(),(float)ui.spinBox_2->value() });
+}
+
+void QtGuiApplication1::paintEvent(QPaintEvent *e)
+{
+	QRect rect = ui.frame->geometry();
+	QPainter paint(this);
+
+	paint.begin(this);
+	paint.setPen(Qt::black);
+	paint.drawRect(rect);
+
+	
+	Matrix_position i;
+	
+	for (i.Y = 0; i.Y < map.get_rows(); i.Y++)
+	{
+		for (i.X = 0; i.X < map.get_cols(); i.X++)
+		{
+			if(map[i]==cell_obstacle)
+			paint.drawPoint(QPoint(i.X+ rect.topLeft().x(), i.Y+ rect.topLeft().y()));
+
+		}
+	}
+	
+
+	paint.end();
+	
+
 }
 
 
-
-void QtGuiApplication1::map_update(Mapa)
+void QtGuiApplication1::map_update(Mapa mapa)
 {
 	
+	this->map = mapa;
+
+}
+
+
+void QtGuiApplication1::odometry_update(Robot_feedback data)
+{
+	ui.lcdNumber->display(data.actual_position.coordinates.X);
+	ui.lcdNumber_2->display(data.actual_position.coordinates.Y);
+	ui.lcdNumber_3->display(data.actual_position.alfa);
+	ui.lcdNumber_4->display(data.motors_speed.translation_speed);
+	ui.lcdNumber_5->display(data.motors_speed.radius);
+
+	ui.lcdNumber_6->display(data.wanted_position.coordinates.X);
+	ui.lcdNumber_7->display(data.wanted_position.coordinates.Y);
+
+	ui.lcdNumber_8->display(data.target.X);
+	ui.lcdNumber_9->display(data.target.Y);
+
+	ui.label_9->setText(QString(QString::fromStdString(data.command_string)));
+
+	if (data.connection_status == true)
+		ui.label_12->setText("connected");
+	else 
+		ui.label_12->setText("unconnected");
 	
 
 }
-
-void QtGuiApplication1::odometry_update(RobotPosition pos)
-{
-	ui.lcdNumber->display( pos.coordinates.X);
-	ui.lcdNumber_2->display(pos.coordinates.Y);
-	ui.lcdNumber_3->display(pos.alfa);
-}
-/*
-
-void RobotControll_QT::command_change(std::string command)
-{
-	if (command == "load" || command == "save")
-		RobotControll::setfilename(ui->lineEdit_2->text().toStdString());
-	RobotControll::set_command(command);
-}
-
-void RobotControll_QT::target_point_set(int X, int Y)
-{
-	RobotControll::set_target(Point{ (float)X, (float)Y });
-}
-
-void RobotControll_QT::push_point_to_path(void)
-{
-	RobotControll::addPointToPath(RobotControll::get_target_point());
-}
-
-void RobotControll_QT::robot_start_threads(void)
-{
-	setip(ui->lineEdit->text().toStdString());
-	parent_robot_update_callback = &::robot_update_callback;
-	parent_map_update_callback = &::map_update_callback;
-	parent_ptr = (void*)this;
-	RobotControll::start_threads();
-	//emit odometry_update_sig(get_position());
-	//emit map_update_sig(getMap());
-}
-
-
-*/

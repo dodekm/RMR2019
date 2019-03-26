@@ -22,43 +22,80 @@
 #include "odometry.h"
 
 
-
-
-#define debug 
-
-#define lidar_measure_modulo 5000
+#define lidar_measure_modulo 2000
 #define histogram_treshold 20
+
+const std::string command_to_string []=
+{
+	"stop",
+	"forward",
+	"back",
+	"left",
+	"right",
+	"auto",
+	"save",
+	"load",
+	"find",
+	"reset",
+	"clear"
+};
+
+
+enum robot_command
+{
+	stop,
+	forward,
+	back,
+	left,
+	right,
+	automatic,
+	save,
+	load,
+	find,
+	reset,
+	clear,
+	disconnect
+
+};
+
+typedef struct
+{
+	RobotPosition actual_position;
+	RobotPosition wanted_position;
+	robotSpeed motors_speed;
+	Point start;
+	Point target;
+	robot_command command;
+	std::string command_string;
+	std::vector<RobotPosition> path;
+	bool connection_status;
+
+}Robot_feedback;
+
+Q_DECLARE_METATYPE(Robot_feedback);
 
 
 class RobotControll:public QObject
 {
 	Q_OBJECT
 
-
 signals:
 
 	void map_update_sig(Mapa);
-	void odometry_update_sig(RobotPosition);
-
-
+	void odometry_update_sig(Robot_feedback);
+	
 public slots:
 	///Interface
 	void set_start(Point start);
 	void set_target(Point target);
-	RobotPosition get_position();
-	RobotPosition get_wanted_position();
-	robotSpeed get_motors_speed();
-	Point get_target_point();
-	Point get_starting_point();
-	std::vector<RobotPosition>get_path();
-	void set_command(std::string command);
-	std::string get_command();
-	void command_reset();
-	void addPointToPath(RobotPosition P);
-	Mapa getMap();
+
+	void set_command(robot_command);
+	void addPointToPath(RobotPosition);
+	
 	void start_threads();
+	void join_threads();
 	void setip(std::string ip);
-	void setfilename(std::string filename);
+	void setfilename(std::string );
 
 public:
 	
@@ -66,6 +103,19 @@ public:
 	~RobotControll();
 
 	QObject* gui;
+	bool connection_status=false;
+
+	void command_reset();
+	std::string get_command();
+	RobotPosition get_position();
+	RobotPosition get_wanted_position();
+	robotSpeed get_motors_speed();
+	Point get_target_point();
+	Point get_starting_point();
+	Robot_feedback RobotControll::getRobotData();
+	Mapa getMap();
+
+	std::vector<RobotPosition>get_path();
 
 	friend std::ostream& operator<<(std::ostream& stream, RobotControll& robot)
 	{
@@ -99,20 +149,7 @@ public:
 	std::thread robotthreadHandle; 
 	std::thread laserthreadHandle; 
 	
-	
-	static void robotUDPVlakno(void *param)
-	{
-		((RobotControll*)param)->robotprocess();
-		return;
-	}
-	
-	
-	static void laserUDPVlakno(void *param)
-	{
-		((RobotControll*)param)->laserprocess();
-		return;
-	}
-
+	bool threads_enabled = true;
 
 private:
 
@@ -140,9 +177,6 @@ private:
 	unsigned long lidar_measure_counter = 0;
 
 	int modulo_print = 50;
-	int modulo_odometry = 1;
-	int modulo_drive = 5;
-
 
 	Encoder encL;
 	Encoder encR;
@@ -171,10 +205,13 @@ private:
 	RobotRegulator regulator;
 	
 	std::string filename="";
-	std::string command;
-	std::string command_old;	
+
+	robot_command command= robot_command::stop;
+	robot_command command_old= robot_command::stop;
 
 };
+
+
 
 
 

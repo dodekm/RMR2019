@@ -7,24 +7,24 @@
 RobotControll::RobotControll() :
 
 	regulator(200, 0.5),
-	mapa(100, 100, -5.0, 5, -5.0, 5.0,""),
-	histogram(mapa,false)
+	mapa(100, 100, -5.0, 5, -5.0, 5.0, ""),
+	histogram(mapa, false)
 {
-	command = "stop";
-	command_old = "stop";
-	
+
+	command = robot_command::stop;
+	command_old = robot_command::stop;
+
 	odometria_using = &odometria_3;
 
 	WinSock_setup();
-	
-	path.push(RobotPosition(0.0, 0.0));
-	
-	start = Point{0, 0 };
-	target = Point{ 0, 0 };
-	
-	
-}
 
+	path.push(RobotPosition(0.0, 0.0));
+
+	start = Point{ 0, 0 };
+	target = Point{ 0, 0 };
+
+
+}
 
 RobotControll::~RobotControll()
 {
@@ -49,6 +49,7 @@ void RobotControll::WinSock_setup()
 
 void RobotControll::processThisRobot()
 {
+
 	if (datacounter == 0)
 	{
 		encoder_init_values(&encL, robotdata.EncoderLeft);
@@ -58,106 +59,88 @@ void RobotControll::processThisRobot()
 
 	if (datacounter % modulo_print == 0)
 	{
-		
 		std::cout << (*this);
-
-
 	}
 
-	if (datacounter % modulo_odometry == 0)
+	encoders_process();
+	odometria_1.odometry_forward_euler(encL, encR);
+	odometria_2.odometry_backward_euler(encL, encR);
+	odometria_3.odometry_trapezoidal_rule(encL, encR);
+	odometria_4.odometry_curved(encL, encR);
+	actual_position = odometria_using->position;
+
+
+
+	switch (command)
 	{
-		
-		encoders_process();
-		odometria_1.odometry_forward_euler(encL ,encR);
-		odometria_2.odometry_backward_euler(encL, encR);
-		odometria_3.odometry_trapezoidal_rule(encL, encR);
-		odometria_4.odometry_curved(encL, encR);
-		actual_position = odometria_using->position;
-	
-		emit odometry_update_sig(actual_position);
-	}
+	case robot_command::stop:
+		motors_speed.translation_speed = 0;
+		motors_speed.radius = max_radius;
+		break;
 
-	if (datacounter % modulo_drive == 0)
-	{
-		if (command == "stop")
-		{
-			motors_speed.translation_speed=0;
-			motors_speed.radius = max_radius;
-			
-		}
-		else if (command == "forward")
-		{
-			motors_speed.translation_speed=200;
-			motors_speed.radius = max_radius;
-		}
-		else if (command == "back")
-		{
-			motors_speed.translation_speed=-200;
-			motors_speed.radius = max_radius;
-		}
-		else if (command == "left")
-		{
-			motors_speed.translation_speed=100;
-			motors_speed.radius = d*1000;
-			
-		}
-		else if (command == "right")
-		{
-			
-			motors_speed.translation_speed=100;
-			motors_speed.radius = -d*1000;
-		}
-		
+	case robot_command::forward:
+		motors_speed.translation_speed = 200;
+		motors_speed.radius = max_radius;
+		break;
 
-		else if (command == "auto")
-		{
-			automode();
-		}
-		
-		
-		else if (command == "save")
-		{
-		
-			mapa.saveMap(filename);
-			command_reset();
-		}
+	case robot_command::back:
+		motors_speed.translation_speed = -200;
+		motors_speed.radius = max_radius;
+		break;
 
-		else if (command == "load")
-		{
-			mapa.loadMap(filename);
-			command_reset();
-		}
+	case robot_command::left:
+		motors_speed.translation_speed = 100;
+		motors_speed.radius = d * 1000;
+		break;
 
-		else if (command == "find")
-		{
-			find_path();
-			command_reset();
-		}
+	case robot_command::right:
+		motors_speed.translation_speed = 100;
+		motors_speed.radius = -d * 1000;
+		break;
 
+	case robot_command::automatic:
+		automode();
+		break;
 
-		else if (command == "reset")
-		{
-			reset_robot();
-			
-		}
+	case robot_command::save:
+		mapa.saveMap(filename);
+		command_reset();
+		break;
 
-		else if (command == "clear")
-		{
-			
-			mapa.clearMap();
-			command_reset();
+	case robot_command::load:
+		mapa.loadMap(filename);
+		command_reset();
+		break;
+	case robot_command::clear:
+		mapa.clearMap();
+		command_reset();
+		break;
 
-		}
-		else
-		{
-			command_reset();
-		}
+	case robot_command::reset:
+		reset_robot();
+		break;
 
-		move_arc(filter.set_speed((int)round(motors_speed.translation_speed),speed_filter_steps), (int)round(motors_speed.radius));
+	case robot_command::find:
+		find_path();
+		command_reset();
+		break;
+	case robot_command::disconnect:
+
+		command_reset();
+
+		break;
 
 	}
+
+	move_arc(filter.set_speed((int)round(motors_speed.translation_speed), speed_filter_steps), (int)round(motors_speed.radius));
+
+
 
 	datacounter++;
+
+	emit odometry_update_sig(getRobotData());
+	//QMetaObject::invokeMethod(gui, "odometry_update", Q_ARG(Robot_feedback, getRobotData()));
+	
 }
 
 void RobotControll::reset_robot()
@@ -173,7 +156,7 @@ void RobotControll::reset_robot()
 	odometria_using->odometry_init();
 	motors_speed.translation_speed = 0;
 	motors_speed.radius = max_radius;
-	command == "stop";
+	command = robot_command::stop;
 }
 
 void RobotControll::addPointToPath(RobotPosition P)
@@ -181,30 +164,37 @@ void RobotControll::addPointToPath(RobotPosition P)
 	path.push(P);
 }
 
-void RobotControll::set_command(std::string command)
+
+
+void RobotControll::set_command(robot_command command)
 {
 	this->command_old = this->command;
 	this->command = command;
+
 }
+
 std::string RobotControll::get_command()
 {
-	return command;
+	return command_to_string[command];
 }
 
 void RobotControll::command_reset()
 {
 	command = command_old;
+
 }
 
 
 void RobotControll::set_start(Point start)
 {
+
 	this->start = start;
-	
+
 }
 
 void RobotControll::set_target(Point target)
 {
+
 	this->target = target;
 }
 
@@ -216,12 +206,14 @@ void RobotControll::setip(std::string ip)
 
 void RobotControll::setfilename(std::string filename)
 {
+
 	this->filename = filename;
 }
 
 
 RobotPosition RobotControll::get_position()
 {
+
 	return actual_position;
 }
 
@@ -247,7 +239,7 @@ Point RobotControll::get_starting_point()
 std::vector<RobotPosition> RobotControll::get_path()
 {
 	std::vector<RobotPosition>trajectory;
-	
+
 	std::queue<RobotPosition>path_copy = path;
 
 	while (!path_copy.empty())
@@ -262,6 +254,21 @@ Mapa RobotControll::getMap()
 {
 	return mapa;
 }
+
+Robot_feedback RobotControll::getRobotData()
+{
+	return Robot_feedback{ actual_position,
+		wanted_position,
+		motors_speed,
+		start,
+		target,
+		command,
+		get_command(),
+		get_path(),
+		connection_status
+	};
+}
+
 
 void RobotControll::printData(std::ostream& stream)
 {
@@ -286,7 +293,7 @@ void RobotControll::printData(std::ostream& stream)
 
 	stream << "vt=" << regulator.getTranslation_output() << "mm/s" << std::endl;
 	stream << "R=" << regulator.getRotation_output() << "mm" << std::endl;
-	stream << "lidar_counter" << lidar_measure_counter << std::endl;
+	
 
 }
 
@@ -298,7 +305,7 @@ void RobotControll::automode()
 		regulator.regulate(actual_position, wanted_position);
 		motors_speed = regulator.output;
 	}
-	else 
+	else
 	{
 		motors_speed.translation_speed = 0;
 		if (!path.empty())
@@ -311,33 +318,33 @@ void RobotControll::automode()
 
 void RobotControll::build_map()
 {
-	
-	for(int i = 0; i<copyOfLaserData.numberOfScans; i++)
+
+	for (int i = 0; i < copyOfLaserData.numberOfScans; i++)
 	{
 		if (lidar_check_measure(copyOfLaserData.Data[i]))
 		{
 			histogram.addPointToHistogram(lidar_measure_2_point(copyOfLaserData.Data[i], actual_position));
 			lidar_measure_counter++;
 		}
-		if (lidar_measure_counter % lidar_measure_modulo== 0)
+		if (lidar_measure_counter % lidar_measure_modulo == 0)
 		{
 			lidar_measure_counter = 0;
 			mapa.buildFromHistogram(histogram, histogram_treshold);
 			histogram.clearMap();
 		}
 	}
-	
+
 }
 
 void RobotControll::find_path()
 {
-	int window_size=2;
-	Mapa mapa_flood_fill(mapa,true);
+	int window_size = 2;
+	Mapa mapa_flood_fill(mapa, true);
 	mapa_flood_fill.FloodFill_fill(start, target, true);
 	mapa_flood_fill.saveMap("floodfill.txt");
 	Mapa map_with_path = mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_Y, path, true, window_size);
 	map_with_path.saveMap("path.txt");
-	
+
 }
 
 
@@ -351,10 +358,9 @@ void RobotControll::encoders_process()
 
 void RobotControll::processThisLidar(LaserMeasurement &laserData)
 {
-	
-	emit map_update_sig(mapa);
 
-	if(command=="stop"&&motors_speed.translation_speed < min_speed&&motors_speed.radius>max_radius/10)
+
+	if (command == robot_command::stop&&motors_speed.translation_speed < min_speed&&motors_speed.radius>max_radius / 10)
 	{
 		memcpy(&copyOfLaserData, &laserData, sizeof(LaserMeasurement));
 		build_map();
@@ -363,19 +369,28 @@ void RobotControll::processThisLidar(LaserMeasurement &laserData)
 	{
 		lidar_measure_counter = 1;
 	}
+
+	emit map_update_sig(mapa);
+	//QMetaObject::invokeMethod(gui, "map_update", Q_ARG(Mapa, mapa));
+
 }
 
 
 void RobotControll::start_threads()
 {
 
-	robotthreadHandle = std::thread(robotUDPVlakno, (void *)this);
-	std::cout << "Thread1 Started" << std::endl;
-	laserthreadHandle = std::thread(laserUDPVlakno, (void *)this);
-	std::cout << "Thread2 Started" << std::endl;
-	
+	if(!robotthreadHandle.joinable())
+	robotthreadHandle = std::thread(&RobotControll::robotprocess,this);
+	if (!laserthreadHandle.joinable())
+	laserthreadHandle = std::thread(&RobotControll::laserprocess,this);
+}
 
-
+void  RobotControll::join_threads()
+{
+	if(robotthreadHandle.joinable())
+	robotthreadHandle.join();
+	if(laserthreadHandle.joinable())
+	laserthreadHandle.join();
 
 }
 
@@ -444,15 +459,12 @@ void RobotControll::stop() //stop
 void RobotControll::laserprocess()
 {
 
-	QObject::connect(this, SIGNAL(map_update_sig(Mapa)), gui, SLOT(map_update(Mapa)));
-
-	std::cout << "running laserprocess" << std::endl;
-
 
 	las_slen = sizeof(las_si_other);
 	if ((las_s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 	{
 		std::cout << "Socket not created" << std::endl;
+		return;
 	}
 	int las_broadcastene = 1;
 	setsockopt(las_s, SOL_SOCKET, SO_BROADCAST, (char*)&las_broadcastene, sizeof(las_broadcastene));
@@ -469,17 +481,20 @@ void RobotControll::laserprocess()
 
 	int result = bind(las_s, (struct sockaddr*)&las_si_me, sizeof(las_si_me));
 	if (result == SOCKET_ERROR)
+	{
 		std::cout << "laser connect error" << std::endl;
-
+		return;
+	}
 	char command = 0x00;
 	if (sendto(las_s, &command, sizeof(command), 0, (struct sockaddr*) &las_si_posli, las_slen) == -1)
 	{
 		std::cout << "send error" << std::endl;
+		return;
 	}
 
-	std::cout << "Entering lidar loop" << std::endl;
+	
 	LaserMeasurement measure;
-	while (1)
+	while (threads_enabled==true)
 	{
 
 		if ((las_recv_len = recvfrom(las_s, (char*)&measure.Data, sizeof(LaserData) * 1000, 0, (struct sockaddr *) &las_si_other, &las_slen)) == -1)
@@ -500,13 +515,12 @@ void RobotControll::laserprocess()
 /// toto je funkcia s nekonecnou sluckou,ktora cita data z robota (UDP komunikacia)
 void RobotControll::robotprocess()
 {
-	QObject::connect(this, SIGNAL(odometry_update_sig(RobotPosition)), gui, SLOT(odometry_update(RobotPosition)));
-	processThisRobot();
 
-	std::cout << "running robotprocess" << std::endl;
+
 	if ((rob_s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 	{
 		std::cout << "Socket not created" << std::endl;
+		return;
 	}
 
 	char rob_broadcastene = 1;
@@ -527,12 +541,13 @@ void RobotControll::robotprocess()
 	if (result == SOCKET_ERROR)
 	{
 		std::cout << "robot connect error" << std::endl;
+		return;
 	}
 	std::vector<unsigned char> mess = robot.setDefaultPID();
 	if (sendto(rob_s, (char*)mess.data(), sizeof(char)*mess.size(), 0, (struct sockaddr*) &rob_si_posli, rob_slen) == -1)
 	{
 		std::cout << "send error" << std::endl;
-
+		return;
 	}
 
 	Sleep(100);
@@ -540,13 +555,18 @@ void RobotControll::robotprocess()
 	if (sendto(rob_s, (char*)mess.data(), sizeof(char)*mess.size(), 0, (struct sockaddr*) &rob_si_posli, rob_slen) == -1)
 	{
 		std::cout << "send error" << std::endl;
+		return;
 	}
 
 	unsigned char buff[50000];
-	std::cout << "Entering robot loop" << std::endl;
-	while (1)
+	
+
+	connection_status = true;
+	
+
+	while (threads_enabled == true)
 	{
-		
+
 
 		memset(buff, 0, 50000 * sizeof(char));
 		if ((rob_recv_len = recvfrom(rob_s, (char*)&buff, sizeof(char) * 50000, 0, (struct sockaddr *) &rob_si_other, &rob_slen)) == -1)
@@ -562,7 +582,7 @@ void RobotControll::robotprocess()
 			processThisRobot();
 		}
 
-		
+
 	}
 }
 

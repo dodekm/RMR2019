@@ -19,6 +19,8 @@ public:
 		return &ui;
 	}
 
+	void paintEvent(QPaintEvent *e);
+
 public slots:
 
     void on_startButton_clicked();
@@ -68,17 +70,23 @@ public slots:
     void on_spinBox_2_valueChanged(int arg1);
 
 	void map_update(Mapa);
-	void odometry_update(RobotPosition);
+	void odometry_update(Robot_feedback);
 
 
 signals:
-	void command_change_sig(std::string command);
+	void command_change_sig(robot_command command);
 	void start_threads_sig(void);
-	
+	void set_filename_sig(std::string);
+	void setip_sig(std::string);
+	void set_target_sig(Point);
+	void addPointToPath_sig(RobotPosition);
+
 
 private:
 	Ui::QtGuiApplication1Class ui;
 	Mapa map;
+	bool connection_status = false;
+
 	
 };
 

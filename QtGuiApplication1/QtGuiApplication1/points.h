@@ -36,6 +36,12 @@ public:
 		coordinates = { 0.0,0.0 };
 	}
 
+	RobotPosition(const RobotPosition& other)
+	{
+		this->alfa = other.alfa;
+		this->coordinates = other.coordinates;
+	}
+	
 	RobotPosition(float X, float Y, float alfa)
 	{
 		coordinates.X = X;
@@ -63,3 +69,4 @@ public:
 	}
 
 };
+

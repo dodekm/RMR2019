@@ -67,7 +67,7 @@ RobotControll::RobotControll() :
 	target = Point{ 3, -3 };
 	
 
-	find_path();
+	//find_path();
 	
 }
 

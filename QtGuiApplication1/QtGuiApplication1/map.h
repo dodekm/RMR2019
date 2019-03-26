@@ -12,7 +12,7 @@
 #include <vector>
 #include <cmath>
 
-
+#include <QMetaType>
 
 #define floodfill_priority_X 1
 #define floodfill_priority_Y 2
@@ -143,7 +143,9 @@ public:
 		
 	}
 
-	
+	int get_rows() { return rows; }
+	int get_cols() { return cols; }
+
 	Mapa(const Mapa& source,bool copy=true)
 	{
 	
@@ -199,7 +201,8 @@ public:
 
 private:
 
-	int cols, rows;
+	int cols = 0; 
+	int rows = 0;
 	float  x_lim[2], y_lim[2];
 	int** cells_data;
 	
@@ -245,4 +248,5 @@ private:
 	
 
 };
+Q_DECLARE_METATYPE(Mapa)
 
