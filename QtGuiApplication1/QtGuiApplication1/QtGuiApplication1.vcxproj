@@ -123,6 +123,7 @@
     <ClCompile Include="encoder.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="map.cpp" />
+    <ClCompile Include="map_loader.cpp" />
     <ClCompile Include="odometry.cpp" />
     <ClCompile Include="points.cpp" />
     <ClCompile Include="QtGuiApplication1.cpp" />
@@ -144,6 +145,7 @@
     <ClInclude Include="CKobuki.h" />
     <ClInclude Include="encoder.h" />
     <ClInclude Include="map.h" />
+    <ClInclude Include="map_loader.h" />
     <ClInclude Include="misc.h" />
     <ClInclude Include="odometry.h" />
     <ClInclude Include="points.h" />

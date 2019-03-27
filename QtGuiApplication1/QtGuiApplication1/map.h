@@ -138,8 +138,7 @@ public:
 		if (cells_data != NULL && assert_matrix_indices(position))
 		{
 			return (cells_data[position.Y][position.X]);
-		}
-		
+		}	
 		
 	}
 
@@ -194,9 +193,7 @@ public:
 	void buildFromHistogram(Mapa& histogram, int treshold);
 
 	void saveMap(std::string filename);
-
 	void clearMap();
-
 	void loadMap(std::string filename);
 
 private:
@@ -204,7 +201,7 @@ private:
 	int cols = 0; 
 	int rows = 0;
 	float  x_lim[2], y_lim[2];
-	int** cells_data;
+	int** cells_data=NULL;
 	
 	void allocate()
 	{
@@ -225,6 +222,7 @@ private:
 				delete[] cells_data[i];
 			}
 			delete[] cells_data;
+			cells_data = NULL;
 		}
 	}
 

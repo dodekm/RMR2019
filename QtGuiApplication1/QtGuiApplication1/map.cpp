@@ -32,7 +32,6 @@ int Mapa::addPoint(Point P)
 	}
 	return -1;
 
-
 }
 
 void Mapa::addPointToHistogram(Point P)

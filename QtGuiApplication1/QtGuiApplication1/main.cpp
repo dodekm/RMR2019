@@ -17,7 +17,9 @@ int main(int argc, char *argv[])
 
 	QObject::connect(&gui, SIGNAL(command_change_sig(robot_command)), &robot, SLOT(set_command(robot_command)));
 	QObject::connect(&gui, SIGNAL(start_threads_sig(void)), &robot, SLOT(start_threads(void)));
-	
+	QObject::connect(&gui, SIGNAL(join_threads_sig(void)), &robot, SLOT(join_threads(void)));
+
+	QObject::connect(&gui, SIGNAL(set_threads_enabled_sig(bool)), &robot, SLOT(set_threads_enabled(bool)));
 	QObject::connect(&gui, SIGNAL(set_filename_sig(std::string)), &robot, SLOT(setfilename(std::string)));
 	QObject::connect(&gui, SIGNAL(setip_sig(std::string)), &robot, SLOT(setip(std::string)));
 	QObject::connect(&gui, SIGNAL(set_target_sig(Point)), &robot, SLOT(set_target(Point)));
@@ -25,6 +27,10 @@ int main(int argc, char *argv[])
 
 	QObject::connect(&robot, SIGNAL(map_update_sig(Mapa)), &gui, SLOT(map_update(Mapa)));
 	QObject::connect(&robot, SIGNAL(odometry_update_sig(Robot_feedback)), &gui, SLOT(odometry_update(Robot_feedback)));
+
+
+	map_loader::TMapArea area;
+	map_loader::load_map("priestor.txt", area);
 
 	gui.show();
 	return app.exec();

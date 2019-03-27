@@ -3,7 +3,6 @@
 
 #include "RMR_windows.h"
 
-
 RobotControll::RobotControll() :
 
 	regulator(200, 0.5),
@@ -45,21 +44,96 @@ void RobotControll::WinSock_setup()
 		return;
 	}
 }
+void RobotControll::robot_controll()
+{
+	while (threads_enabled == true)
+	{
+		//mutex_robot.lock();
+		switch (command)
+		{
+		case robot_command::stop:
+			motors_speed.translation_speed = 0;
+			motors_speed.radius = max_radius;
+			break;
 
+		case robot_command::forward:
+			motors_speed.translation_speed = 200;
+			motors_speed.radius = max_radius;
+			break;
+
+		case robot_command::back:
+			motors_speed.translation_speed = -200;
+			motors_speed.radius = max_radius;
+			break;
+
+		case robot_command::left:
+			motors_speed.translation_speed = 100;
+			motors_speed.radius = d * 1000;
+			break;
+
+		case robot_command::right:
+			motors_speed.translation_speed = 100;
+			motors_speed.radius = -d * 1000;
+			break;
+
+		case robot_command::automatic:
+			automode();
+			break;
+
+		case robot_command::save:
+			mutex_map.lock();
+			mapa.saveMap(filename);
+			command_reset();
+			mutex_map.unlock();
+			break;
+
+		case robot_command::load:
+			mutex_map.lock();
+			mapa.loadMap(filename);
+			command_reset();
+			mutex_map.unlock();
+			break;
+		case robot_command::clear:
+			mutex_map.lock();
+			mapa.clearMap();
+			command_reset();
+			mutex_map.unlock();
+			break;
+
+		case robot_command::reset:
+			reset_robot();
+			break;
+
+		case robot_command::find:
+			mutex_map.lock();
+			find_path();
+			command_reset();
+			mutex_map.unlock();
+			break;
+		case robot_command::disconnect:
+
+			command_reset();
+			break;
+		case robot_command::print:
+
+			std::cout << (*this);
+			command_reset();
+			break;
+		}
+		//mutex_robot.unlock();
+	}
+
+	return;
+
+}
 
 void RobotControll::processThisRobot()
 {
-
+	//mutex_robot.lock();
 	if (datacounter == 0)
 	{
 		encoder_init_values(&encL, robotdata.EncoderLeft);
 		encoder_init_values(&encR, robotdata.EncoderRight);
-	}
-
-
-	if (datacounter % modulo_print == 0)
-	{
-		std::cout << (*this);
 	}
 
 	encoders_process();
@@ -69,78 +143,13 @@ void RobotControll::processThisRobot()
 	odometria_4.odometry_curved(encL, encR);
 	actual_position = odometria_using->position;
 
-
-
-	switch (command)
-	{
-	case robot_command::stop:
-		motors_speed.translation_speed = 0;
-		motors_speed.radius = max_radius;
-		break;
-
-	case robot_command::forward:
-		motors_speed.translation_speed = 200;
-		motors_speed.radius = max_radius;
-		break;
-
-	case robot_command::back:
-		motors_speed.translation_speed = -200;
-		motors_speed.radius = max_radius;
-		break;
-
-	case robot_command::left:
-		motors_speed.translation_speed = 100;
-		motors_speed.radius = d * 1000;
-		break;
-
-	case robot_command::right:
-		motors_speed.translation_speed = 100;
-		motors_speed.radius = -d * 1000;
-		break;
-
-	case robot_command::automatic:
-		automode();
-		break;
-
-	case robot_command::save:
-		mapa.saveMap(filename);
-		command_reset();
-		break;
-
-	case robot_command::load:
-		mapa.loadMap(filename);
-		command_reset();
-		break;
-	case robot_command::clear:
-		mapa.clearMap();
-		command_reset();
-		break;
-
-	case robot_command::reset:
-		reset_robot();
-		break;
-
-	case robot_command::find:
-		find_path();
-		command_reset();
-		break;
-	case robot_command::disconnect:
-
-		command_reset();
-
-		break;
-
-	}
-
-	move_arc(filter.set_speed((int)round(motors_speed.translation_speed), speed_filter_steps), (int)round(motors_speed.radius));
-
-
+	move_arc(filter.set_speed((int)round(motors_speed.translation_speed), 10), (int)round(motors_speed.radius));
 
 	datacounter++;
 
 	emit odometry_update_sig(getRobotData());
 	//QMetaObject::invokeMethod(gui, "odometry_update", Q_ARG(Robot_feedback, getRobotData()));
-	
+	//mutex_robot.unlock();
 }
 
 void RobotControll::reset_robot()
@@ -157,6 +166,7 @@ void RobotControll::reset_robot()
 	motors_speed.translation_speed = 0;
 	motors_speed.radius = max_radius;
 	command = robot_command::stop;
+
 }
 
 void RobotControll::addPointToPath(RobotPosition P)
@@ -171,6 +181,11 @@ void RobotControll::set_command(robot_command command)
 	this->command_old = this->command;
 	this->command = command;
 
+}
+
+void RobotControll::set_threads_enabled(bool status)
+{
+	threads_enabled = status;
 }
 
 std::string RobotControll::get_command()
@@ -342,7 +357,7 @@ void RobotControll::find_path()
 	Mapa mapa_flood_fill(mapa, true);
 	mapa_flood_fill.FloodFill_fill(start, target, true);
 	mapa_flood_fill.saveMap("floodfill.txt");
-	Mapa map_with_path = mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_Y, path, true, window_size);
+	map_with_path = mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_Y, path, true, window_size);
 	map_with_path.saveMap("path.txt");
 
 }
@@ -362,15 +377,15 @@ void RobotControll::processThisLidar(LaserMeasurement &laserData)
 
 	if (command == robot_command::stop&&motors_speed.translation_speed < min_speed&&motors_speed.radius>max_radius / 10)
 	{
+		mutex_map.lock();
 		memcpy(&copyOfLaserData, &laserData, sizeof(LaserMeasurement));
 		build_map();
+		emit map_update_sig(mapa);
+		mutex_map.unlock();
 	}
 	else
-	{
 		lidar_measure_counter = 1;
-	}
 
-	emit map_update_sig(mapa);
 	//QMetaObject::invokeMethod(gui, "map_update", Q_ARG(Mapa, mapa));
 
 }
@@ -378,20 +393,33 @@ void RobotControll::processThisLidar(LaserMeasurement &laserData)
 
 void RobotControll::start_threads()
 {
-
+	threads_enabled = true;
 	if(!robotthreadHandle.joinable())
 	robotthreadHandle = std::thread(&RobotControll::robotprocess,this);
 	if (!laserthreadHandle.joinable())
 	laserthreadHandle = std::thread(&RobotControll::laserprocess,this);
+	if (!controllhreadHandle.joinable())
+	controllhreadHandle= std::thread(&RobotControll::robot_controll, this);
+
 }
 
 void  RobotControll::join_threads()
 {
+	threads_enabled = false;
+	if(robotthreadHandle.joinable())
+	robotthreadHandle.detach();
+	if(laserthreadHandle.joinable())
+	laserthreadHandle.detach();
+	if (controllhreadHandle.joinable())
+	controllhreadHandle.detach();
+	/*
 	if(robotthreadHandle.joinable())
 	robotthreadHandle.join();
 	if(laserthreadHandle.joinable())
 	laserthreadHandle.join();
-
+	if (controllhreadHandle.joinable())
+	controllhreadHandle.join();
+	*/
 }
 
 
@@ -509,6 +537,8 @@ void RobotControll::laserprocess()
 	}
 
 
+	return;
+
 }
 
 ///tato funkcia vas nemusi zaujimat
@@ -584,5 +614,6 @@ void RobotControll::robotprocess()
 
 
 	}
+	return;
 }
 

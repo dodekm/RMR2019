@@ -12,6 +12,7 @@
 #include<string>
 #include <ostream>
 #include<thread>
+#include <mutex>
 #include "CKobuki.h"
 #include "rplidar.h"
 #include "points.h"
@@ -20,6 +21,8 @@
 #include "encoder.h"
 #include "map.h"
 #include "odometry.h"
+
+#include "map_loader.h"
 
 
 #define lidar_measure_modulo 2000
@@ -54,7 +57,8 @@ enum robot_command
 	find,
 	reset,
 	clear,
-	disconnect
+	disconnect,
+	print
 
 };
 
@@ -92,6 +96,7 @@ public slots:
 	void set_command(robot_command);
 	void addPointToPath(RobotPosition);
 	
+	void set_threads_enabled(bool status);
 	void start_threads();
 	void join_threads();
 	void setip(std::string ip);
@@ -130,7 +135,8 @@ public:
 
 	void processThisLidar(LaserMeasurement &laserData);
 	void processThisRobot();
-	
+	void robot_controll();
+
 	void automode();
 	void build_map();
 	void find_path();
@@ -148,12 +154,16 @@ public:
 	
 	std::thread robotthreadHandle; 
 	std::thread laserthreadHandle; 
+	std::thread controllhreadHandle;
+
+	std::mutex mutex_robot;
+	std::mutex mutex_map;
+
 	
-	bool threads_enabled = true;
 
 private:
 
-
+	bool threads_enabled = true;
 	//veci na broadcast laser
 	struct sockaddr_in las_si_me, las_si_other, las_si_posli;
 
@@ -176,8 +186,6 @@ private:
 	unsigned long datacounter=0;
 	unsigned long lidar_measure_counter = 0;
 
-	int modulo_print = 50;
-
 	Encoder encL;
 	Encoder encR;
 	Odometry odometria_1;
@@ -195,12 +203,11 @@ private:
 
 	std::queue <RobotPosition> path;
 
-	int speed_filter_steps = 10;
-	
 	Speed_filter filter;
 
 	Mapa mapa;
 	Mapa histogram;
+	Mapa map_with_path;
 
 	RobotRegulator regulator;
 	

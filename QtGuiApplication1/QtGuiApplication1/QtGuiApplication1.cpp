@@ -17,17 +17,19 @@ void QtGuiApplication1::on_startButton_clicked()
 
 	if (connection_status == false)
 	{
+		emit setip_sig(ui.lineEdit->text().toStdString());
 		emit start_threads_sig();
 		ui.startButton->setText("Unconnect");
 	}
 	else
 	{
+	
+		emit join_threads_sig();
 		ui.startButton->setText("Connect");
 
 	}
 	connection_status = !connection_status;
 
-	emit setip_sig(ui.lineEdit->text().toStdString());
 	
 	
 }
@@ -154,24 +156,39 @@ void QtGuiApplication1::paintEvent(QPaintEvent *e)
 	paint.begin(this);
 	paint.setPen(Qt::black);
 	paint.drawRect(rect);
-
 	
+
 	Matrix_position i;
 	
 	for (i.Y = 0; i.Y < map.get_rows(); i.Y++)
 	{
 		for (i.X = 0; i.X < map.get_cols(); i.X++)
 		{
-			if(map[i]==cell_obstacle)
-			paint.drawPoint(QPoint(i.X+ rect.topLeft().x(), i.Y+ rect.topLeft().y()));
+			
+			if (map[i] == cell_obstacle)
+				paint.setPen(Qt::magenta);
+			
+			else if (map[i] == cell_path)
+				paint.setPen(Qt::blue);
+
+			else if (map[i] == cell_breakpoint)
+				paint.setPen(Qt::cyan);
+			else if (map[i] == cell_finish)
+				paint.setPen(Qt::red);
+			else if (map[i] == cell_start)
+				paint.setPen(Qt::green);
+
+			else 
+				continue;
+		
+			paint.drawRect(QRect(i.X * 3 + rect.topLeft().x(), i.Y * 3 + rect.topLeft().y(), 2, 2));
+			
 
 		}
 	}
 	
-
 	paint.end();
 	
-
 }
 
 
@@ -179,7 +196,7 @@ void QtGuiApplication1::map_update(Mapa mapa)
 {
 	
 	this->map = mapa;
-
+	update();
 }
 
 
