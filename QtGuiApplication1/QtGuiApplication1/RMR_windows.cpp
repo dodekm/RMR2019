@@ -27,7 +27,7 @@ RobotControll::RobotControll() :
 
 RobotControll::~RobotControll()
 {
-
+	stop_threads();
 }
 
 void RobotControll::WinSock_setup()
@@ -101,7 +101,14 @@ void RobotControll::robot_controll()
 			break;
 
 		case robot_command::reset:
+			mutex_map.lock();
 			reset_robot();
+			mutex_map.unlock();
+			break;
+
+		case robot_command::clear_path:
+			clear_path();
+			command_reset();
 			break;
 
 		case robot_command::find:
@@ -143,7 +150,7 @@ void RobotControll::processThisRobot()
 	odometria_4.odometry_curved(encL, encR);
 	actual_position = odometria_using->position;
 
-	move_arc(filter.set_speed((int)round(motors_speed.translation_speed), 10), (int)round(motors_speed.radius));
+	move_arc(filter.set_speed((int)round(motors_speed.translation_speed), 50), (int)round(motors_speed.radius));
 
 	datacounter++;
 
@@ -152,12 +159,18 @@ void RobotControll::processThisRobot()
 	//mutex_robot.unlock();
 }
 
-void RobotControll::reset_robot()
+void RobotControll::clear_path()
 {
 	while (!path.empty())
 	{
 		path.pop();
 	}
+}
+
+
+void RobotControll::reset_robot()
+{
+	clear_path();
 	mapa.clearMap();
 	histogram.clearMap();
 	encoder_init_values(&encL, robotdata.EncoderLeft);
@@ -195,8 +208,9 @@ std::string RobotControll::get_command()
 
 void RobotControll::command_reset()
 {
+	robot_command tmp = command;
 	command = command_old;
-
+	command_old = tmp;
 }
 
 
@@ -265,10 +279,6 @@ std::vector<RobotPosition> RobotControll::get_path()
 	return trajectory;
 }
 
-Mapa RobotControll::getMap()
-{
-	return mapa;
-}
 
 Robot_feedback RobotControll::getRobotData()
 {
@@ -328,6 +338,10 @@ void RobotControll::automode()
 			wanted_position = path.front();
 			path.pop();
 		}
+		else
+		{
+			set_command(robot_command::stop);
+		}
 	}
 }
 
@@ -336,6 +350,7 @@ void RobotControll::build_map()
 
 	for (int i = 0; i < copyOfLaserData.numberOfScans; i++)
 	{
+
 		if (lidar_check_measure(copyOfLaserData.Data[i]))
 		{
 			histogram.addPointToHistogram(lidar_measure_2_point(copyOfLaserData.Data[i], actual_position));
@@ -345,6 +360,7 @@ void RobotControll::build_map()
 		{
 			lidar_measure_counter = 0;
 			mapa.buildFromHistogram(histogram, histogram_treshold);
+
 			histogram.clearMap();
 		}
 	}
@@ -353,12 +369,16 @@ void RobotControll::build_map()
 
 void RobotControll::find_path()
 {
+	set_start(actual_position.coordinates);
 	int window_size = 2;
 	Mapa mapa_flood_fill(mapa, true);
 	mapa_flood_fill.FloodFill_fill(start, target, true);
 	mapa_flood_fill.saveMap("floodfill.txt");
+	clear_path();
 	map_with_path = mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_Y, path, true, window_size);
 	map_with_path.saveMap("path.txt");
+	emit(map_update_sig(map_with_path));
+
 
 }
 
@@ -375,12 +395,19 @@ void RobotControll::processThisLidar(LaserMeasurement &laserData)
 {
 
 
-	if (command == robot_command::stop&&motors_speed.translation_speed < min_speed&&motors_speed.radius>max_radius / 10)
+	if (abs(motors_speed.translation_speed) < min_speed+10)
 	{
 		mutex_map.lock();
 		memcpy(&copyOfLaserData, &laserData, sizeof(LaserMeasurement));
 		build_map();
-		emit map_update_sig(mapa);
+		Mapa map_to_send(mapa);
+		map_to_send.addPoint(actual_position.coordinates, cell_robot);
+		map_to_send.addPoint(target, cell_finish);
+		if(command_old== robot_command::find)
+		emit map_update_sig(map_with_path);
+		else
+		emit map_update_sig(map_to_send);
+		
 		mutex_map.unlock();
 	}
 	else
@@ -403,7 +430,7 @@ void RobotControll::start_threads()
 
 }
 
-void  RobotControll::join_threads()
+void  RobotControll::stop_threads()
 {
 	threads_enabled = false;
 	if(robotthreadHandle.joinable())
@@ -536,6 +563,7 @@ void RobotControll::laserprocess()
 
 	}
 
+	closesocket(las_s);
 
 	return;
 
@@ -611,9 +639,9 @@ void RobotControll::robotprocess()
 		{
 			processThisRobot();
 		}
-
-
 	}
+	closesocket(rob_s);
+	
 	return;
 }
 

@@ -27,7 +27,8 @@ typedef enum
 	cell_finish,
 	cell_start = -1,
 	cell_path = -2,
-	cell_breakpoint=-3
+	cell_breakpoint=-3,
+	cell_robot=-4
 	
 }cell_content;
 
@@ -188,7 +189,7 @@ public:
 	int check_close_obstacle(Matrix_position XY,int window_size);
 
 
-	int addPoint(Point P);
+	int addPoint(Point P, cell_content content);
 	void addPointToHistogram(Point P);
 	void buildFromHistogram(Mapa& histogram, int treshold);
 

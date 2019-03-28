@@ -24,7 +24,7 @@ void QtGuiApplication1::on_startButton_clicked()
 	else
 	{
 	
-		emit join_threads_sig();
+		emit stop_threads_sig();
 		ui.startButton->setText("Connect");
 
 	}
@@ -116,6 +116,11 @@ void QtGuiApplication1::on_pushButton_auto_clicked()
 	emit command_change_sig(robot_command::automatic);
 }
 
+void QtGuiApplication1::on_pushButton_clear_path_clicked()
+{
+	emit command_change_sig(robot_command::clear_path);
+}
+
 void QtGuiApplication1::on_pushButton_clear_map_clicked()
 {
 	emit command_change_sig(robot_command::clear);
@@ -152,11 +157,11 @@ void QtGuiApplication1::paintEvent(QPaintEvent *e)
 {
 	QRect rect = ui.frame->geometry();
 	QPainter paint(this);
-
-	paint.begin(this);
-	paint.setPen(Qt::black);
+	QPen pen(Qt::black, 3, Qt::SolidLine);
+	paint.setPen(pen);
 	paint.drawRect(rect);
 	
+	//map = Mapa(100, 100, -5, 5, -5, 5,"path.txt");
 
 	Matrix_position i;
 	
@@ -166,28 +171,29 @@ void QtGuiApplication1::paintEvent(QPaintEvent *e)
 		{
 			
 			if (map[i] == cell_obstacle)
-				paint.setPen(Qt::magenta);
-			
+				pen.setColor(Qt::magenta);
 			else if (map[i] == cell_path)
-				paint.setPen(Qt::blue);
-
+				pen.setColor(Qt::blue);
 			else if (map[i] == cell_breakpoint)
-				paint.setPen(Qt::cyan);
+				pen.setColor(Qt::cyan);
 			else if (map[i] == cell_finish)
-				paint.setPen(Qt::red);
+				pen.setColor(Qt::red);
 			else if (map[i] == cell_start)
-				paint.setPen(Qt::green);
-
+				pen.setColor(Qt::green);
+			else if (map[i] == cell_robot)
+				pen.setColor(Qt::black);
 			else 
 				continue;
 		
-			paint.drawRect(QRect(i.X * 3 + rect.topLeft().x(), i.Y * 3 + rect.topLeft().y(), 2, 2));
+
+			paint.setPen(pen);
+			paint.drawPoint(i.X * 3 + rect.topLeft().x(), i.Y * 3 + rect.topLeft().y());
+			//paint.drawRect(QRect(i.X * 3 + rect.topLeft().x(), i.Y * 3 + rect.topLeft().y(), 1, 1));
 			
 
 		}
 	}
 	
-	paint.end();
 	
 }
 
@@ -223,3 +229,4 @@ void QtGuiApplication1::odometry_update(Robot_feedback data)
 	
 
 }
+

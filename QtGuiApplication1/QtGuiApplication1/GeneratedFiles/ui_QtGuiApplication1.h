@@ -68,6 +68,7 @@ public:
     QLabel *label_10;
     QLabel *label_11;
     QLabel *label_12;
+    QPushButton *pushButton_clear_path;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -76,7 +77,7 @@ public:
     {
         if (QtGuiApplication1Class->objectName().isEmpty())
             QtGuiApplication1Class->setObjectName(QString::fromUtf8("QtGuiApplication1Class"));
-        QtGuiApplication1Class->resize(756, 405);
+        QtGuiApplication1Class->resize(806, 427);
         centralWidget = new QWidget(QtGuiApplication1Class);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         startButton = new QPushButton(centralWidget);
@@ -237,16 +238,16 @@ public:
         lcdNumber_2->setDigitCount(4);
         pushButton_clear_map = new QPushButton(centralWidget);
         pushButton_clear_map->setObjectName(QString::fromUtf8("pushButton_clear_map"));
-        pushButton_clear_map->setGeometry(QRect(320, 230, 81, 31));
+        pushButton_clear_map->setGeometry(QRect(280, 230, 81, 31));
         label = new QLabel(centralWidget);
         label->setObjectName(QString::fromUtf8("label"));
         label->setGeometry(QRect(30, 70, 51, 21));
         pushButton_find_path = new QPushButton(centralWidget);
         pushButton_find_path->setObjectName(QString::fromUtf8("pushButton_find_path"));
-        pushButton_find_path->setGeometry(QRect(20, 300, 91, 41));
+        pushButton_find_path->setGeometry(QRect(30, 320, 71, 41));
         pushButton_reset = new QPushButton(centralWidget);
         pushButton_reset->setObjectName(QString::fromUtf8("pushButton_reset"));
-        pushButton_reset->setGeometry(QRect(120, 300, 81, 41));
+        pushButton_reset->setGeometry(QRect(30, 260, 61, 41));
         lcdNumber_3 = new QLCDNumber(centralWidget);
         lcdNumber_3->setObjectName(QString::fromUtf8("lcdNumber_3"));
         lcdNumber_3->setGeometry(QRect(33, 150, 60, 23));
@@ -309,18 +310,18 @@ public:
         lcdNumber_3->setDigitCount(4);
         pushButton_auto = new QPushButton(centralWidget);
         pushButton_auto->setObjectName(QString::fromUtf8("pushButton_auto"));
-        pushButton_auto->setGeometry(QRect(210, 300, 81, 41));
+        pushButton_auto->setGeometry(QRect(110, 320, 71, 41));
         pushButton_stop = new QPushButton(centralWidget);
         pushButton_stop->setObjectName(QString::fromUtf8("pushButton_stop"));
         pushButton_stop->setGeometry(QRect(320, 80, 51, 51));
         spinBox = new QSpinBox(centralWidget);
         spinBox->setObjectName(QString::fromUtf8("spinBox"));
-        spinBox->setGeometry(QRect(140, 200, 42, 22));
+        spinBox->setGeometry(QRect(130, 200, 42, 22));
         spinBox->setMinimum(-20);
         spinBox->setMaximum(20);
         spinBox_2 = new QSpinBox(centralWidget);
         spinBox_2->setObjectName(QString::fromUtf8("spinBox_2"));
-        spinBox_2->setGeometry(QRect(140, 230, 42, 22));
+        spinBox_2->setGeometry(QRect(130, 230, 42, 22));
         spinBox_2->setMinimum(-20);
         spinBox_2->setMaximum(20);
         label_2 = new QLabel(centralWidget);
@@ -328,16 +329,16 @@ public:
         label_2->setGeometry(QRect(140, 180, 47, 13));
         pushButton_load_map = new QPushButton(centralWidget);
         pushButton_load_map->setObjectName(QString::fromUtf8("pushButton_load_map"));
-        pushButton_load_map->setGeometry(QRect(320, 270, 81, 31));
+        pushButton_load_map->setGeometry(QRect(280, 270, 81, 31));
         pushButton_save_map = new QPushButton(centralWidget);
         pushButton_save_map->setObjectName(QString::fromUtf8("pushButton_save_map"));
-        pushButton_save_map->setGeometry(QRect(320, 310, 81, 31));
+        pushButton_save_map->setGeometry(QRect(280, 310, 81, 31));
         lineEdit_2 = new QLineEdit(centralWidget);
         lineEdit_2->setObjectName(QString::fromUtf8("lineEdit_2"));
-        lineEdit_2->setGeometry(QRect(320, 200, 81, 21));
+        lineEdit_2->setGeometry(QRect(280, 200, 81, 21));
         pushButton_go = new QPushButton(centralWidget);
         pushButton_go->setObjectName(QString::fromUtf8("pushButton_go"));
-        pushButton_go->setGeometry(QRect(140, 260, 41, 31));
+        pushButton_go->setGeometry(QRect(130, 260, 51, 41));
         label_3 = new QLabel(centralWidget);
         label_3->setObjectName(QString::fromUtf8("label_3"));
         label_3->setGeometry(QRect(30, 180, 47, 13));
@@ -478,7 +479,7 @@ public:
         label_8->setGeometry(QRect(100, 240, 31, 16));
         frame = new QFrame(centralWidget);
         frame->setObjectName(QString::fromUtf8("frame"));
-        frame->setGeometry(QRect(430, 20, 300, 300));
+        frame->setGeometry(QRect(430, 20, 350, 350));
         frame->setFrameShape(QFrame::StyledPanel);
         frame->setFrameShadow(QFrame::Raised);
         label_9 = new QLabel(centralWidget);
@@ -491,7 +492,7 @@ public:
         label_9->setFont(font);
         lcdNumber_6 = new QLCDNumber(centralWidget);
         lcdNumber_6->setObjectName(QString::fromUtf8("lcdNumber_6"));
-        lcdNumber_6->setGeometry(QRect(143, 90, 60, 23));
+        lcdNumber_6->setGeometry(QRect(123, 90, 60, 23));
         QPalette palette5;
         palette5.setBrush(QPalette::Active, QPalette::WindowText, brush);
         palette5.setBrush(QPalette::Active, QPalette::Button, brush1);
@@ -551,7 +552,7 @@ public:
         lcdNumber_6->setDigitCount(4);
         lcdNumber_7 = new QLCDNumber(centralWidget);
         lcdNumber_7->setObjectName(QString::fromUtf8("lcdNumber_7"));
-        lcdNumber_7->setGeometry(QRect(143, 120, 60, 23));
+        lcdNumber_7->setGeometry(QRect(123, 120, 60, 23));
         QPalette palette6;
         palette6.setBrush(QPalette::Active, QPalette::WindowText, brush);
         palette6.setBrush(QPalette::Active, QPalette::Button, brush1);
@@ -611,7 +612,7 @@ public:
         lcdNumber_7->setDigitCount(4);
         lcdNumber_8 = new QLCDNumber(centralWidget);
         lcdNumber_8->setObjectName(QString::fromUtf8("lcdNumber_8"));
-        lcdNumber_8->setGeometry(QRect(190, 200, 60, 23));
+        lcdNumber_8->setGeometry(QRect(180, 200, 60, 23));
         QPalette palette7;
         palette7.setBrush(QPalette::Active, QPalette::WindowText, brush);
         palette7.setBrush(QPalette::Active, QPalette::Button, brush1);
@@ -671,7 +672,7 @@ public:
         lcdNumber_8->setDigitCount(4);
         lcdNumber_9 = new QLCDNumber(centralWidget);
         lcdNumber_9->setObjectName(QString::fromUtf8("lcdNumber_9"));
-        lcdNumber_9->setGeometry(QRect(190, 230, 60, 23));
+        lcdNumber_9->setGeometry(QRect(180, 230, 60, 23));
         QPalette palette8;
         palette8.setBrush(QPalette::Active, QPalette::WindowText, brush);
         palette8.setBrush(QPalette::Active, QPalette::Button, brush1);
@@ -731,17 +732,20 @@ public:
         lcdNumber_9->setDigitCount(4);
         label_10 = new QLabel(centralWidget);
         label_10->setObjectName(QString::fromUtf8("label_10"));
-        label_10->setGeometry(QRect(210, 100, 47, 13));
+        label_10->setGeometry(QRect(190, 100, 47, 13));
         label_11 = new QLabel(centralWidget);
         label_11->setObjectName(QString::fromUtf8("label_11"));
-        label_11->setGeometry(QRect(210, 130, 47, 13));
+        label_11->setGeometry(QRect(190, 130, 47, 13));
         label_12 = new QLabel(centralWidget);
         label_12->setObjectName(QString::fromUtf8("label_12"));
         label_12->setGeometry(QRect(100, 50, 71, 16));
+        pushButton_clear_path = new QPushButton(centralWidget);
+        pushButton_clear_path->setObjectName(QString::fromUtf8("pushButton_clear_path"));
+        pushButton_clear_path->setGeometry(QRect(190, 320, 71, 41));
         QtGuiApplication1Class->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(QtGuiApplication1Class);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 756, 21));
+        menuBar->setGeometry(QRect(0, 0, 806, 21));
         QtGuiApplication1Class->setMenuBar(menuBar);
         mainToolBar = new QToolBar(QtGuiApplication1Class);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
@@ -785,6 +789,7 @@ public:
         label_10->setText(QApplication::translate("QtGuiApplication1Class", "X wanted", nullptr));
         label_11->setText(QApplication::translate("QtGuiApplication1Class", "Y wanted", nullptr));
         label_12->setText(QApplication::translate("QtGuiApplication1Class", "unconnected", nullptr));
+        pushButton_clear_path->setText(QApplication::translate("QtGuiApplication1Class", "ClearPath", nullptr));
     } // retranslateUi
 
 };

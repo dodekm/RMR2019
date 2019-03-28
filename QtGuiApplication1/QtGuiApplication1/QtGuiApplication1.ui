@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>756</width>
-    <height>405</height>
+    <width>806</width>
+    <height>427</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1005,7 +1005,7 @@
    <widget class="QPushButton" name="pushButton_clear_map">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>280</x>
       <y>230</y>
       <width>81</width>
       <height>31</height>
@@ -1031,9 +1031,9 @@
    <widget class="QPushButton" name="pushButton_find_path">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>300</y>
-      <width>91</width>
+      <x>30</x>
+      <y>320</y>
+      <width>71</width>
       <height>41</height>
      </rect>
     </property>
@@ -1044,9 +1044,9 @@
    <widget class="QPushButton" name="pushButton_reset">
     <property name="geometry">
      <rect>
-      <x>120</x>
-      <y>300</y>
-      <width>81</width>
+      <x>30</x>
+      <y>260</y>
+      <width>61</width>
       <height>41</height>
      </rect>
     </property>
@@ -1512,9 +1512,9 @@
    <widget class="QPushButton" name="pushButton_auto">
     <property name="geometry">
      <rect>
-      <x>210</x>
-      <y>300</y>
-      <width>81</width>
+      <x>110</x>
+      <y>320</y>
+      <width>71</width>
       <height>41</height>
      </rect>
     </property>
@@ -1538,7 +1538,7 @@
    <widget class="QSpinBox" name="spinBox">
     <property name="geometry">
      <rect>
-      <x>140</x>
+      <x>130</x>
       <y>200</y>
       <width>42</width>
       <height>22</height>
@@ -1554,7 +1554,7 @@
    <widget class="QSpinBox" name="spinBox_2">
     <property name="geometry">
      <rect>
-      <x>140</x>
+      <x>130</x>
       <y>230</y>
       <width>42</width>
       <height>22</height>
@@ -1583,7 +1583,7 @@
    <widget class="QPushButton" name="pushButton_load_map">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>280</x>
       <y>270</y>
       <width>81</width>
       <height>31</height>
@@ -1596,7 +1596,7 @@
    <widget class="QPushButton" name="pushButton_save_map">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>280</x>
       <y>310</y>
       <width>81</width>
       <height>31</height>
@@ -1609,7 +1609,7 @@
    <widget class="QLineEdit" name="lineEdit_2">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>280</x>
       <y>200</y>
       <width>81</width>
       <height>21</height>
@@ -1622,10 +1622,10 @@
    <widget class="QPushButton" name="pushButton_go">
     <property name="geometry">
      <rect>
-      <x>140</x>
+      <x>130</x>
       <y>260</y>
-      <width>41</width>
-      <height>31</height>
+      <width>51</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
@@ -2625,8 +2625,8 @@
      <rect>
       <x>430</x>
       <y>20</y>
-      <width>300</width>
-      <height>300</height>
+      <width>350</width>
+      <height>350</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -2659,7 +2659,7 @@
    <widget class="QLCDNumber" name="lcdNumber_6">
     <property name="geometry">
      <rect>
-      <x>143</x>
+      <x>123</x>
       <y>90</y>
       <width>60</width>
       <height>23</height>
@@ -3114,7 +3114,7 @@
    <widget class="QLCDNumber" name="lcdNumber_7">
     <property name="geometry">
      <rect>
-      <x>143</x>
+      <x>123</x>
       <y>120</y>
       <width>60</width>
       <height>23</height>
@@ -3569,7 +3569,7 @@
    <widget class="QLCDNumber" name="lcdNumber_8">
     <property name="geometry">
      <rect>
-      <x>190</x>
+      <x>180</x>
       <y>200</y>
       <width>60</width>
       <height>23</height>
@@ -4024,7 +4024,7 @@
    <widget class="QLCDNumber" name="lcdNumber_9">
     <property name="geometry">
      <rect>
-      <x>190</x>
+      <x>180</x>
       <y>230</y>
       <width>60</width>
       <height>23</height>
@@ -4479,7 +4479,7 @@
    <widget class="QLabel" name="label_10">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>190</x>
       <y>100</y>
       <width>47</width>
       <height>13</height>
@@ -4492,7 +4492,7 @@
    <widget class="QLabel" name="label_11">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>190</x>
       <y>130</y>
       <width>47</width>
       <height>13</height>
@@ -4515,13 +4515,26 @@
      <string>unconnected</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="pushButton_clear_path">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>320</y>
+      <width>71</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>ClearPath</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>756</width>
+     <width>806</width>
      <height>21</height>
     </rect>
    </property>

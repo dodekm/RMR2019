@@ -10,6 +10,7 @@ message("You are running qmake on a generated .pro file. This may not work!")
 HEADERS += ./CKobuki.h \
     ./encoder.h \
     ./map.h \
+    ./map_loader.h \
     ./misc.h \
     ./odometry.h \
     ./points.h \
@@ -22,6 +23,7 @@ SOURCES += ./CKobuki.cpp \
     ./encoder.cpp \
     ./main.cpp \
     ./map.cpp \
+    ./map_loader.cpp \
     ./odometry.cpp \
     ./points.cpp \
     ./QtGuiApplication1.cpp \

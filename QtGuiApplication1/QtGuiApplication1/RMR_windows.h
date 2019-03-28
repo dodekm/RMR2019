@@ -25,8 +25,8 @@
 #include "map_loader.h"
 
 
-#define lidar_measure_modulo 2000
-#define histogram_treshold 20
+#define lidar_measure_modulo 1000
+#define histogram_treshold 10
 
 const std::string command_to_string []=
 {
@@ -58,7 +58,8 @@ enum robot_command
 	reset,
 	clear,
 	disconnect,
-	print
+	print,
+	clear_path,
 
 };
 
@@ -98,7 +99,7 @@ public slots:
 	
 	void set_threads_enabled(bool status);
 	void start_threads();
-	void join_threads();
+	void stop_threads();
 	void setip(std::string ip);
 	void setfilename(std::string );
 
@@ -118,7 +119,7 @@ public:
 	Point get_target_point();
 	Point get_starting_point();
 	Robot_feedback RobotControll::getRobotData();
-	Mapa getMap();
+	
 
 	std::vector<RobotPosition>get_path();
 
@@ -143,7 +144,9 @@ public:
 
 	void printData(std::ostream& stream);
 	void reset_robot();
-	
+	void clear_path();
+
+
 	void move_arc(int mmpersec, int radius);
 	void forward(int);
 	void back(int);

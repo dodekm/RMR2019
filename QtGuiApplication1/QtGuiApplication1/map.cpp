@@ -20,14 +20,14 @@ int Mapa::assert_matrix_indices(Matrix_position XY)
 }
 
 
-int Mapa::addPoint(Point P)
+int Mapa::addPoint(Point P,cell_content content=cell_obstacle)
 {
 	Matrix_position XY = point2indices(P);
 	if (assert_matrix_indices(XY))
 	{
 		if ((*this)[XY] == cell_obstacle)
 			return 0;
-		(*this)[XY] = cell_obstacle;
+		(*this)[XY] = content;
 		return 1;
 	}
 	return -1;

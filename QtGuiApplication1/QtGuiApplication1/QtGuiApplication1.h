@@ -77,12 +77,15 @@ signals:
 	void command_change_sig(robot_command command);
 	void set_threads_enabled_sig(bool status);
 	void start_threads_sig(void);
-	void join_threads_sig();
+	void stop_threads_sig();
 	void set_filename_sig(std::string);
 	void setip_sig(std::string);
 	void set_target_sig(Point);
 	void addPointToPath_sig(RobotPosition);
 
+
+private slots:
+    void on_pushButton_clear_path_clicked();
 
 private:
 	Ui::QtGuiApplication1Class ui;
