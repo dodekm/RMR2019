@@ -20,6 +20,27 @@ void RobotRegulator::regulate(RobotPosition& current_position, RobotPosition& de
 	nonlinear_power_function();
 }
 
+
+void RobotRegulator::regulate_alt(RobotPosition& current_position, RobotPosition& desired_position)
+{
+	
+	output.translation_speed = -translation_gain * ((current_position.coordinates.X - desired_position.coordinates.X)*cos(current_position.alfa) + (current_position.coordinates.Y - desired_position.coordinates.Y)*sin(current_position.alfa));
+
+	//output.translation_speed = abs(output.translation_speed);
+
+	delta = ((current_position.coordinates.X - desired_position.coordinates.X)*sin(current_position.alfa) + (current_position.coordinates.Y - desired_position.coordinates.Y)*cos(current_position.alfa));
+	delta /= PointsDistance(current_position.coordinates, desired_position.coordinates);
+	
+	singulatiry_correct(current_position.coordinates, desired_position.coordinates);
+	
+	output.radius = rotation_gain / delta * abs(output.translation_speed);
+
+	saturate_radius();
+	saturate_speed();
+	nonlinear_power_function();
+}
+
+
 int RobotRegulator::isRegulated(RobotPosition& current_position, RobotPosition& desired_position)
 {
 	return (PointsDistance(current_position.coordinates, desired_position.coordinates) < position_deadzone);

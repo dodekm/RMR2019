@@ -328,6 +328,7 @@ void RobotControll::automode()
 	if (!regulator.isRegulated(actual_position, wanted_position))
 	{
 		regulator.regulate(actual_position, wanted_position);
+		//regulator.regulate_alt(actual_position, wanted_position);
 		motors_speed = regulator.output;
 	}
 	else
