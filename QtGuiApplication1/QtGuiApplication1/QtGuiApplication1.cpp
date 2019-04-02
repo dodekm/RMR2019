@@ -157,11 +157,11 @@ void QtGuiApplication1::paintEvent(QPaintEvent *e)
 {
 	QRect rect = ui.frame->geometry();
 	QPainter paint(this);
-	QPen pen(Qt::black, 3, Qt::SolidLine);
+	QPen pen(Qt::black, 4, Qt::SolidLine);
 	paint.setPen(pen);
 	paint.drawRect(rect);
 	
-	//map = Mapa(100, 100, -5, 5, -5, 5,"path.txt");
+	
 
 	Matrix_position i;
 	
@@ -185,9 +185,10 @@ void QtGuiApplication1::paintEvent(QPaintEvent *e)
 			else 
 				continue;
 		
-
 			paint.setPen(pen);
-			paint.drawPoint(i.X * 3 + rect.topLeft().x(), i.Y * 3 + rect.topLeft().y());
+			paint.drawPoint(rect.topLeft().x() + rect.width()*i.X / map.get_cols(), rect.topLeft().y() + rect.height()*i.Y / map.get_rows());
+			
+			//paint.drawPoint(i.X * 3 + rect.topLeft().x(), i.Y * 3 + rect.topLeft().y());
 			//paint.drawRect(QRect(i.X * 3 + rect.topLeft().x(), i.Y * 3 + rect.topLeft().y(), 1, 1));
 			
 

@@ -124,6 +124,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="map.cpp" />
     <ClCompile Include="map_loader.cpp" />
+    <ClCompile Include="misc.cpp" />
     <ClCompile Include="odometry.cpp" />
     <ClCompile Include="points.cpp" />
     <ClCompile Include="QtGuiApplication1.cpp" />

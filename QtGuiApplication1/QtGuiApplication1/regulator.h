@@ -1,18 +1,17 @@
 #pragma once
 
 #include <cmath>
-
 #include "points.h"
 
-#define max_speed  250
-#define min_speed  20
+#define max_speed  300
+#define min_speed  15
 
-#define max_radius  65534/2
-#define min_radius  70
+#define max_radius 65534/2
+#define min_radius  100
 
 #define singularity_product  2
 
-template <typename T>int sign(T x);
+
 
 typedef struct robotSpeed
 {
@@ -100,7 +99,7 @@ private:
 	}
 
 
-	void singulatiry_correct(Point current_position, Point desired_position)
+	void symmetry_correct(Point current_position, Point desired_position)
 	{
 		if (abs(output.translation_speed) < min_speed)
 		{

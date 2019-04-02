@@ -1,5 +1,11 @@
 #pragma once
+
 #include <cmath>
+
+template <typename T>int sign(T x)
+{
+	return (((x) < 0) ? -1 : ((x) > 0));
+}
 
 typedef struct Point
 {
@@ -20,7 +26,7 @@ typedef struct Point
 
 
 float PointsDistance(Point a, Point b);
-float PointAngle(Point p);
+float point2angle(Point p);
 float PointLength(Point a);
 Point polar2point(float angle, float length);
 

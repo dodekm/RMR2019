@@ -1,17 +1,13 @@
 #include "map_loader.h"
-#include "stdlib.h"
-#include "stdio.h"
-#include "string.h"
 
 
- void map_loader::load_map(char *filename,TMapArea &mapss)
+
+ void map_loader::load_objects(char *filename,TMapArea &mapss)
  {
-
 
      FILE *fp=fopen(filename,"r");
      if (fp==NULL)
          return ;
-    
      char myLine[550];
      fgets(myLine,550,fp);
      char *myCopy=(char*)calloc(strlen(myLine)+2,sizeof(char));

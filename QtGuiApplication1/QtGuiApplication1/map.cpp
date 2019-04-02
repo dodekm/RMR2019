@@ -1,7 +1,7 @@
 
 
 #include "map.h"
-#include "misc.h"
+
 
 using namespace std;
 
@@ -104,7 +104,7 @@ void Mapa::loadMap(std::string filename)
 
 	while (i.Y < rows&&getline(file, str))
 	{
-		vector<string>data = string_split(str, ",");
+		vector<string>data= string_split_delim(str, ",");
 		i.X = 0;
 		while (i.X < cols&&i.X < data.size())
 		{
@@ -116,6 +116,51 @@ void Mapa::loadMap(std::string filename)
 	}
 
 	file.close();
+
+
+}
+
+
+
+void Mapa::fill_with_objects(map_loader::TMapArea objects)
+{
+		objects.obstacle.push_back(objects.wall);
+
+	for (int i=0;i<objects.obstacle.size();i++)
+	{
+		for (int k = 0; k < objects.obstacle.at(i).points.size()-1; k++)
+		{
+
+			Point begin = objects.obstacle.at(i).points.at(k);
+			Point end = objects.obstacle.at(i).points.at(k+1);
+			
+			end.X /= 100;
+			end.Y /= 100;
+			
+			begin.X /= 100;
+			begin.Y /= 100;
+
+			Matrix_position begin_ind = point2indices(begin);
+			Matrix_position end_ind = point2indices(end);
+
+			
+			Matrix_position iter = begin_ind;
+			Matrix_position direction = Matrix_position(sign(end_ind.X - iter.X), sign(end_ind.Y - iter.Y));
+
+			while (iter != end_ind)
+			{
+				
+				iter = iter + direction;
+				if (assert_matrix_indices(iter))
+				{
+					(*this)[iter] = cell_obstacle;
+				}
+			}
+
+		}
+		
+	
+	}
 
 
 }

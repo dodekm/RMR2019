@@ -3,6 +3,8 @@
 
 #include "points.h"
 #include "rplidar.h"
+#include "misc.h"
+#include "map_loader.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -17,6 +19,7 @@
 #define floodfill_priority_X 1
 #define floodfill_priority_Y 2
 #define floodfill_priority_diag 3
+
 
 typedef int  floodfill_priority;
 
@@ -67,12 +70,12 @@ class Matrix_position
 
 	Matrix_position operator +(const Matrix_position& other)
 	{
-		return Matrix_position{ X + other.X,Y + other.Y };
+		return Matrix_position( X + other.X,Y + other.Y );
 	}
 
 	Matrix_position operator -(const Matrix_position& other)
 	{
-		return Matrix_position{ X - other.X,Y - other.Y };
+		return Matrix_position( X - other.X,Y - other.Y );
 	}
 	private:
 	
@@ -179,7 +182,6 @@ public:
 	
 	}
 
-	
 
 	void FloodFill_fill(Point start, Point target,bool diagonal);
 	Mapa FloodFill_find_path(Point start, Point target, floodfill_priority priority, std::queue <RobotPosition>& path,bool diagonal,int window_size);
@@ -190,8 +192,11 @@ public:
 
 
 	int addPoint(Point P, cell_content content);
+
 	void addPointToHistogram(Point P);
 	void buildFromHistogram(Mapa& histogram, int treshold);
+
+	void fill_with_objects(map_loader::TMapArea objects);
 
 	void saveMap(std::string filename);
 	void clearMap();

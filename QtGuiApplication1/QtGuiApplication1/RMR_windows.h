@@ -22,7 +22,6 @@
 #include "map.h"
 #include "odometry.h"
 
-#include "map_loader.h"
 
 
 #define lidar_measure_modulo 1000
@@ -211,6 +210,8 @@ private:
 	Mapa mapa;
 	Mapa histogram;
 	Mapa map_with_path;
+	
+
 
 	RobotRegulator regulator;
 	

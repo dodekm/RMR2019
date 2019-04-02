@@ -2,14 +2,18 @@
 
 #include "points.h"
 #include <vector>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 
 namespace map_loader
 {
 
 typedef struct
 {
-    int numofpoints;
-    std::vector<Point> points;
+   int numofpoints;
+   std::vector<Point> points;
+
 }TMapObject;
 
 typedef struct
@@ -19,7 +23,6 @@ typedef struct
    std::vector<TMapObject> obstacle;
 }TMapArea;
 
-    
-    void load_map(char *filename,TMapArea &mapss);
+   void load_objects(char *filename,TMapArea &mapss);
 };
 

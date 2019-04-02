@@ -5,8 +5,8 @@
 
 RobotControll::RobotControll() :
 
-	regulator(200, 0.5),
-	mapa(100, 100, -5.0, 5, -5.0, 5.0, ""),
+	regulator(250, 0.5),
+	mapa(100, 100, 0, 6, 0, 5, ""),
 	histogram(mapa, false)
 {
 
@@ -15,14 +15,20 @@ RobotControll::RobotControll() :
 
 	odometria_using = &odometria_3;
 
-	WinSock_setup();
+	odometria_using->position = RobotPosition(0.5, 0.5);
+	actual_position = odometria_using->position;
 
+
+	WinSock_setup();
 	path.push(RobotPosition(0.0, 0.0));
 
-	start = Point{ 0, 0 };
+	start = Point{ 0, 0};
 	target = Point{ 0, 0 };
 
-
+	map_loader::TMapArea objects;
+	map_loader::load_objects("priestor.txt", objects);
+	mapa.fill_with_objects(objects);
+	
 }
 
 RobotControll::~RobotControll()
@@ -155,8 +161,7 @@ void RobotControll::processThisRobot()
 	datacounter++;
 
 	emit odometry_update_sig(getRobotData());
-	//QMetaObject::invokeMethod(gui, "odometry_update", Q_ARG(Robot_feedback, getRobotData()));
-	//mutex_robot.unlock();
+
 }
 
 void RobotControll::clear_path()
@@ -327,8 +332,8 @@ void RobotControll::automode()
 {
 	if (!regulator.isRegulated(actual_position, wanted_position))
 	{
-		regulator.regulate(actual_position, wanted_position);
-		//regulator.regulate_alt(actual_position, wanted_position);
+		//regulator.regulate(actual_position, wanted_position);
+		regulator.regulate_alt(actual_position, wanted_position);
 		motors_speed = regulator.output;
 	}
 	else
@@ -371,7 +376,7 @@ void RobotControll::build_map()
 void RobotControll::find_path()
 {
 	set_start(actual_position.coordinates);
-	int window_size = 2;
+	int window_size = 3;
 	Mapa mapa_flood_fill(mapa, true);
 	mapa_flood_fill.FloodFill_fill(start, target, true);
 	mapa_flood_fill.saveMap("floodfill.txt");

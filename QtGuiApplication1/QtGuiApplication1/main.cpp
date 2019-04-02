@@ -29,8 +29,6 @@ int main(int argc, char *argv[])
 	QObject::connect(&robot, SIGNAL(odometry_update_sig(Robot_feedback)), &gui, SLOT(odometry_update(Robot_feedback)));
 
 
-	//map_loader::TMapArea area;
-	//map_loader::load_map("priestor.txt", area);
 
 	gui.show();
 	return app.exec();
