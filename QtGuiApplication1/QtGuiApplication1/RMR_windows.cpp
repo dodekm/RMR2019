@@ -4,30 +4,32 @@
 #include "RMR_windows.h"
 
 RobotControll::RobotControll() :
+	odometria_3(5.2,2.5,-M_PI_2),
+	odometria_4(5.2, 2.5, -M_PI_2),
+	regulator(150, 1.2),
+	mapa(100, 100, -0.2, 6, -0.2, 6, ""),
+	histogram(mapa, false),
+	current_scope(100,100,-lidar_treshold_max/1000.0, lidar_treshold_max / 1000.0, -lidar_treshold_max / 1000.0, lidar_treshold_max / 1000.0)
 
-	regulator(250, 0.5),
-	mapa(100, 100, 0, 6, 0, 5, ""),
-	histogram(mapa, false)
-{
-
+{	
 	command = robot_command::stop;
 	command_old = robot_command::stop;
 
-	odometria_using = &odometria_3;
 
-	odometria_using->position = RobotPosition(0.5, 0.5);
+	odometria_using = &odometria_4;
 	actual_position = odometria_using->position;
-
+	reset_position = odometria_using->position;
 
 	WinSock_setup();
-	path.push(RobotPosition(0.0, 0.0));
+	
 
-	start = Point{ 0, 0};
+	start = actual_position.coordinates;
 	target = Point{ 0, 0 };
 
 	map_loader::TMapArea objects;
 	map_loader::load_objects("priestor.txt", objects);
 	mapa.fill_with_objects(objects);
+	slam.map_reference = mapa;
 	
 }
 
@@ -156,7 +158,8 @@ void RobotControll::processThisRobot()
 	odometria_4.odometry_curved(encL, encR);
 	actual_position = odometria_using->position;
 
-	move_arc(filter.set_speed((int)round(motors_speed.translation_speed), 50), (int)round(motors_speed.radius));
+	
+	move_arc(filter_speed.set_speed((int)round(motors_speed.translation_speed), 50),(int)round(motors_speed.radius));
 
 	datacounter++;
 
@@ -178,9 +181,10 @@ void RobotControll::reset_robot()
 	clear_path();
 	mapa.clearMap();
 	histogram.clearMap();
+	current_scope.clearMap();
 	encoder_init_values(&encL, robotdata.EncoderLeft);
 	encoder_init_values(&encR, robotdata.EncoderRight);
-	odometria_using->odometry_init();
+	odometria_using->odometry_init(reset_position);
 	motors_speed.translation_speed = 0;
 	motors_speed.radius = max_radius;
 	command = robot_command::stop;
@@ -199,6 +203,12 @@ void RobotControll::set_command(robot_command command)
 	this->command_old = this->command;
 	this->command = command;
 
+}
+
+
+void RobotControll::set_maping_enabled(bool status)
+{
+	maping_enable = status;
 }
 
 void RobotControll::set_threads_enabled(bool status)
@@ -327,18 +337,22 @@ void RobotControll::printData(std::ostream& stream)
 
 }
 
+void RobotControll::obstacle_avoidance()
+{
+
+}
 
 void RobotControll::automode()
 {
 	if (!regulator.isRegulated(actual_position, wanted_position))
 	{
-		//regulator.regulate(actual_position, wanted_position);
-		regulator.regulate_alt(actual_position, wanted_position);
+		regulator.regulate(actual_position, wanted_position);
 		motors_speed = regulator.output;
 	}
 	else
 	{
 		motors_speed.translation_speed = 0;
+		
 		if (!path.empty())
 		{
 			wanted_position = path.front();
@@ -349,6 +363,21 @@ void RobotControll::automode()
 			set_command(robot_command::stop);
 		}
 	}
+}
+
+void RobotControll::build_scope()
+{
+	current_scope.clearMap();
+	current_scope.addPoint(Point{0.0,0.0}, cell_robot);
+	for (int i = 0; i < copyOfLaserData.numberOfScans; i++)
+	{
+
+		if (lidar_check_measure(copyOfLaserData.Data[i]))
+		{
+			current_scope.addPoint(lidar_measure_2_point(copyOfLaserData.Data[i], RobotPosition(0, 0, M_PI_2)), cell_obstacle);			
+		}
+	}
+
 }
 
 void RobotControll::build_map()
@@ -362,11 +391,12 @@ void RobotControll::build_map()
 			histogram.addPointToHistogram(lidar_measure_2_point(copyOfLaserData.Data[i], actual_position));
 			lidar_measure_counter++;
 		}
+
+
 		if (lidar_measure_counter % lidar_measure_modulo == 0)
 		{
 			lidar_measure_counter = 0;
 			mapa.buildFromHistogram(histogram, histogram_treshold);
-
 			histogram.clearMap();
 		}
 	}
@@ -376,15 +406,16 @@ void RobotControll::build_map()
 void RobotControll::find_path()
 {
 	set_start(actual_position.coordinates);
-	int window_size = 3;
+	int window_size = 5;
 	Mapa mapa_flood_fill(mapa, true);
 	mapa_flood_fill.FloodFill_fill(start, target, true);
 	mapa_flood_fill.saveMap("floodfill.txt");
 	clear_path();
 	map_with_path = mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_Y, path, true, window_size);
 	map_with_path.saveMap("path.txt");
+	if(!path.empty())
+	wanted_position = path.front();
 	emit(map_update_sig(map_with_path));
-
 
 }
 
@@ -393,33 +424,36 @@ void RobotControll::encoders_process()
 {
 	encoder_process(&encL, robotdata.EncoderLeft);
 	encoder_process(&encR, robotdata.EncoderRight);
-
 }
 
 
 void RobotControll::processThisLidar(LaserMeasurement &laserData)
 {
+	memcpy(&copyOfLaserData, &laserData, sizeof(LaserMeasurement));
+	
+	build_scope();
+	emit scope_update_sig(current_scope);
 
-
-	if (abs(motors_speed.translation_speed) < min_speed+10)
+	if (motors_speed.translation_speed==0)
 	{
 		mutex_map.lock();
-		memcpy(&copyOfLaserData, &laserData, sizeof(LaserMeasurement));
+		if(maping_enable==true)
 		build_map();
+		
 		Mapa map_to_send(mapa);
 		map_to_send.addPoint(actual_position.coordinates, cell_robot);
+		map_to_send.addPoint(actual_position.coordinates+polar2point(actual_position.alfa,0.2),cell_start);
 		map_to_send.addPoint(target, cell_finish);
 		if(command_old== robot_command::find)
 		emit map_update_sig(map_with_path);
 		else
 		emit map_update_sig(map_to_send);
-		
 		mutex_map.unlock();
 	}
+
 	else
 		lidar_measure_counter = 1;
-
-	//QMetaObject::invokeMethod(gui, "map_update", Q_ARG(Mapa, mapa));
+	slam_position = slam.locate(actual_position, copyOfLaserData);
 
 }
 

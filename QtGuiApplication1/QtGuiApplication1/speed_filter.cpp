@@ -1,12 +1,17 @@
 
 #include "speed_filter.h"
+#include "points.h"
 
 int Speed_filter::set_speed(int desired_speed, int n_steps)
 {
 	if (desired_speed != this->desired_speed)
 	{
 		this->desired_speed = desired_speed;
-		step_size = (desired_speed - actual_speed) / n_steps;
+		if ((desired_speed - actual_speed) / n_steps != 0)
+			step_size = (desired_speed - actual_speed) / n_steps;
+		else
+			step_size = sign(desired_speed - actual_speed);
+
 	}
 
 	return step();

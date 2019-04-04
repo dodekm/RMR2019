@@ -5,7 +5,7 @@
 
 #include "RMR_windows.h"
 
-
+void map_render(QPainter& paint, QPen& pen, Mapa& map, QRect rect);
 
 class QtGuiApplication1 : public QMainWindow
 {
@@ -70,12 +70,14 @@ public slots:
     void on_spinBox_2_valueChanged(int arg1);
 
 	void map_update(Mapa);
+	void scope_update(Mapa);
 	void odometry_update(Robot_feedback);
 
 
 signals:
 	void command_change_sig(robot_command command);
 	void set_threads_enabled_sig(bool status);
+	void set_maping_enabled_sig(bool status);
 	void start_threads_sig(void);
 	void stop_threads_sig();
 	void set_filename_sig(std::string);
@@ -87,11 +89,13 @@ signals:
 private slots:
     void on_pushButton_clear_path_clicked();
 
+    void on_checkBox_stateChanged(int arg1);
+
 private:
 	Ui::QtGuiApplication1Class ui;
 	Mapa map;
+	Mapa scope;
 	bool connection_status = false;
-
 	
 };
 

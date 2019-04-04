@@ -4,13 +4,12 @@
 #include "points.h"
 
 #define max_speed  300
-#define min_speed  15
+#define min_speed  30
 
 #define max_radius 65534/2
 #define min_radius  100
 
 #define singularity_product  2
-
 
 
 typedef struct robotSpeed
@@ -63,7 +62,7 @@ public:
 private:
 	float translation_gain;
 	float rotation_gain;
-	float gamma = 0.3;
+	float gamma = 0.5;
 	float delta;
 	Point error;
 

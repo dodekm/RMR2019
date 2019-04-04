@@ -131,6 +131,7 @@
     <ClCompile Include="regulator.cpp" />
     <ClCompile Include="RMR_windows.cpp" />
     <ClCompile Include="rplidar.cpp" />
+    <ClCompile Include="slam.cpp" />
     <ClCompile Include="speed_filter.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -156,6 +157,7 @@
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets</IncludePath>
     </QtMoc>
     <ClInclude Include="rplidar.h" />
+    <ClInclude Include="slam.h" />
     <ClInclude Include="speed_filter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

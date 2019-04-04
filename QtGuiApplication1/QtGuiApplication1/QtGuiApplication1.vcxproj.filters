@@ -86,6 +86,9 @@
     <ClCompile Include="misc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="slam.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CKobuki.h">
@@ -119,6 +122,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="map_loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="slam.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

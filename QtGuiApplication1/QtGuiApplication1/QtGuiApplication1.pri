@@ -24,6 +24,7 @@ SOURCES += ./CKobuki.cpp \
     ./main.cpp \
     ./map.cpp \
     ./map_loader.cpp \
+    ./misc.cpp \
     ./odometry.cpp \
     ./points.cpp \
     ./QtGuiApplication1.cpp \

@@ -153,25 +153,26 @@ void QtGuiApplication1::on_spinBox_2_valueChanged(int arg1)
 	emit set_target_sig(Point{ (float)ui.spinBox->value(),(float)ui.spinBox_2->value() });
 }
 
-void QtGuiApplication1::paintEvent(QPaintEvent *e)
+void QtGuiApplication1::on_checkBox_stateChanged(int arg1)
 {
-	QRect rect = ui.frame->geometry();
-	QPainter paint(this);
-	QPen pen(Qt::black, 4, Qt::SolidLine);
-	paint.setPen(pen);
-	paint.drawRect(rect);
-	
-	
+	if(ui.checkBox->isChecked())
+	emit set_maping_enabled_sig(true);
+	else
+	emit set_maping_enabled_sig(false);
+}
 
+
+void map_render(QPainter& paint, QPen& pen, Mapa& map, QRect rect)
+{
 	Matrix_position i;
-	
+
 	for (i.Y = 0; i.Y < map.get_rows(); i.Y++)
 	{
 		for (i.X = 0; i.X < map.get_cols(); i.X++)
 		{
-			
+
 			if (map[i] == cell_obstacle)
-				pen.setColor(Qt::magenta);
+				pen.setColor(Qt::black);
 			else if (map[i] == cell_path)
 				pen.setColor(Qt::blue);
 			else if (map[i] == cell_breakpoint)
@@ -181,21 +182,44 @@ void QtGuiApplication1::paintEvent(QPaintEvent *e)
 			else if (map[i] == cell_start)
 				pen.setColor(Qt::green);
 			else if (map[i] == cell_robot)
-				pen.setColor(Qt::black);
-			else 
+				pen.setColor(Qt::magenta);
+			else
 				continue;
-		
+
 			paint.setPen(pen);
 			paint.drawPoint(rect.topLeft().x() + rect.width()*i.X / map.get_cols(), rect.topLeft().y() + rect.height()*i.Y / map.get_rows());
-			
-			//paint.drawPoint(i.X * 3 + rect.topLeft().x(), i.Y * 3 + rect.topLeft().y());
-			//paint.drawRect(QRect(i.X * 3 + rect.topLeft().x(), i.Y * 3 + rect.topLeft().y(), 1, 1));
-			
 
 		}
 	}
+
+}
+
+void QtGuiApplication1::paintEvent(QPaintEvent *e)
+{
+	QPainter paint(this);
 	
-	
+	{
+		QRect rect = ui.frame->geometry();
+		QPen pen(Qt::green, 2, Qt::SolidLine);
+		paint.setPen(pen);
+		paint.drawRect(rect);
+		pen.setWidth(4);
+		paint.setPen(pen);
+
+		map_render(paint, pen, map, rect);
+	}
+
+	{
+		QRect rect = ui.frame_2->geometry();
+		QPen pen(Qt::green, 2, Qt::SolidLine);
+		paint.setPen(pen);
+		paint.drawEllipse(rect);
+		pen.setWidth(4);
+		paint.setPen(pen);
+
+		map_render(paint, pen, scope, rect);
+	}
+
 }
 
 
@@ -204,6 +228,13 @@ void QtGuiApplication1::map_update(Mapa mapa)
 	
 	this->map = mapa;
 	update();
+}
+
+void QtGuiApplication1::scope_update(Mapa scope)
+{
+	this->scope = scope;
+	update();
+
 }
 
 
@@ -230,4 +261,5 @@ void QtGuiApplication1::odometry_update(Robot_feedback data)
 	
 
 }
+
 

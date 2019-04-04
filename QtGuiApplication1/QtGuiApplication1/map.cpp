@@ -117,14 +117,12 @@ void Mapa::loadMap(std::string filename)
 
 	file.close();
 
-
 }
-
-
 
 void Mapa::fill_with_objects(map_loader::TMapArea objects)
 {
-		objects.obstacle.push_back(objects.wall);
+	
+	objects.obstacle.push_back(objects.wall);
 
 	for (int i=0;i<objects.obstacle.size();i++)
 	{
@@ -142,14 +140,11 @@ void Mapa::fill_with_objects(map_loader::TMapArea objects)
 
 			Matrix_position begin_ind = point2indices(begin);
 			Matrix_position end_ind = point2indices(end);
-
-			
 			Matrix_position iter = begin_ind;
-			Matrix_position direction = Matrix_position(sign(end_ind.X - iter.X), sign(end_ind.Y - iter.Y));
-
+			
 			while (iter != end_ind)
 			{
-				
+				Matrix_position direction = Matrix_position(sign(end_ind.X - iter.X), sign(end_ind.Y - iter.Y));
 				iter = iter + direction;
 				if (assert_matrix_indices(iter))
 				{
@@ -167,13 +162,14 @@ void Mapa::fill_with_objects(map_loader::TMapArea objects)
 
 void Mapa::clearMap()
 {
+	Matrix_position i;
 
-	for (int i = 0; i < rows; ++i)
+	for (i.Y = 0; i.Y < rows; i.Y++)
 	{
 
-		for (int j = 0; j < cols; j++)
+		for (i.X = 0; i.X < cols; i.X++)
 		{
-			cells_data[i][j] = cell_free;
+			(*this)[i] = cell_free;
 		}
 	}
 
@@ -402,14 +398,13 @@ Mapa Mapa::FloodFill_find_path(Point start, Point target, floodfill_priority pri
 
 }
 
-int Mapa::check_close_obstacle(Matrix_position XY, int window_size = 3)
+int Mapa::check_close_obstacle(Matrix_position XY, int window_size = 2)
 {
 
-
 	Matrix_position offset;
-	for (offset.Y = -window_size + 1; offset.Y < window_size; offset.Y++)
+	for (offset.Y = -window_size ; offset.Y <= window_size; offset.Y++)
 	{
-		for (offset.X = -window_size + 1; offset.X < window_size; offset.X++)
+		for (offset.X = -window_size ; offset.X <= window_size; offset.X++)
 		{
 
 			if (assert_matrix_indices(XY + offset))

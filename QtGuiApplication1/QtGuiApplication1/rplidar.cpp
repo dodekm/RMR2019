@@ -13,6 +13,11 @@ int lidar_check_measure(LaserData measure)
 		return 0;
 	}
 	
+	if (measure.scanDistance<zone_error_max && measure.scanDistance>zone_error_min)
+	{
+		return 0;
+	}
+
 
 	else
 		return 1;

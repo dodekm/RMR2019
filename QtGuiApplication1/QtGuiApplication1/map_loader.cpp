@@ -1,7 +1,5 @@
 #include "map_loader.h"
 
-
-
  void map_loader::load_objects(char *filename,TMapArea &mapss)
  {
 

@@ -21,11 +21,11 @@
 #include "encoder.h"
 #include "map.h"
 #include "odometry.h"
+#include "slam.h"
 
 
-
-#define lidar_measure_modulo 1000
-#define histogram_treshold 10
+#define lidar_measure_modulo 2500
+#define histogram_treshold 30
 
 const std::string command_to_string []=
 {
@@ -86,6 +86,7 @@ class RobotControll:public QObject
 signals:
 
 	void map_update_sig(Mapa);
+	void scope_update_sig(Mapa);
 	void odometry_update_sig(Robot_feedback);
 	
 public slots:
@@ -97,6 +98,8 @@ public slots:
 	void addPointToPath(RobotPosition);
 	
 	void set_threads_enabled(bool status);
+	void set_maping_enabled(bool status);
+
 	void start_threads();
 	void stop_threads();
 	void setip(std::string ip);
@@ -137,8 +140,11 @@ public:
 	void processThisRobot();
 	void robot_controll();
 
+
+	void obstacle_avoidance();
 	void automode();
 	void build_map();
+	void build_scope();
 	void find_path();
 
 	void printData(std::ostream& stream);
@@ -198,21 +204,29 @@ private:
 	
 	robotSpeed motors_speed{ 0,0 };
 	
+
+	RobotPosition reset_position;
+
 	RobotPosition actual_position;
+	RobotPosition slam_position;
 	RobotPosition wanted_position;
+
 	Point start;
 	Point target;
 
 	std::queue <RobotPosition> path;
+	std::queue<RobotPosition> path_obstacle_avoid;
 
-	Speed_filter filter;
-
+	Speed_filter filter_speed;
+	
+	bool maping_enable = true;
 	Mapa mapa;
 	Mapa histogram;
 	Mapa map_with_path;
+	Mapa current_scope;
+
+	Slam slam;
 	
-
-
 	RobotRegulator regulator;
 	
 	std::string filename="";

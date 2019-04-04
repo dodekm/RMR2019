@@ -25,14 +25,19 @@ public:
 
 	Odometry()
 	{
-		odometry_init();
+		odometry_init(RobotPosition(0,0,0));
 	}
+	Odometry(float x, float y,float alfa)
+	{
+		odometry_init(RobotPosition(x, y, alfa));
+	}
+
 	~Odometry()
 	{
 
 	}
 
-	void odometry_init();
+	void odometry_init(RobotPosition);
 
 	void odometry_backward_euler(Encoder encL, Encoder encR);
 	void odometry_forward_euler(Encoder encL, Encoder encR);

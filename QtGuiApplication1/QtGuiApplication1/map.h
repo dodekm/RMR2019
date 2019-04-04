@@ -61,10 +61,11 @@ class Matrix_position
 		return !((*this)==other);
 	}
 
-	void operator=(const Matrix_position& other)
+	Matrix_position& operator=(const Matrix_position& other)
 	{
 		X = other.X;
 		Y = other.Y;
+		return *this;
 	}
 	
 
@@ -95,6 +96,12 @@ public:
 	Mapa()
 	{
 	
+		this->cols =0;
+		this->rows =0;
+		this->x_lim[0] = 0.0;
+		this->x_lim[1] = 0.0;
+		this->y_lim[0] = 0.0;
+		this->y_lim[1] = 0.0;
 	}
 	
 	Mapa(int rows,int cols, float  x_low,float x_high,float y_low,float y_high,std::string filename="")
@@ -115,7 +122,7 @@ public:
 	}
 
 
-	void  operator=(const Mapa& source)
+	Mapa&  operator=(const Mapa& source)
 	{
 		deallocate();
 		cols = source.cols;
@@ -126,7 +133,7 @@ public:
 		y_lim[1] = source.y_lim[1];
 		allocate();
 
-		for (int i = 0; i < rows; ++i)
+		for (int i = 0; i < rows; i++)
 		{
 
 			for (int j = 0; j < cols; j++)
@@ -134,7 +141,7 @@ public:
 				cells_data[i][j] = source.cells_data[i][j];
 			}
 		}
-		
+		return *this;
 	}
 
 	auto& operator[](Matrix_position position)
@@ -146,10 +153,45 @@ public:
 		
 	}
 
+	Mapa operator && (Mapa& other)
+	{
+		Mapa AND(other, false);
+		Matrix_position i;
+		for (i.Y = 0; i.Y < rows; i.Y++)
+		{
+			for (i.X = 0; i.X < cols; i.X++)
+			{
+
+				AND[i] = (*this)[i] && other[i];
+
+			}
+
+		}
+		
+		return AND;
+	}
+
+	long sum_elements()
+	{
+		long count = 0;
+		Matrix_position i;
+		for (i.Y = 0; i.Y < rows; i.Y++)
+		{
+			for (i.X = 0; i.X < cols; i.X++)
+			{
+
+				count += (*this)[i];
+
+			}
+
+		}
+		return count;
+	}
+
 	int get_rows() { return rows; }
 	int get_cols() { return cols; }
 
-	Mapa(const Mapa& source,bool copy=true)
+	Mapa (const Mapa& source,bool copy=true)
 	{
 	
 		cols = source.cols;
@@ -161,15 +203,17 @@ public:
 
 		allocate();
 
-		for (int i = 0; i < rows; ++i)
+		Matrix_position i;
+
+		for (i.X = 0; i.X < rows; i.X++)
 		{
 			
-			for (int j = 0; j < cols; j++)
+			for (i.Y = 0; i.Y < cols; i.Y++)
 			{
 				if (copy == true)
-				cells_data[i][j] = source.cells_data[i][j];
+				(*this)[i] = source.cells_data[i.Y][i.X];
 				else
-				cells_data[i][j] = cell_free;
+				(*this)[i] = cell_free;
 			}
 		}
 
@@ -237,7 +281,7 @@ private:
 	{
 		Matrix_position XY;
 		XY.X = (int)round(cols * (P.X - x_lim[0]) / (x_lim[1] - x_lim[0]));
-		XY.Y = (int)round(rows * (P.Y - y_lim[0]) / (y_lim[1] - y_lim[0]));
+		XY.Y = (int)round(rows * (1.0-((P.Y-y_lim[0]) / (y_lim[1] - y_lim[0]))));
 		return XY;
 	}
 
@@ -245,8 +289,8 @@ private:
 	Point indices2point( Matrix_position XY)
 	{
 		Point P;
-		P.X = (x_lim[1] - x_lim[0])*XY.X / cols + x_lim[0];
-		P.Y = (y_lim[1] - y_lim[0])*XY.Y / rows + y_lim[0];
+		P.X = (x_lim[1] - x_lim[0])*(float)XY.X / cols + x_lim[0];
+		P.Y = (y_lim[1] - y_lim[0])*(1.0-(float)XY.Y / rows) + y_lim[0];
 		return P;
 	}
 	

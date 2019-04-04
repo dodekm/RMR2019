@@ -48,6 +48,13 @@ public:
 		this->coordinates = other.coordinates;
 	}
 	
+	RobotPosition& operator=(const RobotPosition& other)
+	{
+		this->alfa = other.alfa;
+		this->coordinates = other.coordinates;
+		return *this;
+	}
+
 	RobotPosition(float X, float Y, float alfa)
 	{
 		coordinates.X = X;

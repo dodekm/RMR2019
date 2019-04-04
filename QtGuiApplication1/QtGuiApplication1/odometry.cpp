@@ -1,7 +1,7 @@
 
 #include "odometry.h"
 
-void Odometry::odometry_init()
+void Odometry::odometry_init(RobotPosition start)
 {
 
 	wheel_distance_right = 0;
@@ -12,7 +12,7 @@ void Odometry::odometry_init()
 	delta_l = 0;
 	delta_l_left = 0;
 	delta_l_right = 0;
-	position = RobotPosition(0, 0);
+	position = start;
 
 }
 
