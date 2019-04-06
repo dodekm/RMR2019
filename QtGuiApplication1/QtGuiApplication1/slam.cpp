@@ -1,7 +1,7 @@
 
 #include "slam.h"
 
-RobotPosition Slam::locate(RobotPosition position_odometry, LaserMeasurement& scan)
+RobotPosition Slam::locate(RobotPosition position_odometry, std::vector<LaserData>& scan)
 {
 	auto max_likehood = 0;
 	estimate = position_odometry;
@@ -18,12 +18,13 @@ RobotPosition Slam::locate(RobotPosition position_odometry, LaserMeasurement& sc
 
 		map_scan.clearMap();
 
-		for (int i = 0; i < scan.numberOfScans; i++)
+		for (int i = 0; i < scan.size(); i++)
 		{
-			if (lidar_check_measure(scan.Data[i]))
+			if (lidar_check_measure(scan[i]))
 			{
-				map_scan.addPoint(lidar_measure_2_point(scan.Data[i], particle), cell_obstacle);
+				map_scan.addPoint(lidar_measure_2_point(scan[i], particle), cell_obstacle);
 			}
+
 		}
 		Mapa AND = map_reference && map_scan;
 		auto likehood = AND.sum_elements();

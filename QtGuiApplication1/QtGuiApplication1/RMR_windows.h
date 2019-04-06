@@ -136,7 +136,7 @@ public:
 	void laserprocess();
 	void encoders_process();
 
-	void processThisLidar(LaserMeasurement &laserData);
+	void processThisLidar();
 	void processThisRobot();
 	void robot_controll();
 
@@ -185,7 +185,8 @@ private:
 	int	rob_recv_len;
 	int rob_slen;
 
-	LaserMeasurement copyOfLaserData;
+	std::vector<LaserData> Laser_data_working;
+
 	std::string ipaddress= "192.168.1.13";
 	
 	CKobuki robot;
@@ -224,6 +225,9 @@ private:
 	Mapa histogram;
 	Mapa map_with_path;
 	Mapa current_scope;
+
+	std::vector<Point> current_scope_obstacles;
+	bool is_obstacle_in_way = false;
 
 	Slam slam;
 	

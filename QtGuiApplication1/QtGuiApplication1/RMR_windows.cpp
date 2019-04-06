@@ -340,6 +340,8 @@ void RobotControll::printData(std::ostream& stream)
 void RobotControll::obstacle_avoidance()
 {
 
+
+
 }
 
 void RobotControll::automode()
@@ -363,18 +365,22 @@ void RobotControll::automode()
 			set_command(robot_command::stop);
 		}
 	}
+	obstacle_avoidance();
 }
 
 void RobotControll::build_scope()
 {
 	current_scope.clearMap();
-	current_scope.addPoint(Point{0.0,0.0}, cell_robot);
-	for (int i = 0; i < copyOfLaserData.numberOfScans; i++)
-	{
+	current_scope_obstacles.clear();
 
-		if (lidar_check_measure(copyOfLaserData.Data[i]))
+	current_scope.addPoint(Point{0.0,0.0}, cell_robot);
+	for (int i = 0; i < Laser_data_working.size(); i++)
+	{
+		if (lidar_check_measure(Laser_data_working[i]))
 		{
-			current_scope.addPoint(lidar_measure_2_point(copyOfLaserData.Data[i], RobotPosition(0, 0, M_PI_2)), cell_obstacle);			
+			current_scope.addPoint(lidar_measure_2_point(Laser_data_working[i], RobotPosition(0, 0, M_PI_2)), cell_obstacle);
+			current_scope_obstacles.push_back(lidar_measure_2_point(Laser_data_working[i], actual_position));
+			
 		}
 	}
 
@@ -383,12 +389,12 @@ void RobotControll::build_scope()
 void RobotControll::build_map()
 {
 
-	for (int i = 0; i < copyOfLaserData.numberOfScans; i++)
+	for (int i = 0; i < Laser_data_working.size(); i++)
 	{
 
-		if (lidar_check_measure(copyOfLaserData.Data[i]))
+		if (lidar_check_measure(Laser_data_working[i]))
 		{
-			histogram.addPointToHistogram(lidar_measure_2_point(copyOfLaserData.Data[i], actual_position));
+			histogram.addPointToHistogram(lidar_measure_2_point(Laser_data_working[i], actual_position));
 			lidar_measure_counter++;
 		}
 
@@ -427,10 +433,10 @@ void RobotControll::encoders_process()
 }
 
 
-void RobotControll::processThisLidar(LaserMeasurement &laserData)
+void RobotControll::processThisLidar()
 {
-	memcpy(&copyOfLaserData, &laserData, sizeof(LaserMeasurement));
 	
+
 	build_scope();
 	emit scope_update_sig(current_scope);
 
@@ -453,7 +459,9 @@ void RobotControll::processThisLidar(LaserMeasurement &laserData)
 
 	else
 		lidar_measure_counter = 1;
-	slam_position = slam.locate(actual_position, copyOfLaserData);
+	slam_position = slam.locate(actual_position, Laser_data_working);
+
+	
 
 }
 
@@ -598,8 +606,9 @@ void RobotControll::laserprocess()
 			continue;
 		}
 		measure.numberOfScans = las_recv_len / sizeof(LaserData);
-		processThisLidar(measure);
-
+		
+		Laser_data_working = std::vector<LaserData>(measure.Data, measure.Data + measure.numberOfScans);
+		processThisLidar();
 
 	}
 

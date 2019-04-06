@@ -7,7 +7,7 @@ class Slam
 {
 	
 public:
-	RobotPosition locate(RobotPosition, LaserMeasurement&);
+	RobotPosition locate(RobotPosition, std::vector<LaserData>& scan);
 	float dispersion_position=0.2;
 	float dispersion_angle=0.5;
 	RobotPosition estimate;
