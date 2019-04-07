@@ -77,6 +77,9 @@ typedef struct
 {
 	RobotPosition actual_position;
 	RobotPosition wanted_position;
+	RobotPosition wanted_position_corrected;
+	std::list<obstacle> obstacles;
+	RobotPosition slam_position;
 	robotSpeed motors_speed;
 	Point start;
 	Point target;
@@ -128,7 +131,7 @@ public:
 	bool connection_status=false;
 
 	
-	std::string get_command();
+	std::string get_command_name();
 	RobotPosition get_position();
 	RobotPosition get_wanted_position();
 	robotSpeed get_motors_speed();
@@ -226,6 +229,7 @@ private:
 	RobotPosition actual_position;
 	RobotPosition slam_position;
 	RobotPosition wanted_position;
+	RobotPosition wanted_position_corrected;
 
 	Point start;
 	Point target;
@@ -243,7 +247,7 @@ private:
 
 	std::vector<Point> current_scope_obstacles;
 	bool is_obstacle_in_way(obstacle);
-	bool is_obstacle_in_way();
+	std::list<obstacle> get_obstacles_in_way();
 	bool is_point_in_way(Point m);
 
 	std::list<obstacle> obstacles;

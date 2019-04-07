@@ -46,8 +46,6 @@ RobotControll::RobotControll() :
 	
 	find_obstacles(body);
 
-	
-
 }
 
 RobotControll::~RobotControll()
@@ -273,7 +271,7 @@ void RobotControll::set_threads_enabled(bool status)
 	threads_enabled = status;
 }
 
-std::string RobotControll::get_command()
+std::string RobotControll::get_command_name()
 {
 	return command_to_string[command];
 }
@@ -347,16 +345,22 @@ std::vector<RobotPosition> RobotControll::get_path()
 
 Robot_feedback RobotControll::getRobotData()
 {
-	return Robot_feedback{ actual_position,
-		wanted_position,
-		motors_speed,
-		start,
-		target,
-		command,
-		get_command(),
-		get_path(),
-		connection_status
+
+	return Robot_feedback{ 
+	 actual_position,
+	 wanted_position,
+	 wanted_position_corrected,
+	 obstacles,
+	 slam_position,
+	 motors_speed,
+	 start,
+	 target,
+	 command,
+	 get_command_name(),
+	 get_path(),
+	 connection_status,
 	};
+
 }
 
 
@@ -389,7 +393,30 @@ void RobotControll::printData(std::ostream& stream)
 
 void RobotControll::obstacle_avoidance()
 {
+	
+	obstacle obst_1 = get_obstacles_in_way().front();
 
+	if (obst_1.is_out_of_range(actual_position.coordinates,0.9*lidar_treshold_max/1000) == false)
+	{
+		Point edge_A = obst_1.get_edges().front();
+		Point edge_B = obst_1.get_edges().back();
+
+		Point shortest_edge;
+
+		float path_A_length = PointsDistance(actual_position.coordinates, edge_A) + PointsDistance(edge_A, wanted_position.coordinates);
+		float path_B_length = PointsDistance(actual_position.coordinates, edge_B) + PointsDistance(edge_B, wanted_position.coordinates);
+		if (path_A_length < path_B_length)
+		{
+			wanted_position_corrected.coordinates = edge_A;
+		}
+
+		else
+		{
+			wanted_position_corrected.coordinates = edge_B;
+		}
+
+
+	}
 
 
 }
@@ -429,14 +456,16 @@ bool RobotControll::is_obstacle_in_way(obstacle obst)
 
 }
 
-bool RobotControll::is_obstacle_in_way()
+std::list<obstacle> RobotControll::get_obstacles_in_way()
 {
+	std::list<obstacle> obstacle_list;
+
 	for (std::list<obstacle>::iterator it = obstacles.begin(); it != obstacles.end(); it++)
 	{
 		if (is_obstacle_in_way(*it) == true)
-			return true;
+			obstacle_list.push_back(*it);
 	}
-	return false;
+	return obstacle_list;
 
 }
 
@@ -514,11 +543,12 @@ void RobotControll::find_obstacles(std::vector<Point>points)
 
 void RobotControll::automode()
 {
-	if (is_obstacle_in_way() == false)
+	
+
+	//if (get_obstacles_in_way().empty())
 	{
 		regulator.regulate(actual_position, wanted_position);
-		motors_speed = regulator.output;
-
+	
 		if (regulator.isRegulated(actual_position, wanted_position))
 		{
 			if (!path.empty())
@@ -538,11 +568,14 @@ void RobotControll::automode()
 		}
 	}
 	
-	else
+	/*else
 	{
 		
-	}
+		obstacle_avoidance();
+		regulator.regulate(actual_position, wanted_position_corrected);
+	}*/
 
+	motors_speed = regulator.output;
 }
 
 void RobotControll::build_scope()
@@ -561,7 +594,7 @@ void RobotControll::build_scope()
 		}
 	}
 
-	find_obstacles(current_scope_obstacles);
+	//find_obstacles(current_scope_obstacles);
 
 }
 
@@ -632,6 +665,7 @@ void RobotControll::processThisLidar()
 	}
 	
 	Mapa map_to_send(mapa);
+	map_to_send.addPoint(slam_position.coordinates, cell_robot);
 	map_to_send.addPoint(actual_position.coordinates, cell_robot);
 	map_to_send.addPoint(actual_position.coordinates + polar2point(actual_position.alfa, 0.2), cell_start);
 	map_to_send.addPoint(target, cell_finish);

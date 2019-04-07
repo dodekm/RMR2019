@@ -3,10 +3,7 @@
 #include <cmath>
 #include <list>
 
-template <typename T>int sign(T x)
-{
-	return (((x) < 0) ? -1 : ((x) > 0));
-}
+
 
 typedef struct Point
 {
@@ -27,9 +24,12 @@ typedef struct Point
 
 
 float PointsDistance(Point a, Point b);
-float point2angle(Point p);
+float Point_angle(Point p);
 float PointLength(Point a);
 Point polar2point(float angle, float length);
+
+
+
 
 class RobotPosition
 {
@@ -53,6 +53,20 @@ public:
 	{
 		this->alfa = other.alfa;
 		this->coordinates = other.coordinates;
+		return *this;
+	}
+
+	RobotPosition& operator+(const RobotPosition& other)
+	{
+		this->alfa += other.alfa;
+		this->coordinates = this->coordinates+other.coordinates;
+		return *this;
+	}
+
+	RobotPosition& operator/(float real)
+	{
+		this->alfa /= real;
+		this->coordinates = Point{ this->coordinates.X / real ,this->coordinates.Y / real };
 		return *this;
 	}
 
@@ -94,9 +108,18 @@ private:
 public:
 	std::list<Point>points;
 
-	std::list<Point> get_borders()
+	std::list<Point> get_edges()
 	{
-		return std::list<Point>(points.begin(), points.end());
+		std::list<Point> l;
+		l.push_back(*points.begin());
+		l.push_back(*points.end());
+		return l;
+	}
+
+	bool is_out_of_range(Point actual_position,float treshold)
+	{
+		return PointsDistance(actual_position, *points.begin())>treshold && PointsDistance(actual_position, *points.end())>treshold;
+	
 	}
 
 };

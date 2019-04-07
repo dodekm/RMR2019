@@ -8,12 +8,12 @@ void RobotRegulator::regulate(RobotPosition& current_position, RobotPosition& de
 	
 	float alfa;
 	output.translation_speed = -translation_gain * ((current_position.coordinates.X - desired_position.coordinates.X)*cos(current_position.alfa) + (current_position.coordinates.Y - desired_position.coordinates.Y)*sin(current_position.alfa));
-	alfa = point2angle(current_position.coordinates - desired_position.coordinates);
+	alfa = Point_angle(current_position.coordinates - desired_position.coordinates);
 	
 	error.X = -cos(alfa - current_position.alfa)*sign(output.translation_speed);
 	error.Y = -sin(alfa - current_position.alfa)*sign(output.translation_speed);
 	
-	delta = point2angle(error);
+	delta = Point_angle(error);
 	symmetry_correct(current_position.coordinates,desired_position.coordinates);
 	output.radius = rotation_gain / delta * output.translation_speed;
 	

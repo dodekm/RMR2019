@@ -1,5 +1,6 @@
 #pragma once
 #include <cmath>
+#include "misc.h"
 
 class Speed_filter
 {

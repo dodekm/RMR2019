@@ -7,6 +7,8 @@ RobotPosition Slam::locate(RobotPosition position_odometry, std::vector<LaserDat
 	estimate = position_odometry;
 	Mapa map_scan(map_reference,false);
 
+	//std::vector<float> likehood_vector;
+
 	for (int i=0;i<n_particles;i++)
 	{
 
@@ -28,12 +30,16 @@ RobotPosition Slam::locate(RobotPosition position_odometry, std::vector<LaserDat
 		}
 		Mapa AND = map_reference && map_scan;
 		auto likehood = AND.sum_elements();
+		//likehood_vector.push_back(likehood);
+
 		if (likehood>max_likehood)
 		{
 			max_likehood = likehood;
 			estimate = particle;
 		}
 	}
+
+	//return (estimate + position_odometry)/2;
 
 	return estimate;
 }

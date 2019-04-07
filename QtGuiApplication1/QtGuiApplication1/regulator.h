@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include "points.h"
+#include "misc.h"
 
 #define max_speed  300
 #define min_speed  30

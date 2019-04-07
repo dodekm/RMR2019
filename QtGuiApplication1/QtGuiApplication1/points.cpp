@@ -11,7 +11,7 @@ float PointLength(Point a)
 	return sqrt((a.X)*(a.X) + (a.Y)*(a.Y));
 }
 
-float point2angle(Point p)
+float Point_angle(Point p)
 {
 	return atan2(p.Y, p.X);
 }
@@ -24,6 +24,7 @@ Point polar2point(float angle, float length)
 	p.Y = length * sin(angle);
 	return p;
 }
+
 
 
 

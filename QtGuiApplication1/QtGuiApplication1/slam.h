@@ -2,7 +2,7 @@
 
 #include "map.h"
 #include <random>
-
+#include <misc.h>
 class Slam
 {
 	
