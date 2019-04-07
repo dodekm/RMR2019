@@ -27,6 +27,8 @@
 #define lidar_measure_modulo 2500
 #define histogram_treshold 30
 
+#define zone_width 0.4
+
 const std::string command_to_string []=
 {
 	"stop",
@@ -39,7 +41,13 @@ const std::string command_to_string []=
 	"load",
 	"find",
 	"reset",
-	"clear"
+	"clear",
+	"disconnect",
+	"print",
+	"clear_path",
+	"slam",
+	"build_map",
+	"build_scope"
 };
 
 
@@ -59,6 +67,9 @@ enum robot_command
 	disconnect,
 	print,
 	clear_path,
+	slam,
+	build_map,
+	build_scope
 
 };
 
@@ -95,6 +106,9 @@ public slots:
 	void set_target(Point target);
 
 	void set_command(robot_command);
+	robot_command pop_command();
+	void reset_command_queue();
+
 	void addPointToPath(RobotPosition);
 	
 	void set_threads_enabled(bool status);
@@ -113,7 +127,7 @@ public:
 	QObject* gui;
 	bool connection_status=false;
 
-	void command_reset();
+	
 	std::string get_command();
 	RobotPosition get_position();
 	RobotPosition get_wanted_position();
@@ -143,6 +157,7 @@ public:
 
 	void obstacle_avoidance();
 	void automode();
+
 	void build_map();
 	void build_scope();
 	void find_path();
@@ -165,6 +180,7 @@ public:
 	std::thread controllhreadHandle;
 
 	std::mutex mutex_robot;
+	std::mutex mutex_command_queue;
 	std::mutex mutex_map;
 
 	
@@ -207,7 +223,6 @@ private:
 	
 
 	RobotPosition reset_position;
-
 	RobotPosition actual_position;
 	RobotPosition slam_position;
 	RobotPosition wanted_position;
@@ -216,7 +231,7 @@ private:
 	Point target;
 
 	std::queue <RobotPosition> path;
-	std::queue<RobotPosition> path_obstacle_avoid;
+	
 
 	Speed_filter filter_speed;
 	
@@ -227,7 +242,12 @@ private:
 	Mapa current_scope;
 
 	std::vector<Point> current_scope_obstacles;
-	bool is_obstacle_in_way = false;
+	bool is_obstacle_in_way(obstacle);
+	bool is_obstacle_in_way();
+	bool is_point_in_way(Point m);
+
+	std::list<obstacle> obstacles;
+	void find_obstacles(std::vector<Point>points);
 
 	Slam slam;
 	
@@ -236,7 +256,7 @@ private:
 	std::string filename="";
 
 	robot_command command= robot_command::stop;
-	robot_command command_old= robot_command::stop;
+	std::queue<robot_command>command_queue;
 
 };
 

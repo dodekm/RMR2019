@@ -35,5 +35,5 @@ RobotPosition Slam::locate(RobotPosition position_odometry, std::vector<LaserDat
 		}
 	}
 
-	return estimate;;
+	return estimate;
 }

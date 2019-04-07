@@ -31,8 +31,7 @@ public:
 
 private:
 	
-	int n_particles=100;
+	unsigned int n_particles=100;
 	std::default_random_engine generator;
-
 
 };

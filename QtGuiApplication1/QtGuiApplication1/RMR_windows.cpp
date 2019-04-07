@@ -13,8 +13,6 @@ RobotControll::RobotControll() :
 
 {	
 	command = robot_command::stop;
-	command_old = robot_command::stop;
-
 
 	odometria_using = &odometria_4;
 	actual_position = odometria_using->position;
@@ -31,6 +29,25 @@ RobotControll::RobotControll() :
 	mapa.fill_with_objects(objects);
 	slam.map_reference = mapa;
 	
+	//////////////REMOVE
+	
+	std::vector<Point> body;
+	body.push_back(Point{ 0.2,0.3 });
+	body.push_back(Point{ 0.0,0.0 });
+	body.push_back(Point{ 2.8,1.5 });
+	body.push_back(Point{ 0.2,0.0 });
+	body.push_back(Point{ 2.6,1.2 });
+	body.push_back(Point{ 0.2,0.1 });
+	
+	
+	body.push_back(Point{ 2.9,1.2 });
+	body.push_back(Point{ 0.1,0.0 });
+	body.push_back(Point{ 2.7,1.4 });
+	
+	find_obstacles(body);
+
+	
+
 }
 
 RobotControll::~RobotControll()
@@ -56,95 +73,112 @@ void RobotControll::robot_controll()
 {
 	while (threads_enabled == true)
 	{
-		//mutex_robot.lock();
-		switch (command)
+		
+		if (!command_queue.empty())
 		{
-		case robot_command::stop:
-			motors_speed.translation_speed = 0;
-			motors_speed.radius = max_radius;
-			break;
+			mutex_robot.lock();
+			command = pop_command();
+			switch (command)
+			{
+			case robot_command::stop:
+				reset_command_queue();
+				motors_speed.translation_speed = 0;
+				motors_speed.radius = max_radius;
+				break;
 
-		case robot_command::forward:
-			motors_speed.translation_speed = 200;
-			motors_speed.radius = max_radius;
-			break;
+			case robot_command::forward:
+				motors_speed.translation_speed = 200;
+				motors_speed.radius = max_radius;
+				break;
 
-		case robot_command::back:
-			motors_speed.translation_speed = -200;
-			motors_speed.radius = max_radius;
-			break;
+			case robot_command::back:
+				motors_speed.translation_speed = -200;
+				motors_speed.radius = max_radius;
+				break;
 
-		case robot_command::left:
-			motors_speed.translation_speed = 100;
-			motors_speed.radius = d * 1000;
-			break;
+			case robot_command::left:
+				motors_speed.translation_speed = 100;
+				motors_speed.radius = d * 1000;
+				break;
 
-		case robot_command::right:
-			motors_speed.translation_speed = 100;
-			motors_speed.radius = -d * 1000;
-			break;
+			case robot_command::right:
+				motors_speed.translation_speed = 100;
+				motors_speed.radius = -d * 1000;
+				break;
 
-		case robot_command::automatic:
-			automode();
-			break;
+			case robot_command::automatic:
+				automode();
+				break;
 
-		case robot_command::save:
-			mutex_map.lock();
-			mapa.saveMap(filename);
-			command_reset();
-			mutex_map.unlock();
-			break;
+			case robot_command::save:
+				mutex_map.lock();
+				mapa.saveMap(filename);
+				mutex_map.unlock();
+				break;
 
-		case robot_command::load:
-			mutex_map.lock();
-			mapa.loadMap(filename);
-			command_reset();
-			mutex_map.unlock();
-			break;
-		case robot_command::clear:
-			mutex_map.lock();
-			mapa.clearMap();
-			command_reset();
-			mutex_map.unlock();
-			break;
+			case robot_command::load:
+				mutex_map.lock();
+				mapa.loadMap(filename);
+				mutex_map.unlock();
+				break;
+			case robot_command::clear:
+				mutex_map.lock();
+				mapa.clearMap();
+				mutex_map.unlock();
+				break;
 
-		case robot_command::reset:
-			mutex_map.lock();
-			reset_robot();
-			mutex_map.unlock();
-			break;
+			case robot_command::reset:
+				mutex_map.lock();
+				reset_robot();
+				mutex_map.unlock();
+				break;
 
-		case robot_command::clear_path:
-			clear_path();
-			command_reset();
-			break;
+			case robot_command::clear_path:
+				clear_path();
+				break;
 
-		case robot_command::find:
-			mutex_map.lock();
-			find_path();
-			command_reset();
-			mutex_map.unlock();
-			break;
-		case robot_command::disconnect:
+			case robot_command::find:
+				mutex_map.lock();
+				find_path();
+				mutex_map.unlock();
+				break;
+			case robot_command::disconnect:
 
-			command_reset();
-			break;
-		case robot_command::print:
+				break;
+			case robot_command::print:
 
-			std::cout << (*this);
-			command_reset();
-			break;
+				std::cout << (*this);
+				break;
+
+			case robot_command::slam:
+				slam_position = slam.locate(actual_position, Laser_data_working);
+				break;
+
+			case robot_command::build_scope:
+				build_scope();
+				break;
+
+			case robot_command::build_map:
+				build_map();
+				break;
+			
+			}
+
+			mutex_robot.unlock();
 		}
-		//mutex_robot.unlock();
+		else
+		{
+		
+		
+		
+		}
 	}
-
 	return;
-
 }
 
 void RobotControll::processThisRobot()
 {
-	//mutex_robot.lock();
+	mutex_robot.lock();
 	if (datacounter == 0)
 	{
 		encoder_init_values(&encL, robotdata.EncoderLeft);
@@ -164,6 +198,7 @@ void RobotControll::processThisRobot()
 	datacounter++;
 
 	emit odometry_update_sig(getRobotData());
+	mutex_robot.unlock();
 
 }
 
@@ -178,6 +213,7 @@ void RobotControll::clear_path()
 
 void RobotControll::reset_robot()
 {
+	reset_command_queue();
 	clear_path();
 	mapa.clearMap();
 	histogram.clearMap();
@@ -200,9 +236,30 @@ void RobotControll::addPointToPath(RobotPosition P)
 
 void RobotControll::set_command(robot_command command)
 {
-	this->command_old = this->command;
-	this->command = command;
+	mutex_command_queue.lock();
+	command_queue.push(command);
+	mutex_command_queue.unlock();
+}
 
+robot_command RobotControll::pop_command()
+{
+	mutex_command_queue.lock();
+	robot_command command = command_queue.front();
+	command_queue.pop();
+	mutex_command_queue.unlock();
+	return command;
+	
+}
+
+void RobotControll::reset_command_queue()
+{
+	mutex_command_queue.lock();
+	while (!command_queue.empty())
+	{
+		command_queue.pop();
+	}
+	mutex_command_queue.unlock();
+		
 }
 
 
@@ -219,13 +276,6 @@ void RobotControll::set_threads_enabled(bool status)
 std::string RobotControll::get_command()
 {
 	return command_to_string[command];
-}
-
-void RobotControll::command_reset()
-{
-	robot_command tmp = command;
-	command = command_old;
-	command_old = tmp;
 }
 
 
@@ -344,28 +394,155 @@ void RobotControll::obstacle_avoidance()
 
 }
 
+bool RobotControll::is_point_in_way(Point m)
+{
+	//parametricke vyjadrenie priamky 
+	Point A = actual_position.coordinates;
+	Point B = wanted_position.coordinates;
+
+	float k_x = (B - A).X;
+	float k_y = (B - A).Y;
+
+	//vseobecna rovnica priamky
+	float a, b, c;
+
+	a = -k_y;
+	b = k_x;
+	c = -k_x * A.Y + k_y * A.X;
+
+
+	float dist = abs(a*m.X + b * m.Y + c) / PointLength(Point{ a,b });
+	if (dist < zone_width)
+		return true;
+	return false;
+
+}
+
+bool RobotControll::is_obstacle_in_way(obstacle obst)
+{
+	for (std::list<Point>::iterator it = obst.points.begin(); it != obst.points.end(); it++)
+	{
+		if (is_point_in_way(*it) == true)
+			return true;
+	}
+	return false;
+
+}
+
+bool RobotControll::is_obstacle_in_way()
+{
+	for (std::list<obstacle>::iterator it = obstacles.begin(); it != obstacles.end(); it++)
+	{
+		if (is_obstacle_in_way(*it) == true)
+			return true;
+	}
+	return false;
+
+}
+
+void RobotControll::find_obstacles(std::vector<Point>points)
+{
+	obstacles.clear();
+	
+	std::list<Point>candidates(points.begin(),points.end());
+
+	while (!candidates.empty())
+	{
+		obstacle obst;
+		Point working_point;
+		std::list<Point>::iterator it;
+		std::list<Point>::iterator starting_point = candidates.begin();
+
+		obst.points.push_back(*starting_point);
+		working_point = *candidates.begin();
+		while(1)
+		{
+			std::list<Point>::iterator closest_point= candidates.end();
+			float min_distance = 100;
+			for (it = candidates.begin(); it != candidates.end(); it++)
+			{
+				if (PointsDistance(working_point,*it)<min_distance && it!=starting_point)
+				{
+					min_distance = PointsDistance(working_point, *it);
+					closest_point = it;
+				}
+			}
+			if(min_distance<zone_width)
+			{
+				obst.points.push_back(*closest_point);
+				working_point = *closest_point;
+				candidates.erase(closest_point);
+			}
+			else
+			{
+				break;
+			}
+			
+		}
+
+		working_point = *starting_point;
+		while (1)
+		{
+			std::list<Point>::iterator closest_point = candidates.end();
+			float min_distance = 100;
+			for (it = candidates.begin(); it != candidates.end(); it++)
+			{
+				if (PointsDistance(working_point, *it) < min_distance && it != starting_point)
+				{
+					min_distance = PointsDistance(working_point, *it);
+					closest_point = it;
+				}
+			}
+			if (min_distance < zone_width)
+			{
+				obst.points.push_front(*closest_point);
+				working_point = *closest_point;
+				candidates.erase(closest_point);
+			}
+			else
+			{
+				break;
+			}
+
+		}
+		candidates.erase(starting_point);
+		obstacles.push_back(obst);
+	}
+	
+
+}
+
 void RobotControll::automode()
 {
-	if (!regulator.isRegulated(actual_position, wanted_position))
+	if (is_obstacle_in_way() == false)
 	{
 		regulator.regulate(actual_position, wanted_position);
 		motors_speed = regulator.output;
-	}
-	else
-	{
-		motors_speed.translation_speed = 0;
-		
-		if (!path.empty())
+
+		if (regulator.isRegulated(actual_position, wanted_position))
 		{
-			wanted_position = path.front();
-			path.pop();
+			if (!path.empty())
+			{
+				wanted_position = path.front();
+				path.pop();
+				set_command(robot_command::automatic);
+			}
+			else
+			{
+				set_command(robot_command::stop);
+			}
 		}
 		else
 		{
-			set_command(robot_command::stop);
+			set_command(robot_command::automatic);
 		}
 	}
-	obstacle_avoidance();
+	
+	else
+	{
+		
+	}
+
 }
 
 void RobotControll::build_scope()
@@ -383,6 +560,8 @@ void RobotControll::build_scope()
 			
 		}
 	}
+
+	find_obstacles(current_scope_obstacles);
 
 }
 
@@ -436,32 +615,31 @@ void RobotControll::encoders_process()
 void RobotControll::processThisLidar()
 {
 	
-
-	build_scope();
+	set_command(robot_command::build_scope);
 	emit scope_update_sig(current_scope);
+
+	mutex_map.lock();
 
 	if (motors_speed.translation_speed==0)
 	{
-		mutex_map.lock();
 		if(maping_enable==true)
-		build_map();
-		
-		Mapa map_to_send(mapa);
-		map_to_send.addPoint(actual_position.coordinates, cell_robot);
-		map_to_send.addPoint(actual_position.coordinates+polar2point(actual_position.alfa,0.2),cell_start);
-		map_to_send.addPoint(target, cell_finish);
-		if(command_old== robot_command::find)
-		emit map_update_sig(map_with_path);
-		else
-		emit map_update_sig(map_to_send);
-		mutex_map.unlock();
+		set_command(robot_command::build_map);
 	}
 
 	else
+	{
 		lidar_measure_counter = 1;
-	slam_position = slam.locate(actual_position, Laser_data_working);
-
+	}
 	
+	Mapa map_to_send(mapa);
+	map_to_send.addPoint(actual_position.coordinates, cell_robot);
+	map_to_send.addPoint(actual_position.coordinates + polar2point(actual_position.alfa, 0.2), cell_start);
+	map_to_send.addPoint(target, cell_finish);
+	
+	emit map_update_sig(map_to_send);
+	mutex_map.unlock();
+
+	set_command(robot_command::slam);
 
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <list>
 
 template <typename T>int sign(T x)
 {
@@ -79,6 +80,23 @@ public:
 	~RobotPosition()
 	{
 	
+	}
+
+};
+
+
+class obstacle
+{
+
+private:
+	
+
+public:
+	std::list<Point>points;
+
+	std::list<Point> get_borders()
+	{
+		return std::list<Point>(points.begin(), points.end());
 	}
 
 };
