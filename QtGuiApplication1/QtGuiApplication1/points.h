@@ -70,6 +70,15 @@ public:
 		return *this;
 	}
 
+
+	RobotPosition& operator*(float real)
+	{
+		this->alfa *= real;
+		this->coordinates = Point{ this->coordinates.X * real ,this->coordinates.Y * real };
+		return *this;
+	}
+
+
 	RobotPosition(float X, float Y, float alfa)
 	{
 		coordinates.X = X;

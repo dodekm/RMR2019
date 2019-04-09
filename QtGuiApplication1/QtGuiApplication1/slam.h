@@ -3,19 +3,32 @@
 #include "map.h"
 #include <random>
 #include <misc.h>
+
+
+RobotPosition weighted_position(RobotPosition A, RobotPosition B, float weight_A, float weight_B);
+
+
 class Slam
 {
 	
 public:
 	RobotPosition locate(RobotPosition, std::vector<LaserData>& scan);
-	float dispersion_position=0.2;
-	float dispersion_angle=0.5;
+	float dispersion_position=0.1;
+	float dispersion_angle=0.2;
+	unsigned int n_particles = 150;
+
+	float feedback_gain = 0.5;
+	float odometry_gain = 0.5;
+
+
+	float estimate_quality;
 	RobotPosition estimate;
 	Mapa map_reference;
-
+	std::vector <float>likehood_vector;
+	
 	Slam()
 	{
-
+	
 	}
 
 	Slam(Mapa map_reference):map_reference(map_reference)
@@ -29,9 +42,18 @@ public:
 
 	}
 
+
+	float get_dispersion()
+	{
+		return vector_standard_deviation(likehood_vector);
+	}
+
 private:
 	
-	unsigned int n_particles=100;
 	std::default_random_engine generator;
 
 };
+
+
+
+

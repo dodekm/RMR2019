@@ -41,7 +41,7 @@ public:
 	}
 
 	void regulate(RobotPosition& current_position, RobotPosition& desired_position);
-	void regulate_alt(RobotPosition& current_position, RobotPosition& desired_position);
+	void regulate_alternative(RobotPosition& current_position, RobotPosition& desired_position);
 
 	int isRegulated(RobotPosition& current_position, RobotPosition& desired_position);
 

@@ -3,21 +3,21 @@
 
 RobotPosition Slam::locate(RobotPosition position_odometry, std::vector<LaserData>& scan)
 {
+	likehood_vector.clear();
 	auto max_likehood = 0;
-	estimate = position_odometry;
+	
+	RobotPosition position_center = weighted_position(estimate, position_odometry, feedback_gain, odometry_gain);
+	
 	Mapa map_scan(map_reference,false);
-
-	//std::vector<float> likehood_vector;
 
 	for (int i=0;i<n_particles;i++)
 	{
 
-		std::normal_distribution<float> distribution_X(position_odometry.coordinates.X, dispersion_position);
-		std::normal_distribution<float> distribution_Y(position_odometry.coordinates.Y, dispersion_position);
-		std::normal_distribution <float> distribution_alfa(position_odometry.alfa, dispersion_angle);
+		std::normal_distribution<float> distribution_X(position_center.coordinates.X, dispersion_position);
+		std::normal_distribution<float> distribution_Y(position_center.coordinates.Y, dispersion_position);
+		std::normal_distribution <float> distribution_alfa(position_center.alfa, dispersion_angle);
 
 		RobotPosition particle = RobotPosition(distribution_X(generator),distribution_Y(generator),distribution_alfa(generator));
-
 		map_scan.clearMap();
 
 		for (int i = 0; i < scan.size(); i++)
@@ -30,7 +30,8 @@ RobotPosition Slam::locate(RobotPosition position_odometry, std::vector<LaserDat
 		}
 		Mapa AND = map_reference && map_scan;
 		auto likehood = AND.sum_elements();
-		//likehood_vector.push_back(likehood);
+		
+		likehood_vector.push_back(likehood);
 
 		if (likehood>max_likehood)
 		{
@@ -39,7 +40,17 @@ RobotPosition Slam::locate(RobotPosition position_odometry, std::vector<LaserDat
 		}
 	}
 
-	//return (estimate + position_odometry)/2;
+	estimate_quality = (float)max_likehood / map_scan.sum_elements();
 
+	if (estimate_quality<0.1)
+	{
+		estimate = position_odometry;
+	}
 	return estimate;
+}
+
+
+RobotPosition weighted_position(RobotPosition A, RobotPosition B, float weight_A, float weight_B)
+{
+	return(A*weight_A + B * weight_B) / (weight_A + weight_B);
 }

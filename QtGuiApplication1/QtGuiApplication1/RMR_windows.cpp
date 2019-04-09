@@ -17,10 +17,11 @@ RobotControll::RobotControll() :
 	odometria_using = &odometria_4;
 	actual_position = odometria_using->position;
 	reset_position = odometria_using->position;
+	slam_position = actual_position;
 
 	WinSock_setup();
-	
 
+	wanted_position = actual_position;
 	start = actual_position.coordinates;
 	target = Point{ 0, 0 };
 
@@ -29,22 +30,6 @@ RobotControll::RobotControll() :
 	mapa.fill_with_objects(objects);
 	slam.map_reference = mapa;
 	
-	//////////////REMOVE
-	
-	std::vector<Point> body;
-	body.push_back(Point{ 0.2,0.3 });
-	body.push_back(Point{ 0.0,0.0 });
-	body.push_back(Point{ 2.8,1.5 });
-	body.push_back(Point{ 0.2,0.0 });
-	body.push_back(Point{ 2.6,1.2 });
-	body.push_back(Point{ 0.2,0.1 });
-	
-	
-	body.push_back(Point{ 2.9,1.2 });
-	body.push_back(Point{ 0.1,0.0 });
-	body.push_back(Point{ 2.7,1.4 });
-	
-	find_obstacles(body);
 
 }
 
@@ -69,39 +54,50 @@ void RobotControll::WinSock_setup()
 }
 void RobotControll::robot_controll()
 {
+
 	while (threads_enabled == true)
 	{
 		
 		if (!command_queue.empty())
 		{
-			mutex_robot.lock();
+			
 			command = pop_command();
 			switch (command)
 			{
 			case robot_command::stop:
+				mutex_robot_data.lock();
 				reset_command_queue();
 				motors_speed.translation_speed = 0;
 				motors_speed.radius = max_radius;
+				mutex_robot_data.unlock();
 				break;
 
 			case robot_command::forward:
+				mutex_robot_data.lock();
 				motors_speed.translation_speed = 200;
 				motors_speed.radius = max_radius;
+				mutex_robot_data.unlock();
 				break;
 
 			case robot_command::back:
+				mutex_robot_data.lock();
 				motors_speed.translation_speed = -200;
 				motors_speed.radius = max_radius;
+				mutex_robot_data.unlock();
 				break;
 
 			case robot_command::left:
+				mutex_robot_data.lock();
 				motors_speed.translation_speed = 100;
 				motors_speed.radius = d * 1000;
+				mutex_robot_data.unlock();
 				break;
 
 			case robot_command::right:
+				mutex_robot_data.lock();
 				motors_speed.translation_speed = 100;
 				motors_speed.radius = -d * 1000;
+				mutex_robot_data.unlock();
 				break;
 
 			case robot_command::automatic:
@@ -109,36 +105,38 @@ void RobotControll::robot_controll()
 				break;
 
 			case robot_command::save:
-				mutex_map.lock();
+				mutex_robot_data.lock();
 				mapa.saveMap(filename);
-				mutex_map.unlock();
+				mutex_robot_data.unlock();
 				break;
 
 			case robot_command::load:
-				mutex_map.lock();
+				mutex_robot_data.lock();
 				mapa.loadMap(filename);
-				mutex_map.unlock();
+				mutex_robot_data.unlock();
 				break;
 			case robot_command::clear:
-				mutex_map.lock();
+				mutex_robot_data.lock();
 				mapa.clearMap();
-				mutex_map.unlock();
+				mutex_robot_data.unlock();
 				break;
 
 			case robot_command::reset:
-				mutex_map.lock();
+				mutex_robot_data.lock();
 				reset_robot();
-				mutex_map.unlock();
+				mutex_robot_data.unlock();
 				break;
 
 			case robot_command::clear_path:
+				mutex_robot_data.lock();
 				clear_path();
+				mutex_robot_data.unlock();
 				break;
 
 			case robot_command::find:
-				mutex_map.lock();
+				mutex_robot_data.lock();
 				find_path();
-				mutex_map.unlock();
+				mutex_robot_data.unlock();
 				break;
 			case robot_command::disconnect:
 
@@ -149,34 +147,39 @@ void RobotControll::robot_controll()
 				break;
 
 			case robot_command::slam:
-				slam_position = slam.locate(actual_position, Laser_data_working);
+				
+				slam_moduler++;
+				if (slam_moduler % 15 == 0)
+				{
+					slam_moduler = 0;
+					slam_position = slam.locate(actual_position, Laser_data_working);
+					slam_position= (slam_position +actual_position)/2;
+				}
 				break;
 
 			case robot_command::build_scope:
+				//mutex_robot_data.lock();
 				build_scope();
+				//mutex_robot_data.unlock();
 				break;
 
 			case robot_command::build_map:
+				//mutex_robot_data.lock();
 				build_map();
+				//mutex_robot_data.unlock();
 				break;
 			
 			}
-
-			mutex_robot.unlock();
+			
 		}
-		else
-		{
 		
-		
-		
-		}
 	}
 	return;
 }
 
 void RobotControll::processThisRobot()
 {
-	mutex_robot.lock();
+	mutex_robot_data.lock(); 
 	if (datacounter == 0)
 	{
 		encoder_init_values(&encL, robotdata.EncoderLeft);
@@ -196,16 +199,18 @@ void RobotControll::processThisRobot()
 	datacounter++;
 
 	emit odometry_update_sig(getRobotData());
-	mutex_robot.unlock();
+	mutex_robot_data.unlock();
 
 }
 
 void RobotControll::clear_path()
 {
+	
 	while (!path.empty())
 	{
 		path.pop();
 	}
+	
 }
 
 
@@ -227,12 +232,15 @@ void RobotControll::reset_robot()
 
 void RobotControll::addPointToPath(RobotPosition P)
 {
+	mutex_robot_data.lock();
 	path.push(P);
+	mutex_robot_data.unlock();
+
 }
 
 
 
-void RobotControll::set_command(robot_command command)
+void RobotControll::push_command(robot_command command)
 {
 	mutex_command_queue.lock();
 	command_queue.push(command);
@@ -263,12 +271,16 @@ void RobotControll::reset_command_queue()
 
 void RobotControll::set_maping_enabled(bool status)
 {
+	
 	maping_enable = status;
+	
 }
 
 void RobotControll::set_threads_enabled(bool status)
 {
+	
 	threads_enabled = status;
+	
 }
 
 std::string RobotControll::get_command_name()
@@ -279,15 +291,17 @@ std::string RobotControll::get_command_name()
 
 void RobotControll::set_start(Point start)
 {
-
+	mutex_robot_data.lock();
 	this->start = start;
+	mutex_robot_data.unlock();
 
 }
 
 void RobotControll::set_target(Point target)
 {
-
+	mutex_robot_data.lock();
 	this->target = target;
+	mutex_robot_data.unlock();
 }
 
 void RobotControll::setip(std::string ip)
@@ -330,6 +344,7 @@ Point RobotControll::get_starting_point()
 }
 std::vector<RobotPosition> RobotControll::get_path()
 {
+	
 	std::vector<RobotPosition>trajectory;
 
 	std::queue<RobotPosition>path_copy = path;
@@ -339,13 +354,14 @@ std::vector<RobotPosition> RobotControll::get_path()
 		trajectory.push_back(path_copy.front());
 		path_copy.pop();
 	}
+	
 	return trajectory;
 }
 
 
 Robot_feedback RobotControll::getRobotData()
 {
-
+	
 	return Robot_feedback{ 
 	 actual_position,
 	 wanted_position,
@@ -358,8 +374,8 @@ Robot_feedback RobotControll::getRobotData()
 	 command,
 	 get_command_name(),
 	 get_path(),
-	 connection_status,
 	};
+	
 
 }
 
@@ -549,28 +565,30 @@ void RobotControll::automode()
 	{
 		regulator.regulate(actual_position, wanted_position);
 	
+		
+
 		if (regulator.isRegulated(actual_position, wanted_position))
 		{
 			if (!path.empty())
 			{
 				wanted_position = path.front();
 				path.pop();
-				set_command(robot_command::automatic);
+				push_command(robot_command::automatic);
 			}
 			else
 			{
-				set_command(robot_command::stop);
+				push_command(robot_command::stop);
+
 			}
 		}
 		else
 		{
-			set_command(robot_command::automatic);
+			push_command(robot_command::automatic);
 		}
 	}
 	
 	/*else
 	{
-		
 		obstacle_avoidance();
 		regulator.regulate(actual_position, wanted_position_corrected);
 	}*/
@@ -580,20 +598,30 @@ void RobotControll::automode()
 
 void RobotControll::build_scope()
 {
-	current_scope.clearMap();
-	current_scope_obstacles.clear();
-
-	current_scope.addPoint(Point{0.0,0.0}, cell_robot);
-	for (int i = 0; i < Laser_data_working.size(); i++)
+	
+	if (Laser_data_new.size()> lidar_scan_modulo)
 	{
-		if (lidar_check_measure(Laser_data_working[i]))
-		{
-			current_scope.addPoint(lidar_measure_2_point(Laser_data_working[i], RobotPosition(0, 0, M_PI_2)), cell_obstacle);
-			current_scope_obstacles.push_back(lidar_measure_2_point(Laser_data_working[i], actual_position));
-			
-		}
-	}
+		mutex_lidar_data.lock();
+		Laser_data_working = Laser_data_new;
+		Laser_data_new.clear();
+		mutex_lidar_data.unlock();
 
+		current_scope.clearMap();
+		current_scope_obstacles.clear();
+
+		current_scope.addPoint(Point{ 0.0,0.0 }, cell_robot);
+		for (int i = 0; i < Laser_data_working.size(); i++)
+		{
+			if (lidar_check_measure(Laser_data_working[i]))
+			{
+				current_scope.addPoint(lidar_measure_2_point(Laser_data_working[i], RobotPosition(0, 0, M_PI_2)), cell_obstacle);
+				current_scope_obstacles.push_back(lidar_measure_2_point(Laser_data_working[i], actual_position));
+
+			}
+		}
+		emit scope_update_sig(current_scope);
+	}
+	
 	//find_obstacles(current_scope_obstacles);
 
 }
@@ -601,29 +629,42 @@ void RobotControll::build_scope()
 void RobotControll::build_map()
 {
 
-	for (int i = 0; i < Laser_data_working.size(); i++)
+	if (motors_speed.translation_speed == 0 && maping_enable == true)
 	{
 
-		if (lidar_check_measure(Laser_data_working[i]))
+		for (int i = 0; i < Laser_data_working.size(); i++)
 		{
-			histogram.addPointToHistogram(lidar_measure_2_point(Laser_data_working[i], actual_position));
-			lidar_measure_counter++;
-		}
+
+			if (lidar_check_measure(Laser_data_working[i]))
+			{
+				histogram.addPointToHistogram(lidar_measure_2_point(Laser_data_working[i], actual_position));
+				lidar_measure_counter++;
+			}
 
 
-		if (lidar_measure_counter % lidar_measure_modulo == 0)
-		{
-			lidar_measure_counter = 0;
-			mapa.buildFromHistogram(histogram, histogram_treshold);
-			histogram.clearMap();
+			if (lidar_measure_counter % lidar_build_modulo == 0)
+			{
+				lidar_measure_counter = 0;
+				mapa.buildFromHistogram(histogram, histogram_treshold);
+				histogram.clearMap();
+			}
 		}
 	}
+	Mapa map_to_send(mapa);
+	map_to_send.addPoint(slam_position.coordinates, cell_slam);
+	map_to_send.addPoint(actual_position.coordinates, cell_robot);
+	map_to_send.addPoint(actual_position.coordinates + polar2point(actual_position.alfa, 0.2), cell_direction);
+	map_to_send.addPoint(target, cell_finish);
+
+	emit map_update_sig(map_to_send);
+
+
 
 }
 
 void RobotControll::find_path()
 {
-	set_start(actual_position.coordinates);
+	start=actual_position.coordinates;
 	int window_size = 5;
 	Mapa mapa_flood_fill(mapa, true);
 	mapa_flood_fill.FloodFill_fill(start, target, true);
@@ -645,35 +686,18 @@ void RobotControll::encoders_process()
 }
 
 
-void RobotControll::processThisLidar()
+void RobotControll::processThisLidar(std::vector<LaserData> new_scan)
 {
-	
-	set_command(robot_command::build_scope);
-	emit scope_update_sig(current_scope);
-
-	mutex_map.lock();
-
-	if (motors_speed.translation_speed==0)
+	mutex_lidar_data.lock();
+	for (std::vector<LaserData>::iterator i= new_scan.begin(); i!= new_scan.end(); i++)
 	{
-		if(maping_enable==true)
-		set_command(robot_command::build_map);
+		Laser_data_new.push_back(*i);
 	}
+	mutex_lidar_data.unlock();
 
-	else
-	{
-		lidar_measure_counter = 1;
-	}
-	
-	Mapa map_to_send(mapa);
-	map_to_send.addPoint(slam_position.coordinates, cell_robot);
-	map_to_send.addPoint(actual_position.coordinates, cell_robot);
-	map_to_send.addPoint(actual_position.coordinates + polar2point(actual_position.alfa, 0.2), cell_start);
-	map_to_send.addPoint(target, cell_finish);
-	
-	emit map_update_sig(map_to_send);
-	mutex_map.unlock();
-
-	set_command(robot_command::slam);
+	push_command(robot_command::build_scope);
+	push_command(robot_command::build_map);
+	push_command(robot_command::slam);
 
 }
 
@@ -819,8 +843,8 @@ void RobotControll::laserprocess()
 		}
 		measure.numberOfScans = las_recv_len / sizeof(LaserData);
 		
-		Laser_data_working = std::vector<LaserData>(measure.Data, measure.Data + measure.numberOfScans);
-		processThisLidar();
+	
+		processThisLidar(std::vector<LaserData>(measure.Data, measure.Data + measure.numberOfScans));
 
 	}
 
@@ -880,7 +904,7 @@ void RobotControll::robotprocess()
 	unsigned char buff[50000];
 	
 
-	connection_status = true;
+
 	
 
 	while (threads_enabled == true)

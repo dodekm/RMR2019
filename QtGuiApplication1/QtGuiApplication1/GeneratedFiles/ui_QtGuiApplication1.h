@@ -68,10 +68,10 @@ public:
     QLCDNumber *lcdNumber_9;
     QLabel *label_10;
     QLabel *label_11;
-    QLabel *label_12;
     QPushButton *pushButton_clear_path;
     QFrame *frame_2;
     QCheckBox *checkBox;
+    QPushButton *pushButton_locate;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -739,9 +739,6 @@ public:
         label_11 = new QLabel(centralWidget);
         label_11->setObjectName(QString::fromUtf8("label_11"));
         label_11->setGeometry(QRect(230, 80, 47, 13));
-        label_12 = new QLabel(centralWidget);
-        label_12->setObjectName(QString::fromUtf8("label_12"));
-        label_12->setGeometry(QRect(350, 90, 71, 16));
         pushButton_clear_path = new QPushButton(centralWidget);
         pushButton_clear_path->setObjectName(QString::fromUtf8("pushButton_clear_path"));
         pushButton_clear_path->setGeometry(QRect(660, 460, 71, 41));
@@ -754,6 +751,9 @@ public:
         checkBox->setObjectName(QString::fromUtf8("checkBox"));
         checkBox->setGeometry(QRect(340, 470, 70, 17));
         checkBox->setChecked(true);
+        pushButton_locate = new QPushButton(centralWidget);
+        pushButton_locate->setObjectName(QString::fromUtf8("pushButton_locate"));
+        pushButton_locate->setGeometry(QRect(340, 350, 81, 41));
         QtGuiApplication1Class->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(QtGuiApplication1Class);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
@@ -800,9 +800,9 @@ public:
         label_9->setText(QApplication::translate("QtGuiApplication1Class", "command", nullptr));
         label_10->setText(QApplication::translate("QtGuiApplication1Class", "X wanted", nullptr));
         label_11->setText(QApplication::translate("QtGuiApplication1Class", "Y wanted", nullptr));
-        label_12->setText(QApplication::translate("QtGuiApplication1Class", "unconnected", nullptr));
         pushButton_clear_path->setText(QApplication::translate("QtGuiApplication1Class", "ClearPath", nullptr));
         checkBox->setText(QApplication::translate("QtGuiApplication1Class", "mapping", nullptr));
+        pushButton_locate->setText(QApplication::translate("QtGuiApplication1Class", "Locate", nullptr));
     } // retranslateUi
 
 };

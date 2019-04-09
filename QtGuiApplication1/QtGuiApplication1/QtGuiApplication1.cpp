@@ -136,8 +136,13 @@ void QtGuiApplication1::on_pushButton_save_map_clicked()
 {
 	emit set_filename_sig(ui.lineEdit_2->text().toStdString());
 	emit command_change_sig(robot_command::save);
+	
 }
 
+void QtGuiApplication1::on_pushButton_locate_clicked()
+{
+	emit command_change_sig(robot_command::slam);
+}
 void QtGuiApplication1::on_pushButton_go_clicked()
 {
 	emit addPointToPath_sig(RobotPosition((float)ui.spinBox->value(),(float)ui.spinBox_2->value()));
@@ -183,6 +188,10 @@ void map_render(QPainter& paint, QPen& pen, Mapa& map, QRect rect)
 				pen.setColor(Qt::green);
 			else if (map[i] == cell_robot)
 				pen.setColor(Qt::magenta);
+			else if (map[i] == cell_direction)
+				pen.setColor(Qt::cyan);
+			else if (map[i] == cell_slam)
+				pen.setColor(Qt::yellow);
 			else
 				continue;
 
@@ -205,8 +214,8 @@ void QtGuiApplication1::paintEvent(QPaintEvent *e)
 		paint.drawRect(rect);
 		pen.setWidth(4);
 		paint.setPen(pen);
-
 		map_render(paint, pen, map, rect);
+
 	}
 
 	{
@@ -243,6 +252,8 @@ void QtGuiApplication1::odometry_update(Robot_feedback data)
 	ui.lcdNumber->display(data.actual_position.coordinates.X);
 	ui.lcdNumber_2->display(data.actual_position.coordinates.Y);
 	ui.lcdNumber_3->display(data.actual_position.alfa);
+
+
 	ui.lcdNumber_4->display(data.motors_speed.translation_speed);
 	ui.lcdNumber_5->display(data.motors_speed.radius);
 
@@ -254,12 +265,11 @@ void QtGuiApplication1::odometry_update(Robot_feedback data)
 
 	ui.label_9->setText(QString(QString::fromStdString(data.command_string)));
 
-	if (data.connection_status == true)
-		ui.label_12->setText("connected");
-	else 
-		ui.label_12->setText("unconnected");
-	
+	//ui.lcdNumber->display(data.slam_position.coordinates.X);
+	//ui.lcdNumber_2->display(data.slam_position.coordinates.Y);
+	//ui.lcdNumber_3->display(data.slam_position.alfa);
 
 }
+
 
 

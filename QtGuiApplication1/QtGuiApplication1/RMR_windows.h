@@ -24,7 +24,8 @@
 #include "slam.h"
 
 
-#define lidar_measure_modulo 2500
+#define lidar_build_modulo 2500
+#define lidar_scan_modulo 1000
 #define histogram_treshold 30
 
 #define zone_width 0.4
@@ -86,7 +87,6 @@ typedef struct
 	robot_command command;
 	std::string command_string;
 	std::vector<RobotPosition> path;
-	bool connection_status;
 
 }Robot_feedback;
 
@@ -108,7 +108,7 @@ public slots:
 	void set_start(Point start);
 	void set_target(Point target);
 
-	void set_command(robot_command);
+	void push_command(robot_command);
 	robot_command pop_command();
 	void reset_command_queue();
 
@@ -128,7 +128,7 @@ public:
 	~RobotControll();
 
 	QObject* gui;
-	bool connection_status=false;
+	
 
 	
 	std::string get_command_name();
@@ -153,7 +153,7 @@ public:
 	void laserprocess();
 	void encoders_process();
 
-	void processThisLidar();
+	void processThisLidar(std::vector<LaserData> new_scan);
 	void processThisRobot();
 	void robot_controll();
 
@@ -182,9 +182,9 @@ public:
 	std::thread laserthreadHandle; 
 	std::thread controllhreadHandle;
 
-	std::mutex mutex_robot;
+	std::mutex mutex_robot_data;
 	std::mutex mutex_command_queue;
-	std::mutex mutex_map;
+	std::mutex mutex_lidar_data;
 
 	
 
@@ -205,6 +205,7 @@ private:
 	int rob_slen;
 
 	std::vector<LaserData> Laser_data_working;
+	std::vector<LaserData> Laser_data_new;
 
 	std::string ipaddress= "192.168.1.13";
 	
@@ -212,6 +213,7 @@ private:
 	TKobukiData robotdata;
 	
 	unsigned long datacounter=0;
+	long slam_moduler = 0;
 	unsigned long lidar_measure_counter = 0;
 
 	Encoder encL;

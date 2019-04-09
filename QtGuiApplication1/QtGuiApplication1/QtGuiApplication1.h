@@ -91,6 +91,8 @@ private slots:
 
     void on_checkBox_stateChanged(int arg1);
 
+    void on_pushButton_locate_clicked();
+
 private:
 	Ui::QtGuiApplication1Class ui;
 	Mapa map;

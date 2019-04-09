@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<Mapa>();
 	qRegisterMetaType<Robot_feedback>();
 
-	QObject::connect(&gui, SIGNAL(command_change_sig(robot_command)), &robot, SLOT(set_command(robot_command)));
+	QObject::connect(&gui, SIGNAL(command_change_sig(robot_command)), &robot, SLOT(push_command(robot_command)));
 	QObject::connect(&gui, SIGNAL(start_threads_sig(void)), &robot, SLOT(start_threads(void)));
 	QObject::connect(&gui, SIGNAL(stop_threads_sig(void)), &robot, SLOT(stop_threads(void)));
 

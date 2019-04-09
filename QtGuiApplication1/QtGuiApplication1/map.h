@@ -32,7 +32,9 @@ typedef enum
 	cell_start = -1,
 	cell_path = -2,
 	cell_breakpoint=-3,
-	cell_robot=-4
+	cell_robot=-4,
+	cell_direction = -5,
+	cell_slam=-6
 	
 }cell_content;
 

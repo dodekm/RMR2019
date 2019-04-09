@@ -23,7 +23,7 @@ void RobotRegulator::regulate(RobotPosition& current_position, RobotPosition& de
 }
 
 
-void RobotRegulator::regulate_alt(RobotPosition& current_position, RobotPosition& desired_position)
+void RobotRegulator::regulate_alternative(RobotPosition& current_position, RobotPosition& desired_position)
 {
 	
 	output.translation_speed = -translation_gain * ((current_position.coordinates.X - desired_position.coordinates.X)*cos(current_position.alfa) + (current_position.coordinates.Y - desired_position.coordinates.Y)*sin(current_position.alfa));

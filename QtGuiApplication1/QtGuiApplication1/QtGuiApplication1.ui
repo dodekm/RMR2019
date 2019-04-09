@@ -4502,19 +4502,6 @@
      <string>Y wanted</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_12">
-    <property name="geometry">
-     <rect>
-      <x>350</x>
-      <y>90</y>
-      <width>71</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>unconnected</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="pushButton_clear_path">
     <property name="geometry">
      <rect>
@@ -4558,6 +4545,19 @@
     </property>
     <property name="checked">
      <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_locate">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>350</y>
+      <width>81</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Locate</string>
     </property>
    </widget>
   </widget>

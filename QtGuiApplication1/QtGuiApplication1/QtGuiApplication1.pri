@@ -16,6 +16,7 @@ HEADERS += ./CKobuki.h \
     ./points.h \
     ./regulator.h \
     ./rplidar.h \
+    ./slam.h \
     ./speed_filter.h \
     ./QtGuiApplication1.h \
     ./RMR_windows.h
@@ -31,6 +32,7 @@ SOURCES += ./CKobuki.cpp \
     ./regulator.cpp \
     ./RMR_windows.cpp \
     ./rplidar.cpp \
+    ./slam.cpp \
     ./speed_filter.cpp
 FORMS += ./QtGuiApplication1.ui
 RESOURCES += QtGuiApplication1.qrc
