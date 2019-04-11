@@ -288,9 +288,8 @@ void QtGuiApplication1::odometry_update(Robot_feedback data)
 		ui.textBrowser_path->append(QString(QString::fromStdString(" X=" + std::to_string((*it).coordinates.X) + " Y=" + std::to_string((*it).coordinates.Y)+'\n')));
 	}
 
-	ui.label_9->setText(QString(QString::fromStdString(data.command_string)));
 
-	
+	ui.statusBar->showMessage(QString(QString::fromStdString(data.command_string)));
 
 }
 
