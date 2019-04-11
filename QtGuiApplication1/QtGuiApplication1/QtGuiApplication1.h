@@ -23,51 +23,9 @@ public:
 
 public slots:
 
-    void on_startButton_clicked();
+   
 
-    void on_pushButton_forward_clicked();
-
-    void on_pushButton_back_clicked();
-
-    void on_pushButton_right_clicked();
-
-    void on_pushButton_left_clicked();
-
-    void on_pushButton_forward_pressed();
-
-    void on_pushButton_forward_released();
-
-    void on_pushButton_right_pressed();
-
-    void on_pushButton_right_released();
-
-    void on_pushButton_back_pressed();
-
-    void on_pushButton_back_released();
-
-    void on_pushButton_left_pressed();
-
-    void on_pushButton_left_released();
-
-    void on_pushButton_stop_clicked();
-
-    void on_pushButton_find_path_clicked();
-
-    void on_pushButton_reset_clicked();
-
-    void on_pushButton_auto_clicked();
-
-    void on_pushButton_clear_map_clicked();
-
-    void on_pushButton_load_map_clicked();
-
-    void on_pushButton_save_map_clicked();
-
-    void on_pushButton_go_clicked();
-
-    void on_spinBox_valueChanged(int arg1);
-
-    void on_spinBox_2_valueChanged(int arg1);
+    
 
 	void map_update(Mapa);
 	void scope_update(Mapa);
@@ -78,6 +36,8 @@ signals:
 	void command_change_sig(robot_command command);
 	void set_threads_enabled_sig(bool status);
 	void set_maping_enabled_sig(bool status);
+	void set_map_with_path_enabled_sig(bool status);
+
 	void start_threads_sig(void);
 	void stop_threads_sig();
 	void set_filename_sig(std::string);
@@ -92,6 +52,54 @@ private slots:
     void on_checkBox_stateChanged(int arg1);
 
     void on_pushButton_locate_clicked();
+
+    void on_checkBox_2_stateChanged(int arg1);
+
+    void on_doubleSpinBox_valueChanged(double arg1);
+
+    void on_doubleSpinBox_2_valueChanged(double arg1);
+
+	void on_startButton_clicked();
+
+	void on_pushButton_forward_clicked();
+
+	void on_pushButton_back_clicked();
+
+	void on_pushButton_right_clicked();
+
+	void on_pushButton_left_clicked();
+
+	void on_pushButton_forward_pressed();
+
+	void on_pushButton_forward_released();
+
+	void on_pushButton_right_pressed();
+
+	void on_pushButton_right_released();
+
+	void on_pushButton_back_pressed();
+
+	void on_pushButton_back_released();
+
+	void on_pushButton_left_pressed();
+
+	void on_pushButton_left_released();
+
+	void on_pushButton_stop_clicked();
+
+	void on_pushButton_find_path_clicked();
+
+	void on_pushButton_reset_clicked();
+
+	void on_pushButton_auto_clicked();
+
+	void on_pushButton_clear_map_clicked();
+
+	void on_pushButton_load_map_clicked();
+
+	void on_pushButton_save_map_clicked();
+
+	void on_pushButton_go_clicked();
 
 private:
 	Ui::QtGuiApplication1Class ui;

@@ -26,6 +26,10 @@
 
 #define lidar_build_modulo 2500
 #define lidar_scan_modulo 1000
+
+#define slam_modulo_main 35
+#define slam_modulo_rebuild 150
+
 #define histogram_treshold 30
 
 #define zone_width 0.4
@@ -81,6 +85,7 @@ typedef struct
 	RobotPosition wanted_position_corrected;
 	std::list<obstacle> obstacles;
 	RobotPosition slam_position;
+	float slam_estimate_quality;
 	robotSpeed motors_speed;
 	Point start;
 	Point target;
@@ -116,6 +121,7 @@ public slots:
 	
 	void set_threads_enabled(bool status);
 	void set_maping_enabled(bool status);
+	void set_map_with_path_enabled(bool status);
 
 	void start_threads();
 	void stop_threads();
@@ -127,9 +133,7 @@ public:
 	RobotControll();
 	~RobotControll();
 
-	QObject* gui;
-	
-
+	QObject* gui_ptr;
 	
 	std::string get_command_name();
 	RobotPosition get_position();
@@ -213,7 +217,7 @@ private:
 	TKobukiData robotdata;
 	
 	unsigned long datacounter=0;
-	long slam_moduler = 0;
+	unsigned long slam_counter = 1;
 	unsigned long lidar_measure_counter = 0;
 
 	Encoder encL;
@@ -228,6 +232,10 @@ private:
 	
 
 	RobotPosition reset_position;
+
+	RobotPosition odometry_position_last;
+	RobotPosition odometry_position;
+
 	RobotPosition actual_position;
 	RobotPosition slam_position;
 	RobotPosition wanted_position;
@@ -242,6 +250,7 @@ private:
 	Speed_filter filter_speed;
 	
 	bool maping_enable = true;
+	bool map_with_path_enable = false;
 	Mapa mapa;
 	Mapa histogram;
 	Mapa map_with_path;
@@ -251,12 +260,10 @@ private:
 	bool is_obstacle_in_way(obstacle);
 	std::list<obstacle> get_obstacles_in_way();
 	bool is_point_in_way(Point m);
-
 	std::list<obstacle> obstacles;
 	void find_obstacles(std::vector<Point>points);
 
 	Slam slam;
-	
 	RobotRegulator regulator;
 	
 	std::string filename="";

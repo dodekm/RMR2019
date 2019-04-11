@@ -20,7 +20,6 @@ public:
 	float feedback_gain = 0.5;
 	float odometry_gain = 0.5;
 
-
 	float estimate_quality;
 	RobotPosition estimate;
 	Mapa map_reference;

@@ -56,26 +56,40 @@ public:
 		return *this;
 	}
 
-	RobotPosition& operator+(const RobotPosition& other)
+	RobotPosition operator+(const RobotPosition& other)
 	{
-		this->alfa += other.alfa;
-		this->coordinates = this->coordinates+other.coordinates;
-		return *this;
+		RobotPosition sum;
+		sum.alfa=this->alfa + other.alfa;
+		sum.coordinates=this->coordinates+other.coordinates;
+		return sum;
 	}
 
-	RobotPosition& operator/(float real)
+	RobotPosition operator-(const RobotPosition& other)
 	{
-		this->alfa /= real;
-		this->coordinates = Point{ this->coordinates.X / real ,this->coordinates.Y / real };
-		return *this;
+		RobotPosition sum;
+		sum.alfa = this->alfa - other.alfa;
+		sum.coordinates = this->coordinates - other.coordinates;
+		return sum;
 	}
 
 
-	RobotPosition& operator*(float real)
+	RobotPosition operator/(float real)
 	{
-		this->alfa *= real;
-		this->coordinates = Point{ this->coordinates.X * real ,this->coordinates.Y * real };
-		return *this;
+		RobotPosition div;
+		div.alfa=this->alfa / real;
+
+		div.coordinates = Point{ this->coordinates.X / real ,this->coordinates.Y / real };
+		return div;
+	}
+
+
+	RobotPosition operator*(float real)
+	{
+
+		RobotPosition mul;
+		mul.alfa=this->alfa * real;
+		mul.coordinates= Point{ this->coordinates.X * real ,this->coordinates.Y * real };
+		return mul;
 	}
 
 

@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 	QtGuiApplication1 gui;
 	
 	RobotControll robot;
-	robot.gui = &gui;
+	robot.gui_ptr = &gui;
 
 	qRegisterMetaType<Mapa>();
 	qRegisterMetaType<Robot_feedback>();
@@ -21,6 +21,8 @@ int main(int argc, char *argv[])
 
 	QObject::connect(&gui, SIGNAL(set_threads_enabled_sig(bool)), &robot, SLOT(set_threads_enabled(bool)));
 	QObject::connect(&gui, SIGNAL(set_maping_enabled_sig(bool)), &robot, SLOT(set_maping_enabled(bool)));
+	QObject::connect(&gui, SIGNAL(set_map_with_path_enabled_sig(bool)), &robot, SLOT(set_map_with_path_enabled(bool)));
+
 	QObject::connect(&gui, SIGNAL(set_filename_sig(std::string)), &robot, SLOT(setfilename(std::string)));
 	QObject::connect(&gui, SIGNAL(setip_sig(std::string)), &robot, SLOT(setip(std::string)));
 	QObject::connect(&gui, SIGNAL(set_target_sig(Point)), &robot, SLOT(set_target(Point)));

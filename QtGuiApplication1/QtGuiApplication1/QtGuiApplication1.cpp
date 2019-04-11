@@ -145,18 +145,24 @@ void QtGuiApplication1::on_pushButton_locate_clicked()
 }
 void QtGuiApplication1::on_pushButton_go_clicked()
 {
-	emit addPointToPath_sig(RobotPosition((float)ui.spinBox->value(),(float)ui.spinBox_2->value()));
+	emit addPointToPath_sig(RobotPosition((float)ui.doubleSpinBox->value(),(float)ui.doubleSpinBox_2->value()));
 }
 
-void QtGuiApplication1::on_spinBox_valueChanged(int arg1)
+
+
+
+void QtGuiApplication1::on_doubleSpinBox_valueChanged(double arg1)
 {
-	emit set_target_sig(Point{ (float)ui.spinBox->value(),(float)ui.spinBox_2->value() });
+	emit set_target_sig(Point{ (float)ui.doubleSpinBox->value(),(float)ui.doubleSpinBox_2->value() });
 }
 
-void QtGuiApplication1::on_spinBox_2_valueChanged(int arg1)
+void QtGuiApplication1::on_doubleSpinBox_2_valueChanged(double arg1)
 {
-	emit set_target_sig(Point{ (float)ui.spinBox->value(),(float)ui.spinBox_2->value() });
+	emit set_target_sig(Point{ (float)ui.doubleSpinBox->value(),(float)ui.doubleSpinBox_2->value() });
 }
+
+
+
 
 void QtGuiApplication1::on_checkBox_stateChanged(int arg1)
 {
@@ -165,6 +171,16 @@ void QtGuiApplication1::on_checkBox_stateChanged(int arg1)
 	else
 	emit set_maping_enabled_sig(false);
 }
+
+void QtGuiApplication1::on_checkBox_2_stateChanged(int arg1)
+{
+
+	if (ui.checkBox_2->isChecked())
+		emit set_map_with_path_enabled_sig(true);
+	else
+		emit set_map_with_path_enabled_sig(false);
+}
+
 
 
 void map_render(QPainter& paint, QPen& pen, Mapa& map, QRect rect)
@@ -263,13 +279,21 @@ void QtGuiApplication1::odometry_update(Robot_feedback data)
 	ui.lcdNumber_8->display(data.target.X);
 	ui.lcdNumber_9->display(data.target.Y);
 
+	ui.lcdNumber_10->display(data.slam_estimate_quality);
+
+	ui.textBrowser_path->clear();
+	
+	for (std::vector<RobotPosition>::iterator it = data.path.begin();it!=data.path.end();it++)
+	{
+		ui.textBrowser_path->append(QString(QString::fromStdString(" X=" + std::to_string((*it).coordinates.X) + " Y=" + std::to_string((*it).coordinates.Y)+'\n')));
+	}
+
 	ui.label_9->setText(QString(QString::fromStdString(data.command_string)));
 
-	//ui.lcdNumber->display(data.slam_position.coordinates.X);
-	//ui.lcdNumber_2->display(data.slam_position.coordinates.Y);
-	//ui.lcdNumber_3->display(data.slam_position.alfa);
+	
 
 }
+
 
 
 

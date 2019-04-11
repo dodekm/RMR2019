@@ -4,7 +4,10 @@
 #include "RMR_windows.h"
 
 RobotControll::RobotControll() :
-	odometria_3(5.2,2.5,-M_PI_2),
+
+	odometria_1(5.2, 2.5, -M_PI_2),
+	odometria_2(5.2, 2.5, -M_PI_2),
+	odometria_3(5.2, 2.5, -M_PI_2),
 	odometria_4(5.2, 2.5, -M_PI_2),
 	regulator(150, 1.2),
 	mapa(100, 100, -0.2, 6, -0.2, 6, ""),
@@ -12,12 +15,14 @@ RobotControll::RobotControll() :
 	current_scope(100,100,-lidar_treshold_max/1000.0, lidar_treshold_max / 1000.0, -lidar_treshold_max / 1000.0, lidar_treshold_max / 1000.0)
 
 {	
+	
 	command = robot_command::stop;
-
 	odometria_using = &odometria_4;
 	actual_position = odometria_using->position;
 	reset_position = odometria_using->position;
 	slam_position = actual_position;
+	odometry_position_last = actual_position;
+	odometry_position = actual_position;
 
 	WinSock_setup();
 
@@ -28,8 +33,9 @@ RobotControll::RobotControll() :
 	map_loader::TMapArea objects;
 	map_loader::load_objects("priestor.txt", objects);
 	mapa.fill_with_objects(objects);
-	slam.map_reference = mapa;
 	
+	slam.map_reference = mapa;
+	slam.estimate = slam_position;
 
 }
 
@@ -57,10 +63,8 @@ void RobotControll::robot_controll()
 
 	while (threads_enabled == true)
 	{
-		
 		if (!command_queue.empty())
 		{
-			
 			command = pop_command();
 			switch (command)
 			{
@@ -148,13 +152,29 @@ void RobotControll::robot_controll()
 
 			case robot_command::slam:
 				
-				slam_moduler++;
-				if (slam_moduler % 15 == 0)
+				slam_counter++;
+
+				if (slam_counter % slam_modulo_main == 0)
 				{
-					slam_moduler = 0;
-					slam_position = slam.locate(actual_position, Laser_data_working);
-					slam_position= (slam_position +actual_position)/2;
+					slam.dispersion_position = 0.1;
+					slam.dispersion_angle = 0.2;
+					slam.feedback_gain = 0.8;
+					slam.odometry_gain = 0.2;
+					slam.n_particles = 150;
+					slam_position = slam.locate(odometry_position, Laser_data_working);
+					
 				}
+
+				if (slam_counter % slam_modulo_rebuild == 0)
+				{
+					slam.dispersion_position = 1;
+					slam.dispersion_angle = M_PI/2;
+					slam.feedback_gain = 0.2;
+					slam.odometry_gain = 0.8;
+					slam.n_particles = 500;
+					slam_position = slam.locate(odometry_position, Laser_data_working);					
+				}
+
 				break;
 
 			case robot_command::build_scope:
@@ -180,23 +200,20 @@ void RobotControll::robot_controll()
 void RobotControll::processThisRobot()
 {
 	mutex_robot_data.lock(); 
-	if (datacounter == 0)
-	{
-		encoder_init_values(&encL, robotdata.EncoderLeft);
-		encoder_init_values(&encR, robotdata.EncoderRight);
-	}
-
+	
 	encoders_process();
 	odometria_1.odometry_forward_euler(encL, encR);
 	odometria_2.odometry_backward_euler(encL, encR);
 	odometria_3.odometry_trapezoidal_rule(encL, encR);
 	odometria_4.odometry_curved(encL, encR);
-	actual_position = odometria_using->position;
 
+	odometry_position = odometria_using->position;
+	actual_position = slam_position+(odometry_position-odometry_position_last);
 	
+	odometry_position_last = odometry_position;
+
 	move_arc(filter_speed.set_speed((int)round(motors_speed.translation_speed), 50),(int)round(motors_speed.radius));
 
-	datacounter++;
 
 	emit odometry_update_sig(getRobotData());
 	mutex_robot_data.unlock();
@@ -275,6 +292,13 @@ void RobotControll::set_maping_enabled(bool status)
 	maping_enable = status;
 	
 }
+
+void RobotControll::set_map_with_path_enabled(bool status)
+{
+
+	map_with_path_enable = status;
+}
+
 
 void RobotControll::set_threads_enabled(bool status)
 {
@@ -368,6 +392,7 @@ Robot_feedback RobotControll::getRobotData()
 	 wanted_position_corrected,
 	 obstacles,
 	 slam_position,
+	 slam.estimate_quality,
 	 motors_speed,
 	 start,
 	 target,
@@ -565,8 +590,6 @@ void RobotControll::automode()
 	{
 		regulator.regulate(actual_position, wanted_position);
 	
-		
-
 		if (regulator.isRegulated(actual_position, wanted_position))
 		{
 			if (!path.empty())
@@ -651,15 +674,19 @@ void RobotControll::build_map()
 		}
 	}
 	Mapa map_to_send(mapa);
-	map_to_send.addPoint(slam_position.coordinates, cell_slam);
-	map_to_send.addPoint(actual_position.coordinates, cell_robot);
+	map_to_send.addPoint(actual_position.coordinates, cell_slam);
+	map_to_send.addPoint(odometry_position.coordinates, cell_robot);
 	map_to_send.addPoint(actual_position.coordinates + polar2point(actual_position.alfa, 0.2), cell_direction);
 	map_to_send.addPoint(target, cell_finish);
 
-	emit map_update_sig(map_to_send);
-
-
-
+	if (map_with_path_enable == false)
+	{
+		emit map_update_sig(map_to_send);
+	}
+	else
+	{
+		emit(map_update_sig(map_with_path));
+	}
 }
 
 void RobotControll::find_path()
@@ -668,15 +695,17 @@ void RobotControll::find_path()
 	int window_size = 5;
 	Mapa mapa_flood_fill(mapa, true);
 	mapa_flood_fill.FloodFill_fill(start, target, true);
-	mapa_flood_fill.saveMap("floodfill.txt");
 	clear_path();
 	map_with_path = mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_Y, path, true, window_size);
-	map_with_path.saveMap("path.txt");
 	if(!path.empty())
 	wanted_position = path.front();
 	emit(map_update_sig(map_with_path));
 
+	
+
 }
+
+
 
 
 void RobotControll::encoders_process()
@@ -704,6 +733,7 @@ void RobotControll::processThisLidar(std::vector<LaserData> new_scan)
 
 void RobotControll::start_threads()
 {
+	emit odometry_update_sig(getRobotData());
 	threads_enabled = true;
 	if(!robotthreadHandle.joinable())
 	robotthreadHandle = std::thread(&RobotControll::robotprocess,this);
@@ -904,9 +934,6 @@ void RobotControll::robotprocess()
 	unsigned char buff[50000];
 	
 
-
-	
-
 	while (threads_enabled == true)
 	{
 
@@ -922,6 +949,12 @@ void RobotControll::robotprocess()
 		int returnval = robot.fillData(robotdata, (unsigned char*)buff);
 		if (returnval == 0)
 		{
+			if (datacounter == 0)
+			{
+				encoder_init_values(&encL, robotdata.EncoderLeft);
+				encoder_init_values(&encR, robotdata.EncoderRight);
+			}
+			datacounter++;
 			processThisRobot();
 		}
 	}
