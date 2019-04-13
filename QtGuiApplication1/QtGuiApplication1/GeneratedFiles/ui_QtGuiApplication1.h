@@ -77,6 +77,7 @@ public:
     QDoubleSpinBox *doubleSpinBox;
     QDoubleSpinBox *doubleSpinBox_2;
     QTextBrowser *textBrowser_command;
+    QTextBrowser *textBrowser_obstacles;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -85,7 +86,7 @@ public:
     {
         if (QtGuiApplication1Class->objectName().isEmpty())
             QtGuiApplication1Class->setObjectName(QString::fromUtf8("QtGuiApplication1Class"));
-        QtGuiApplication1Class->resize(1340, 616);
+        QtGuiApplication1Class->resize(1348, 625);
         centralWidget = new QWidget(QtGuiApplication1Class);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         startButton = new QPushButton(centralWidget);
@@ -252,10 +253,10 @@ public:
         label->setGeometry(QRect(70, 10, 51, 21));
         pushButton_find_path = new QPushButton(centralWidget);
         pushButton_find_path->setObjectName(QString::fromUtf8("pushButton_find_path"));
-        pushButton_find_path->setGeometry(QRect(520, 460, 71, 41));
+        pushButton_find_path->setGeometry(QRect(510, 450, 71, 41));
         pushButton_reset = new QPushButton(centralWidget);
         pushButton_reset->setObjectName(QString::fromUtf8("pushButton_reset"));
-        pushButton_reset->setGeometry(QRect(850, 460, 71, 41));
+        pushButton_reset->setGeometry(QRect(840, 450, 71, 41));
         lcdNumber_3 = new QLCDNumber(centralWidget);
         lcdNumber_3->setObjectName(QString::fromUtf8("lcdNumber_3"));
         lcdNumber_3->setGeometry(QRect(73, 90, 60, 23));
@@ -318,7 +319,7 @@ public:
         lcdNumber_3->setDigitCount(4);
         pushButton_auto = new QPushButton(centralWidget);
         pushButton_auto->setObjectName(QString::fromUtf8("pushButton_auto"));
-        pushButton_auto->setGeometry(QRect(630, 460, 71, 41));
+        pushButton_auto->setGeometry(QRect(620, 450, 71, 41));
         pushButton_stop = new QPushButton(centralWidget);
         pushButton_stop->setObjectName(QString::fromUtf8("pushButton_stop"));
         pushButton_stop->setGeometry(QRect(100, 390, 51, 51));
@@ -728,7 +729,7 @@ public:
         label_11->setGeometry(QRect(240, 70, 47, 13));
         pushButton_clear_path = new QPushButton(centralWidget);
         pushButton_clear_path->setObjectName(QString::fromUtf8("pushButton_clear_path"));
-        pushButton_clear_path->setGeometry(QRect(740, 460, 71, 41));
+        pushButton_clear_path->setGeometry(QRect(730, 450, 71, 41));
         frame_2 = new QFrame(centralWidget);
         frame_2->setObjectName(QString::fromUtf8("frame_2"));
         frame_2->setGeometry(QRect(920, 30, 400, 400));
@@ -827,12 +828,15 @@ public:
         doubleSpinBox_2->setSingleStep(0.200000000000000);
         textBrowser_command = new QTextBrowser(centralWidget);
         textBrowser_command->setObjectName(QString::fromUtf8("textBrowser_command"));
-        textBrowser_command->setGeometry(QRect(1220, 440, 101, 121));
+        textBrowser_command->setGeometry(QRect(1220, 430, 101, 121));
         textBrowser_command->setFont(font);
+        textBrowser_obstacles = new QTextBrowser(centralWidget);
+        textBrowser_obstacles->setObjectName(QString::fromUtf8("textBrowser_obstacles"));
+        textBrowser_obstacles->setGeometry(QRect(920, 430, 131, 71));
         QtGuiApplication1Class->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(QtGuiApplication1Class);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1340, 21));
+        menuBar->setGeometry(QRect(0, 0, 1348, 21));
         QtGuiApplication1Class->setMenuBar(menuBar);
         mainToolBar = new QToolBar(QtGuiApplication1Class);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));

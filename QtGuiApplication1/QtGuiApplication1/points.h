@@ -131,13 +131,7 @@ private:
 public:
 	std::list<Point>points;
 
-	std::list<Point> get_edges()
-	{
-		std::list<Point> l;
-		l.push_back(*points.begin());
-		l.push_back(*points.end());
-		return l;
-	}
+	
 
 	bool is_out_of_range(Point actual_position,float treshold)
 	{

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1340</width>
-    <height>616</height>
+    <width>1348</width>
+    <height>625</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1031,8 +1031,8 @@
    <widget class="QPushButton" name="pushButton_find_path">
     <property name="geometry">
      <rect>
-      <x>520</x>
-      <y>460</y>
+      <x>510</x>
+      <y>450</y>
       <width>71</width>
       <height>41</height>
      </rect>
@@ -1044,8 +1044,8 @@
    <widget class="QPushButton" name="pushButton_reset">
     <property name="geometry">
      <rect>
-      <x>850</x>
-      <y>460</y>
+      <x>840</x>
+      <y>450</y>
       <width>71</width>
       <height>41</height>
      </rect>
@@ -1512,8 +1512,8 @@
    <widget class="QPushButton" name="pushButton_auto">
     <property name="geometry">
      <rect>
-      <x>630</x>
-      <y>460</y>
+      <x>620</x>
+      <y>450</y>
       <width>71</width>
       <height>41</height>
      </rect>
@@ -4453,8 +4453,8 @@
    <widget class="QPushButton" name="pushButton_clear_path">
     <property name="geometry">
      <rect>
-      <x>740</x>
-      <y>460</y>
+      <x>730</x>
+      <y>450</y>
       <width>71</width>
       <height>41</height>
      </rect>
@@ -5046,7 +5046,7 @@
     <property name="geometry">
      <rect>
       <x>1220</x>
-      <y>440</y>
+      <y>430</y>
       <width>101</width>
       <height>121</height>
      </rect>
@@ -5057,13 +5057,23 @@
      </font>
     </property>
    </widget>
+   <widget class="QTextBrowser" name="textBrowser_obstacles">
+    <property name="geometry">
+     <rect>
+      <x>920</x>
+      <y>430</y>
+      <width>131</width>
+      <height>71</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1340</width>
+     <width>1348</width>
      <height>21</height>
     </rect>
    </property>

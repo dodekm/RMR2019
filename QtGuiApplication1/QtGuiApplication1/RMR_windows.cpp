@@ -402,6 +402,7 @@ Robot_feedback RobotControll::getRobotData()
 	 wanted_position,
 	 wanted_position_corrected,
 	 obstacles,
+	 obstacles_in_way,
 	 slam_position,
 	 slam.estimate_quality,
 	 motors_speed,
@@ -447,12 +448,12 @@ void RobotControll::printData(std::ostream& stream)
 void RobotControll::obstacle_avoidance()
 {
 
-	obstacle obst_1 = get_obstacles_in_way().front();
+	obstacle obst = obstacles_in_way.front();
 
-	if (obst_1.is_out_of_range(actual_position.coordinates, 0.9*lidar_treshold_max / 1000) == false)
+	if (obst.is_out_of_range(actual_position.coordinates, 0.9*lidar_treshold_max / 1000) == false)
 	{
-		Point edge_A = obst_1.get_edges().front();
-		Point edge_B = obst_1.get_edges().back();
+		Point edge_A = *obst.points.begin();
+		Point edge_B = *obst.points.end();
 
 		Point shortest_edge;
 
@@ -596,9 +597,9 @@ void RobotControll::find_obstacles(std::vector<Point>points)
 
 void RobotControll::automode()
 {
-
-	//if (get_obstacles_in_way().empty())
-	{
+	obstacles_in_way = get_obstacles_in_way();
+	bool is_any_obstacle_in_way = !obstacles_in_way.empty();
+	
 		
 		if (regulator.isRegulated(actual_position, wanted_position))
 		{
@@ -619,7 +620,7 @@ void RobotControll::automode()
 		{
 			push_command(robot_command::automatic);
 		}
-	}
+	
 
 	/*else
 	{
@@ -653,10 +654,11 @@ void RobotControll::build_scope()
 
 			}
 		}
+		find_obstacles(current_scope_obstacles);
 		emit scope_update_sig(current_scope);
 	}
 
-	//find_obstacles(current_scope_obstacles);
+	
 
 }
 

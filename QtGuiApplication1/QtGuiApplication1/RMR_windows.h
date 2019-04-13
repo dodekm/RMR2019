@@ -84,6 +84,7 @@ typedef struct
 	RobotPosition wanted_position;
 	RobotPosition wanted_position_corrected;
 	std::list<obstacle> obstacles;
+	std::list<obstacle> obstacles_in_way;
 	RobotPosition slam_position;
 	float slam_estimate_quality;
 	robotSpeed motors_speed;
@@ -263,7 +264,7 @@ private:
 	bool is_point_in_way(Point m);
 	std::list<obstacle> obstacles;
 	void find_obstacles(std::vector<Point>points);
-
+	std::list<obstacle> obstacles_in_way;
 	Slam slam;
 	RobotRegulator regulator;
 	

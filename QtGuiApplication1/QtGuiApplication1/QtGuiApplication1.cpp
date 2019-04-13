@@ -296,6 +296,10 @@ void QtGuiApplication1::odometry_update(Robot_feedback data)
 		ui.textBrowser_command->append(QString(QString::fromStdString(command_to_string[command])));
 	}
 
+	ui.textBrowser_obstacles->clear();
+	ui.textBrowser_obstacles->append(QString(QString::fromStdString("Obstacles:"+std::to_string(data.obstacles.size()))));
+	ui.textBrowser_obstacles->append(QString(QString::fromStdString("In way:" + std::to_string(data.obstacles_in_way.size()))));
+
 	ui.statusBar->showMessage(QString(QString::fromStdString(data.command_string)));
 
 }
