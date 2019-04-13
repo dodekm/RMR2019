@@ -600,6 +600,12 @@ void RobotControll::automode()
 	obstacles_in_way = get_obstacles_in_way();
 	bool is_any_obstacle_in_way = !obstacles_in_way.empty();
 	
+	/*if (is_any_obstacle_in_way == true)
+	{
+		regulator.enabled = false;
+		return;
+	}*/
+
 		
 		if (regulator.isRegulated(actual_position, wanted_position))
 		{
