@@ -27,7 +27,7 @@
 #define lidar_build_modulo 2500
 #define lidar_scan_modulo 1000
 
-#define slam_modulo_main 35
+#define slam_modulo_main 30
 #define slam_modulo_rebuild 150
 
 #define histogram_treshold 30
@@ -90,6 +90,7 @@ typedef struct
 	Point start;
 	Point target;
 	robot_command command;
+	std::queue<robot_command>command_queue;
 	std::string command_string;
 	std::vector<RobotPosition> path;
 

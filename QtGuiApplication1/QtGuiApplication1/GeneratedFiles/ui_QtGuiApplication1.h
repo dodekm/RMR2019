@@ -76,6 +76,7 @@ public:
     QTextBrowser *textBrowser_path;
     QDoubleSpinBox *doubleSpinBox;
     QDoubleSpinBox *doubleSpinBox_2;
+    QTextBrowser *textBrowser_command;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -84,7 +85,7 @@ public:
     {
         if (QtGuiApplication1Class->objectName().isEmpty())
             QtGuiApplication1Class->setObjectName(QString::fromUtf8("QtGuiApplication1Class"));
-        QtGuiApplication1Class->resize(1448, 578);
+        QtGuiApplication1Class->resize(1340, 616);
         centralWidget = new QWidget(QtGuiApplication1Class);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         startButton = new QPushButton(centralWidget);
@@ -476,7 +477,7 @@ public:
         label_8->setGeometry(QRect(140, 230, 31, 16));
         frame = new QFrame(centralWidget);
         frame->setObjectName(QString::fromUtf8("frame"));
-        frame->setGeometry(QRect(520, 30, 400, 400));
+        frame->setGeometry(QRect(510, 30, 400, 400));
         frame->setFrameShape(QFrame::StyledPanel);
         frame->setFrameShadow(QFrame::Raised);
         lcdNumber_6 = new QLCDNumber(centralWidget);
@@ -730,7 +731,7 @@ public:
         pushButton_clear_path->setGeometry(QRect(740, 460, 71, 41));
         frame_2 = new QFrame(centralWidget);
         frame_2->setObjectName(QString::fromUtf8("frame_2"));
-        frame_2->setGeometry(QRect(970, 30, 400, 400));
+        frame_2->setGeometry(QRect(920, 30, 400, 400));
         frame_2->setFrameShape(QFrame::StyledPanel);
         frame_2->setFrameShadow(QFrame::Raised);
         checkBox = new QCheckBox(centralWidget);
@@ -808,9 +809,9 @@ public:
         label_12->setGeometry(QRect(140, 140, 41, 21));
         textBrowser_path = new QTextBrowser(centralWidget);
         textBrowser_path->setObjectName(QString::fromUtf8("textBrowser_path"));
-        textBrowser_path->setGeometry(QRect(240, 220, 141, 261));
+        textBrowser_path->setGeometry(QRect(240, 220, 141, 301));
         QFont font;
-        font.setPointSize(7);
+        font.setPointSize(8);
         textBrowser_path->setFont(font);
         doubleSpinBox = new QDoubleSpinBox(centralWidget);
         doubleSpinBox->setObjectName(QString::fromUtf8("doubleSpinBox"));
@@ -824,10 +825,14 @@ public:
         doubleSpinBox_2->setMinimum(-100.000000000000000);
         doubleSpinBox_2->setMaximum(100.000000000000000);
         doubleSpinBox_2->setSingleStep(0.200000000000000);
+        textBrowser_command = new QTextBrowser(centralWidget);
+        textBrowser_command->setObjectName(QString::fromUtf8("textBrowser_command"));
+        textBrowser_command->setGeometry(QRect(1220, 440, 101, 121));
+        textBrowser_command->setFont(font);
         QtGuiApplication1Class->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(QtGuiApplication1Class);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1448, 21));
+        menuBar->setGeometry(QRect(0, 0, 1340, 21));
         QtGuiApplication1Class->setMenuBar(menuBar);
         mainToolBar = new QToolBar(QtGuiApplication1Class);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));

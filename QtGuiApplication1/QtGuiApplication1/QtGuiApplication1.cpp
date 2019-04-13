@@ -285,14 +285,18 @@ void QtGuiApplication1::odometry_update(Robot_feedback data)
 	
 	for (std::vector<RobotPosition>::iterator it = data.path.begin();it!=data.path.end();it++)
 	{
-		ui.textBrowser_path->append(QString(QString::fromStdString(" X=" + std::to_string((*it).coordinates.X) + " Y=" + std::to_string((*it).coordinates.Y)+'\n')));
+		ui.textBrowser_path->append(QString(QString::fromStdString(" X=" + std::to_string((*it).coordinates.X) + " Y=" + std::to_string((*it).coordinates.Y))));
 	}
 
+	ui.textBrowser_command->clear();
+	while (!data.command_queue.empty())
+	{
+		robot_command command = data.command_queue.front();
+		data.command_queue.pop();
+		ui.textBrowser_command->append(QString(QString::fromStdString(command_to_string[command])));
+	}
 
 	ui.statusBar->showMessage(QString(QString::fromStdString(data.command_string)));
 
 }
-
-
-
 

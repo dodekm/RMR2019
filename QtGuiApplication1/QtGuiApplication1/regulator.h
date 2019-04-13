@@ -22,6 +22,7 @@ typedef struct robotSpeed
 class RobotRegulator
 {
 public:
+	bool enabled = false;
 	RobotRegulator()
 	{
 

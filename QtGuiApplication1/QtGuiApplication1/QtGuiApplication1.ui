@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1448</width>
-    <height>578</height>
+    <width>1340</width>
+    <height>616</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -2591,7 +2591,7 @@
    <widget class="QFrame" name="frame">
     <property name="geometry">
      <rect>
-      <x>520</x>
+      <x>510</x>
       <y>30</y>
       <width>400</width>
       <height>400</height>
@@ -4466,7 +4466,7 @@
    <widget class="QFrame" name="frame_2">
     <property name="geometry">
      <rect>
-      <x>970</x>
+      <x>920</x>
       <y>30</y>
       <width>400</width>
       <height>400</height>
@@ -4995,12 +4995,12 @@
       <x>240</x>
       <y>220</y>
       <width>141</width>
-      <height>261</height>
+      <height>301</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>7</pointsize>
+      <pointsize>8</pointsize>
      </font>
     </property>
    </widget>
@@ -5042,13 +5042,28 @@
      <double>0.200000000000000</double>
     </property>
    </widget>
+   <widget class="QTextBrowser" name="textBrowser_command">
+    <property name="geometry">
+     <rect>
+      <x>1220</x>
+      <y>440</y>
+      <width>101</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1448</width>
+     <width>1340</width>
      <height>21</height>
     </rect>
    </property>
