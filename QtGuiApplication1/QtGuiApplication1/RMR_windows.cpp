@@ -110,7 +110,9 @@ void RobotControll::robot_controll()
 				break;
 
 			case robot_command::automatic:
+				mutex_robot_data.lock();
 				automode();
+				mutex_robot_data.unlock();
 				break;
 
 			case robot_command::save:
@@ -144,7 +146,7 @@ void RobotControll::robot_controll()
 
 			case robot_command::find:
 				mutex_robot_data.lock();
-				find_path();
+				find_path(mapa);
 				mutex_robot_data.unlock();
 				break;
 			case robot_command::disconnect:
@@ -166,7 +168,9 @@ void RobotControll::robot_controll()
 					slam.feedback_gain = 0.2;
 					slam.odometry_gain = 0.8;
 					slam.n_particles = 500;
-					slam_position = slam.locate(odometry_position, Laser_data_working);
+					slam.locate(odometry_position, Laser_data_working);
+					if (slam.estimate_quality > slam.quality_treshold)
+						slam_position = slam.estimate;
 				}
 
 				if (slam_counter % slam_modulo_main == 0)
@@ -176,21 +180,20 @@ void RobotControll::robot_controll()
 					slam.feedback_gain = 0.8;
 					slam.odometry_gain = 0.2;
 					slam.n_particles = 150;
-					slam_position = slam.locate(odometry_position, Laser_data_working);
+					
+					slam.locate(odometry_position, Laser_data_working);
+					if (slam.estimate_quality > slam.quality_treshold)
+						slam_position = slam.estimate;
 
 				}
 				break;
 
 			case robot_command::build_scope:
-				//mutex_robot_data.lock();
 				build_scope();
-				//mutex_robot_data.unlock();
 				break;
 
 			case robot_command::build_map:
-				//mutex_robot_data.lock();
 				build_map();
-				//mutex_robot_data.unlock();
 				break;
 
 			}
@@ -212,7 +215,11 @@ void RobotControll::processThisRobot()
 	odometria_4.odometry_curved(encL, encR);
 
 	odometry_position = odometria_using->position;
+#ifdef use_slam
 	actual_position = slam_position + (odometry_position - odometry_position_last);
+#else
+	actual_position = odometry_position;
+#endif
 
 	odometry_position_last = odometry_position;
 
@@ -278,8 +285,12 @@ void RobotControll::push_command(robot_command command)
 robot_command RobotControll::pop_command()
 {
 	mutex_command_queue.lock();
-	robot_command command = command_queue.front();
-	command_queue.pop();
+	robot_command command;
+	if (!command_queue.empty())
+	{
+		command = command_queue.front();
+		command_queue.pop();
+	}
 	mutex_command_queue.unlock();
 	return command;
 
@@ -382,7 +393,7 @@ std::vector<RobotPosition> RobotControll::get_path()
 
 	std::vector<RobotPosition>trajectory;
 
-	std::queue<RobotPosition>path_copy = path;
+	std::queue<RobotPosition>path_copy = std::queue<RobotPosition>(path);
 
 	while (!path_copy.empty())
 	{
@@ -397,24 +408,25 @@ std::vector<RobotPosition> RobotControll::get_path()
 Robot_feedback RobotControll::getRobotData()
 {
 
-	return Robot_feedback{
+	mutex_command_queue.lock();
+	Robot_feedback data{
 	 actual_position,
 	 wanted_position,
 	 wanted_position_corrected,
-	 obstacles,
-	 obstacles_in_way,
+	 std::list<obstacle>(obstacles),
+	 std::list<obstacle>(obstacles_in_way),
 	 slam_position,
 	 slam.estimate_quality,
 	 motors_speed,
 	 start,
 	 target,
 	 command,
-	 command_queue,
+	 std::queue<robot_command>(command_queue),
 	 get_command_name(),
 	 get_path(),
 	};
-
-
+	mutex_command_queue.unlock();
+	return data;
 }
 
 
@@ -447,18 +459,21 @@ void RobotControll::printData(std::ostream& stream)
 
 void RobotControll::obstacle_avoidance()
 {
+	if (obstacles_in_way.empty())
+		return;
 
 	obstacle obst = obstacles_in_way.front();
 
 	if (obst.is_out_of_range(actual_position.coordinates, 0.9*lidar_treshold_max / 1000) == false)
 	{
-		Point edge_A = *obst.points.begin();
-		Point edge_B = *obst.points.end();
+		Point edge_A = obst.points.front();
+		Point edge_B = obst.points.back();
 
 		Point shortest_edge;
 
 		float path_A_length = PointsDistance(actual_position.coordinates, edge_A) + PointsDistance(edge_A, wanted_position.coordinates);
 		float path_B_length = PointsDistance(actual_position.coordinates, edge_B) + PointsDistance(edge_B, wanted_position.coordinates);
+
 		if (path_A_length < path_B_length)
 		{
 			wanted_position_corrected.coordinates = edge_A;
@@ -501,6 +516,8 @@ bool RobotControll::is_point_in_way(Point m)
 
 bool RobotControll::is_obstacle_in_way(obstacle obst)
 {
+	if (obst.points.empty())
+		return false;
 	for (std::list<Point>::iterator it = obst.points.begin(); it != obst.points.end(); it++)
 	{
 		if (is_point_in_way(*it) == true)
@@ -514,6 +531,9 @@ std::list<obstacle> RobotControll::get_obstacles_in_way()
 {
 	std::list<obstacle> obstacle_list;
 
+	if (obstacles.empty())
+		return obstacle_list;
+
 	for (std::list<obstacle>::iterator it = obstacles.begin(); it != obstacles.end(); it++)
 	{
 		if (is_obstacle_in_way(*it) == true)
@@ -523,11 +543,14 @@ std::list<obstacle> RobotControll::get_obstacles_in_way()
 
 }
 
-void RobotControll::find_obstacles(std::vector<Point>points)
+void RobotControll::find_obstacles(std::list<Point>points)
 {
 	obstacles.clear();
 
-	std::list<Point>candidates(points.begin(), points.end());
+	if (points.empty())
+		return;
+	std::list<Point>candidates(points);
+
 
 	while (!candidates.empty())
 	{
@@ -540,8 +563,8 @@ void RobotControll::find_obstacles(std::vector<Point>points)
 		working_point = *candidates.begin();
 		while (1)
 		{
-			std::list<Point>::iterator closest_point = candidates.end();
-			float min_distance = 100;
+			std::list<Point>::iterator closest_point = candidates.begin();
+			float min_distance = 10000000000;
 			for (it = candidates.begin(); it != candidates.end(); it++)
 			{
 				if (PointsDistance(working_point, *it) < min_distance && it != starting_point)
@@ -550,7 +573,7 @@ void RobotControll::find_obstacles(std::vector<Point>points)
 					closest_point = it;
 				}
 			}
-			if (min_distance < zone_width)
+			if (min_distance < point_dist_treshold)
 			{
 				obst.points.push_back(*closest_point);
 				working_point = *closest_point;
@@ -566,8 +589,12 @@ void RobotControll::find_obstacles(std::vector<Point>points)
 		working_point = *starting_point;
 		while (1)
 		{
-			std::list<Point>::iterator closest_point = candidates.end();
-			float min_distance = 100;
+			std::list<Point>::iterator closest_point = candidates.begin();
+			float min_distance = 100000000;
+			
+			if (candidates.empty())
+				break;
+
 			for (it = candidates.begin(); it != candidates.end(); it++)
 			{
 				if (PointsDistance(working_point, *it) < min_distance && it != starting_point)
@@ -590,6 +617,8 @@ void RobotControll::find_obstacles(std::vector<Point>points)
 		}
 		candidates.erase(starting_point);
 		obstacles.push_back(obst);
+
+
 	}
 
 
@@ -597,15 +626,23 @@ void RobotControll::find_obstacles(std::vector<Point>points)
 
 void RobotControll::automode()
 {
-	obstacles_in_way = get_obstacles_in_way();
-	bool is_any_obstacle_in_way = !obstacles_in_way.empty();
 	
-	/*if (is_any_obstacle_in_way == true)
+	bool is_any_obstacle_in_way = !obstacles_in_way.empty();
+	/*
+	if (is_any_obstacle_in_way == true)
 	{
-		regulator.enabled = false;
-		return;
-	}*/
-
+		
+		Mapa merged_map(mapa);
+		if (!current_scope_obstacles.empty())
+		{
+			for (std::list<Point>::iterator it = current_scope_obstacles.begin(); it != current_scope_obstacles.end(); it++)
+			{
+				merged_map.addPoint(*it, cell_obstacle);
+			}
+			find_path(merged_map);
+		}
+	}
+	*/
 		
 		if (regulator.isRegulated(actual_position, wanted_position))
 		{
@@ -614,7 +651,6 @@ void RobotControll::automode()
 				wanted_position = path.front();
 				path.pop();
 				push_command(robot_command::automatic);
-				regulator.enabled = true;
 			}
 			else
 			{
@@ -625,6 +661,7 @@ void RobotControll::automode()
 		else
 		{
 			push_command(robot_command::automatic);
+			regulator.enabled = true;
 		}
 	
 
@@ -647,6 +684,7 @@ void RobotControll::build_scope()
 		Laser_data_new.clear();
 		mutex_lidar_data.unlock();
 
+
 		current_scope.clearMap();
 		current_scope_obstacles.clear();
 
@@ -660,7 +698,11 @@ void RobotControll::build_scope()
 
 			}
 		}
+		mutex_robot_data.lock();
 		find_obstacles(current_scope_obstacles);
+		obstacles_in_way = get_obstacles_in_way();
+		mutex_robot_data.unlock();
+
 		emit scope_update_sig(current_scope);
 	}
 
@@ -693,10 +735,34 @@ void RobotControll::build_map()
 		}
 	}
 	Mapa map_to_send(mapa);
-	map_to_send.addPoint(actual_position.coordinates, cell_slam);
+	map_to_send.addPoint(actual_position.coordinates, cell_slam_estimate);
 	map_to_send.addPoint(odometry_position.coordinates, cell_robot);
 	map_to_send.addPoint(actual_position.coordinates + polar2point(actual_position.alfa, 0.2), cell_direction);
 	map_to_send.addPoint(target, cell_finish);
+
+	
+	if (!obstacles.empty())
+	{
+		for (std::list<obstacle>::iterator it = obstacles.begin(); it != obstacles.end(); it++)
+		{
+			Point P_1 = (*it).points.front();
+			Point P_2 = (*it).points.back();
+			map_to_send.addPoint(P_1, cell_misc_obstacle_corner);
+			map_to_send.addPoint(P_2, cell_misc_obstacle_corner);
+		}
+	}
+	
+	if (!obstacles_in_way.empty())
+	{
+		for (std::list<obstacle>::iterator it = obstacles_in_way.begin(); it != obstacles_in_way.end(); it++)
+		{
+			Point P_1 = (*it).points.front();
+			Point P_2 = (*it).points.back();
+			map_to_send.addPoint(P_1, cell_misc_obstacle_corner_in_way);
+			map_to_send.addPoint(P_2, cell_misc_obstacle_corner_in_way);
+		}
+	}
+	
 
 	if (map_with_path_enable == false)
 	{
@@ -708,11 +774,11 @@ void RobotControll::build_map()
 	}
 }
 
-void RobotControll::find_path()
+void RobotControll::find_path(Mapa working_map)
 {
 	start = actual_position.coordinates;
 	int window_size = 5;
-	Mapa mapa_flood_fill(mapa, true);
+	Mapa mapa_flood_fill(working_map, true);
 	mapa_flood_fill.FloodFill_fill(start, target, true);
 	clear_path();
 	map_with_path = mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_Y, path, true, window_size);
@@ -735,22 +801,26 @@ void RobotControll::encoders_process()
 void RobotControll::processThisLidar(std::vector<LaserData> new_scan)
 {
 	mutex_lidar_data.lock();
-	for (std::vector<LaserData>::iterator i = new_scan.begin(); i != new_scan.end(); i++)
+	if (!new_scan.empty())
 	{
-		Laser_data_new.push_back(*i);
+		for (std::vector<LaserData>::iterator i = new_scan.begin(); i != new_scan.end(); i++)
+		{
+			Laser_data_new.push_back(*i);
+		}
 	}
 	mutex_lidar_data.unlock();
 
 	push_command(robot_command::build_scope);
 	push_command(robot_command::build_map);
+#ifdef use_slam
 	push_command(robot_command::slam);
-
+#endif
 }
 
 
 void RobotControll::start_threads()
 {
-	emit odometry_update_sig(getRobotData());
+	
 	threads_enabled = true;
 	if (!robotthreadHandle.joinable())
 		robotthreadHandle = std::thread(&RobotControll::robotprocess, this);
@@ -770,14 +840,7 @@ void  RobotControll::stop_threads()
 		laserthreadHandle.detach();
 	if (controllhreadHandle.joinable())
 		controllhreadHandle.detach();
-	/*
-	if(robotthreadHandle.joinable())
-	robotthreadHandle.join();
-	if(laserthreadHandle.joinable())
-	laserthreadHandle.join();
-	if (controllhreadHandle.joinable())
-	controllhreadHandle.join();
-	*/
+
 }
 
 

@@ -25,8 +25,6 @@ int Mapa::addPoint(Point P,cell_content content=cell_obstacle)
 	Matrix_position XY = point2indices(P);
 	if (assert_matrix_indices(XY))
 	{
-		if ((*this)[XY] == cell_obstacle)
-			return 0;
 		(*this)[XY] = content;
 		return 1;
 	}

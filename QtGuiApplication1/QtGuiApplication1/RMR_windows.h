@@ -23,6 +23,7 @@
 #include "odometry.h"
 #include "slam.h"
 
+#define use_slam
 
 #define lidar_build_modulo 2500
 #define lidar_scan_modulo 1000
@@ -32,7 +33,9 @@
 
 #define histogram_treshold 30
 
-#define zone_width 0.4
+#define zone_width 0.2
+#define point_dist_treshold 0.4
+
 
 const std::string command_to_string []=
 {
@@ -91,7 +94,7 @@ typedef struct
 	Point start;
 	Point target;
 	robot_command command;
-	std::queue<robot_command>command_queue;
+	std::queue<robot_command> command_queue_send;
 	std::string command_string;
 	std::vector<RobotPosition> path;
 
@@ -169,7 +172,7 @@ public:
 
 	void build_map();
 	void build_scope();
-	void find_path();
+	void find_path(Mapa working_map);
 
 	void printData(std::ostream& stream);
 	void reset_robot();
@@ -258,12 +261,12 @@ private:
 	Mapa map_with_path;
 	Mapa current_scope;
 
-	std::vector<Point> current_scope_obstacles;
+	std::list<Point> current_scope_obstacles;
 	bool is_obstacle_in_way(obstacle);
 	std::list<obstacle> get_obstacles_in_way();
 	bool is_point_in_way(Point m);
 	std::list<obstacle> obstacles;
-	void find_obstacles(std::vector<Point>points);
+	void find_obstacles(std::list<Point>points);
 	std::list<obstacle> obstacles_in_way;
 	Slam slam;
 	RobotRegulator regulator;

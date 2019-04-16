@@ -26,15 +26,19 @@ typedef int  floodfill_priority;
 
 typedef enum
 {
-	cell_free,
-	cell_obstacle,
-	cell_finish,
+	cell_free=0,
+	cell_obstacle=1,
+	cell_finish=2,
 	cell_start = -1,
 	cell_path = -2,
 	cell_breakpoint=-3,
 	cell_robot=-4,
 	cell_direction = -5,
-	cell_slam=-6
+	cell_slam_estimate=-6,
+
+	cell_misc_obstacle_corner=-1,
+	cell_misc_obstacle_corner_in_way=2
+	
 	
 }cell_content;
 
@@ -173,6 +177,10 @@ public:
 		
 		return AND;
 	}
+
+
+
+
 
 	long sum_elements()
 	{

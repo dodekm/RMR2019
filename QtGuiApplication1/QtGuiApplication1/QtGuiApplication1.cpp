@@ -206,7 +206,7 @@ void map_render(QPainter& paint, QPen& pen, Mapa& map, QRect rect)
 				pen.setColor(Qt::magenta);
 			else if (map[i] == cell_direction)
 				pen.setColor(Qt::cyan);
-			else if (map[i] == cell_slam)
+			else if (map[i] == cell_slam_estimate)
 				pen.setColor(Qt::yellow);
 			else
 				continue;
@@ -289,13 +289,14 @@ void QtGuiApplication1::odometry_update(Robot_feedback data)
 	}
 
 	ui.textBrowser_command->clear();
-	while (!data.command_queue.empty())
+	
+	while (!data.command_queue_send.empty())
 	{
-		robot_command command = data.command_queue.front();
-		data.command_queue.pop();
+		robot_command command = data.command_queue_send.front();
+		data.command_queue_send.pop();
 		ui.textBrowser_command->append(QString(QString::fromStdString(command_to_string[command])));
 	}
-
+	
 	ui.textBrowser_obstacles->clear();
 	ui.textBrowser_obstacles->append(QString(QString::fromStdString("Obstacles:"+std::to_string(data.obstacles.size()))));
 	ui.textBrowser_obstacles->append(QString(QString::fromStdString("In way:" + std::to_string(data.obstacles_in_way.size()))));

@@ -6,6 +6,8 @@ RobotPosition Slam::locate(RobotPosition position_odometry, std::vector<LaserDat
 	likehood_vector.clear();
 	auto max_likehood = 0;
 	
+	RobotPosition estimate_last = estimate;
+
 	RobotPosition position_center = weighted_position(estimate, position_odometry, feedback_gain, odometry_gain);
 	
 	Mapa map_scan(map_reference,false);
@@ -41,6 +43,9 @@ RobotPosition Slam::locate(RobotPosition position_odometry, std::vector<LaserDat
 	}
 
 	estimate_quality = (float)max_likehood / map_scan.sum_elements();
+
+
+
 	return estimate;
 }
 
