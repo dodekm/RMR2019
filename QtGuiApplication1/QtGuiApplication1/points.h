@@ -135,7 +135,7 @@ public:
 
 	bool is_out_of_range(Point actual_position,float treshold)
 	{
-		return PointsDistance(actual_position, *points.begin())>treshold && PointsDistance(actual_position, *points.end())>treshold;
+		return PointsDistance(actual_position, points.front())>treshold && PointsDistance(actual_position, points.back())>treshold;
 	
 	}
 

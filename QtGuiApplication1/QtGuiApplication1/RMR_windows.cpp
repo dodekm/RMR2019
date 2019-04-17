@@ -160,7 +160,7 @@ void RobotControll::robot_controll()
 			case robot_command::slam:
 
 				slam_counter++;
-
+				/*
 				if (slam_counter % slam_modulo_rebuild == 0)
 				{
 					slam.dispersion_position = 1;
@@ -169,9 +169,8 @@ void RobotControll::robot_controll()
 					slam.odometry_gain = 0.8;
 					slam.n_particles = 500;
 					slam.locate(odometry_position, Laser_data_working);
-					if (slam.estimate_quality > slam.quality_treshold)
-						slam_position = slam.estimate;
-				}
+					slam_position = slam.estimate;
+				}*/
 
 				if (slam_counter % slam_modulo_main == 0)
 				{
@@ -182,8 +181,7 @@ void RobotControll::robot_controll()
 					slam.n_particles = 150;
 					
 					slam.locate(odometry_position, Laser_data_working);
-					if (slam.estimate_quality > slam.quality_treshold)
-						slam_position = slam.estimate;
+					slam_position = slam.estimate;
 
 				}
 				break;
@@ -216,7 +214,10 @@ void RobotControll::processThisRobot()
 
 	odometry_position = odometria_using->position;
 #ifdef use_slam
+	if (slam.estimate_quality > slam.quality_treshold)
 	actual_position = slam_position + (odometry_position - odometry_position_last);
+	else
+	actual_position = actual_position+ (odometry_position - odometry_position_last);
 #else
 	actual_position = odometry_position;
 #endif
@@ -641,6 +642,10 @@ void RobotControll::automode()
 			}
 			find_path(merged_map);
 		}
+
+
+		//obstacle_avoidance();
+		//regulator.regulate(actual_position, wanted_position_corrected);
 	}
 	*/
 		
@@ -664,12 +669,6 @@ void RobotControll::automode()
 			regulator.enabled = true;
 		}
 	
-
-	/*else
-	{
-		obstacle_avoidance();
-		regulator.regulate(actual_position, wanted_position_corrected);
-	}*/
 
 	
 }

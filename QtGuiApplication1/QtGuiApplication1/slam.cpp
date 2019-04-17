@@ -43,9 +43,6 @@ RobotPosition Slam::locate(RobotPosition position_odometry, std::vector<LaserDat
 	}
 
 	estimate_quality = (float)max_likehood / map_scan.sum_elements();
-
-
-
 	return estimate;
 }
 
