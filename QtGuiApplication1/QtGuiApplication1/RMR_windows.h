@@ -28,7 +28,7 @@
 #define lidar_build_modulo 2500
 #define lidar_scan_modulo 1000
 
-#define slam_modulo_main 30
+#define slam_modulo_main 100
 #define slam_modulo_rebuild 150
 
 #define histogram_treshold 30

@@ -15,12 +15,12 @@ public:
 	RobotPosition locate(RobotPosition, std::vector<LaserData>& scan);
 	float dispersion_position=0.1;
 	float dispersion_angle=0.2;
-	unsigned int n_particles = 150;
+	unsigned int n_particles = 100;
 
 	float feedback_gain = 0.5;
 	float odometry_gain = 0.5;
 
-	float quality_treshold = 0.5;
+	float quality_treshold = 0.4;
 	float estimate_quality;
 	
 	RobotPosition estimate;

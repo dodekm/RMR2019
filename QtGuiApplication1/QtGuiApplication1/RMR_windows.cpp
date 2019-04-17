@@ -160,25 +160,15 @@ void RobotControll::robot_controll()
 			case robot_command::slam:
 
 				slam_counter++;
-				/*
-				if (slam_counter % slam_modulo_rebuild == 0)
-				{
-					slam.dispersion_position = 1;
-					slam.dispersion_angle = M_PI / 2;
-					slam.feedback_gain = 0.2;
-					slam.odometry_gain = 0.8;
-					slam.n_particles = 500;
-					slam.locate(odometry_position, Laser_data_working);
-					slam_position = slam.estimate;
-				}*/
+				
 
 				if (slam_counter % slam_modulo_main == 0)
 				{
-					slam.dispersion_position = 0.1;
+					slam.dispersion_position = 0.2;
 					slam.dispersion_angle = 0.2;
 					slam.feedback_gain = 0.8;
 					slam.odometry_gain = 0.2;
-					slam.n_particles = 150;
+					slam.n_particles = 100;
 					
 					slam.locate(odometry_position, Laser_data_working);
 					slam_position = slam.estimate;
@@ -214,7 +204,7 @@ void RobotControll::processThisRobot()
 
 	odometry_position = odometria_using->position;
 #ifdef use_slam
-	if (slam.estimate_quality > slam.quality_treshold)
+	if (slam.estimate_quality > slam.quality_treshold && motors_speed.translation_speed<min_speed)
 	actual_position = slam_position + (odometry_position - odometry_position_last);
 	else
 	actual_position = actual_position+ (odometry_position - odometry_position_last);
@@ -653,9 +643,13 @@ void RobotControll::automode()
 		{
 			if (!path.empty())
 			{
-				wanted_position = path.front();
-				path.pop();
+				if (slam.estimate_quality > slam.quality_treshold)
+				{
+					wanted_position = path.front();
+					path.pop();
+				}
 				push_command(robot_command::automatic);
+			
 			}
 			else
 			{
@@ -739,7 +733,7 @@ void RobotControll::build_map()
 	map_to_send.addPoint(actual_position.coordinates + polar2point(actual_position.alfa, 0.2), cell_direction);
 	map_to_send.addPoint(target, cell_finish);
 
-	
+	/*
 	if (!obstacles.empty())
 	{
 		for (std::list<obstacle>::iterator it = obstacles.begin(); it != obstacles.end(); it++)
@@ -762,7 +756,7 @@ void RobotControll::build_map()
 		}
 	}
 	
-
+	*/
 	if (map_with_path_enable == false)
 	{
 		emit map_update_sig(map_to_send);
