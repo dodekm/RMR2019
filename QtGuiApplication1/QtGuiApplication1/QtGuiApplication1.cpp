@@ -192,21 +192,19 @@ void map_render(QPainter& paint, QPen& pen, Mapa& map, QRect rect)
 		for (i.X = 0; i.X < map.get_cols(); i.X++)
 		{
 
-			if (map[i] == cell_obstacle)
+			if (map[i] == cell_black)
 				pen.setColor(Qt::black);
-			else if (map[i] == cell_path)
+			else if (map[i] == cell_blue)
 				pen.setColor(Qt::blue);
-			else if (map[i] == cell_breakpoint)
+			else if (map[i] == cell_cyan)
 				pen.setColor(Qt::cyan);
-			else if (map[i] == cell_finish)
+			else if (map[i] == cell_red)
 				pen.setColor(Qt::red);
-			else if (map[i] == cell_start)
+			else if (map[i] == cell_green)
 				pen.setColor(Qt::green);
-			else if (map[i] == cell_robot)
+			else if (map[i] == cell_magenta)
 				pen.setColor(Qt::magenta);
-			else if (map[i] == cell_direction)
-				pen.setColor(Qt::cyan);
-			else if (map[i] == cell_slam_estimate)
+			else if (map[i] == cell_yellow)
 				pen.setColor(Qt::yellow);
 			else
 				continue;

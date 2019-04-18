@@ -26,20 +26,29 @@ typedef int  floodfill_priority;
 
 typedef enum
 {
-	cell_free=0,
-	cell_obstacle=1,
-	cell_finish=2,
+	cell_free = 0,
+	cell_obstacle = 1,
+	cell_finish = 2,
 	cell_start = -1,
-	cell_path = -2,
-	cell_breakpoint=-3,
-	cell_robot=-4,
-	cell_direction = -5,
-	cell_slam_estimate=-6,
+	
+	cell_black=1,
+	cell_red = 2,
+	cell_green=-1,
+	cell_blue=-2,
+	cell_cyan=-4,
+	cell_magenta=-5,
+	cell_yellow=-6,
 
-	cell_misc_obstacle_corner=-1,
-	cell_misc_obstacle_corner_in_way=2
-	
-	
+	cell_path = cell_blue,
+	cell_breakpoint = cell_yellow,
+	cell_robot = cell_magenta,
+	cell_direction = cell_yellow,
+	cell_slam_estimate = cell_cyan,
+
+	cell_obstacle_corner = cell_green,
+	cell_obstacle_corner_in_way = cell_red
+
+
 }cell_content;
 
 

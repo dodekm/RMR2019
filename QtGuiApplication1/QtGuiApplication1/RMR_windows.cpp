@@ -159,21 +159,32 @@ void RobotControll::robot_controll()
 
 			case robot_command::slam:
 
-				slam_counter++;
-				
-
-				if (slam_counter % slam_modulo_main == 0)
+				if (motors_speed.translation_speed < min_speed)
 				{
-					slam.dispersion_position = 0.2;
-					slam.dispersion_angle = 0.2;
-					slam.feedback_gain = 0.8;
-					slam.odometry_gain = 0.2;
-					slam.n_particles = 100;
-					
-					slam.locate(odometry_position, Laser_data_working);
-					slam_position = slam.estimate;
 
+					slam_counter++;
+
+
+					if (slam_counter % slam_modulo_main == 0)
+					{
+						slam.dispersion_position = 0.2;
+						slam.dispersion_angle = 0.2;
+						slam.feedback_gain = 0.8;
+						slam.odometry_gain = 0.2;
+						slam.n_particles = 100;
+
+						slam.locate(odometry_position, Laser_data_working);
+						slam_position = slam.estimate;
+
+					}
 				}
+
+				else
+				{
+					slam.estimate_quality = 0;
+					slam_counter = 0;
+				}
+
 				break;
 
 			case robot_command::build_scope:
@@ -204,7 +215,7 @@ void RobotControll::processThisRobot()
 
 	odometry_position = odometria_using->position;
 #ifdef use_slam
-	if (slam.estimate_quality > slam.quality_treshold && motors_speed.translation_speed<min_speed)
+	if (slam.estimate_quality > slam.quality_treshold)
 	actual_position = slam_position + (odometry_position - odometry_position_last);
 	else
 	actual_position = actual_position+ (odometry_position - odometry_position_last);
@@ -733,15 +744,15 @@ void RobotControll::build_map()
 	map_to_send.addPoint(actual_position.coordinates + polar2point(actual_position.alfa, 0.2), cell_direction);
 	map_to_send.addPoint(target, cell_finish);
 
-	/*
+	
 	if (!obstacles.empty())
 	{
 		for (std::list<obstacle>::iterator it = obstacles.begin(); it != obstacles.end(); it++)
 		{
 			Point P_1 = (*it).points.front();
 			Point P_2 = (*it).points.back();
-			map_to_send.addPoint(P_1, cell_misc_obstacle_corner);
-			map_to_send.addPoint(P_2, cell_misc_obstacle_corner);
+			map_to_send.addPoint(P_1, cell_obstacle_corner);
+			map_to_send.addPoint(P_2, cell_obstacle_corner);
 		}
 	}
 	
@@ -751,12 +762,12 @@ void RobotControll::build_map()
 		{
 			Point P_1 = (*it).points.front();
 			Point P_2 = (*it).points.back();
-			map_to_send.addPoint(P_1, cell_misc_obstacle_corner_in_way);
-			map_to_send.addPoint(P_2, cell_misc_obstacle_corner_in_way);
+			map_to_send.addPoint(P_1, cell_obstacle_corner_in_way);
+			map_to_send.addPoint(P_2, cell_obstacle_corner_in_way);
 		}
 	}
 	
-	*/
+	
 	if (map_with_path_enable == false)
 	{
 		emit map_update_sig(map_to_send);
