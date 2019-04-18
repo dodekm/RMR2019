@@ -266,7 +266,7 @@ private:
 	std::list<obstacle> get_obstacles_in_way();
 	bool is_point_in_way(Point m);
 	std::list<obstacle> obstacles;
-	void find_obstacles(std::list<Point>points);
+	std::list<obstacle> find_obstacles(std::list<Point>points);
 	std::list<obstacle> obstacles_in_way;
 	Slam slam;
 	RobotRegulator regulator;

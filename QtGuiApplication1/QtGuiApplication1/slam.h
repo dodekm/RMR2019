@@ -21,7 +21,7 @@ public:
 	float odometry_gain = 0.5;
 
 	float quality_treshold = 0.4;
-	float estimate_quality;
+	float estimate_quality=0.0;
 	
 	RobotPosition estimate;
 	Mapa map_reference;

@@ -545,14 +545,14 @@ std::list<obstacle> RobotControll::get_obstacles_in_way()
 
 }
 
-void RobotControll::find_obstacles(std::list<Point>points)
+std::list<obstacle> RobotControll::find_obstacles(std::list<Point>points)
 {
-	obstacles.clear();
+	std::list<obstacle> obstacles;
 
 	if (points.empty())
-		return;
-	std::list<Point>candidates(points);
+		return std::list<obstacle>();
 
+	std::list<Point>candidates(points);
 
 	while (!candidates.empty())
 	{
@@ -566,10 +566,10 @@ void RobotControll::find_obstacles(std::list<Point>points)
 		while (1)
 		{
 			std::list<Point>::iterator closest_point = candidates.begin();
-			float min_distance = 10000000000;
+			float min_distance;
 			for (it = candidates.begin(); it != candidates.end(); it++)
 			{
-				if (PointsDistance(working_point, *it) < min_distance && it != starting_point)
+				if (it == candidates.begin() ||(PointsDistance(working_point, *it) < min_distance && it != starting_point))
 				{
 					min_distance = PointsDistance(working_point, *it);
 					closest_point = it;
@@ -592,14 +592,14 @@ void RobotControll::find_obstacles(std::list<Point>points)
 		while (1)
 		{
 			std::list<Point>::iterator closest_point = candidates.begin();
-			float min_distance = 100000000;
+			float min_distance;
 			
 			if (candidates.empty())
 				break;
 
 			for (it = candidates.begin(); it != candidates.end(); it++)
 			{
-				if (PointsDistance(working_point, *it) < min_distance && it != starting_point)
+				if (it == candidates.begin() || (PointsDistance(working_point, *it) < min_distance && it != starting_point))
 				{
 					min_distance = PointsDistance(working_point, *it);
 					closest_point = it;
@@ -622,16 +622,14 @@ void RobotControll::find_obstacles(std::list<Point>points)
 
 
 	}
-
+	return obstacles;
 
 }
 
 void RobotControll::automode()
 {
 	
-	bool is_any_obstacle_in_way = !obstacles_in_way.empty();
-	/*
-	if (is_any_obstacle_in_way == true)
+	if (!obstacles_in_way.empty())
 	{
 		
 		Mapa merged_map(mapa);
@@ -642,19 +640,21 @@ void RobotControll::automode()
 				merged_map.addPoint(*it, cell_obstacle);
 			}
 			find_path(merged_map);
+			push_command(robot_command::stop);
+			regulator.enabled = false;
+			return;
 		}
 
-
-		//obstacle_avoidance();
-		//regulator.regulate(actual_position, wanted_position_corrected);
 	}
-	*/
+	
 		
 		if (regulator.isRegulated(actual_position, wanted_position))
 		{
 			if (!path.empty())
 			{
+		#ifdef use_slam
 				if (slam.estimate_quality > slam.quality_treshold)
+		#endif 
 				{
 					wanted_position = path.front();
 					path.pop();
@@ -703,7 +703,7 @@ void RobotControll::build_scope()
 			}
 		}
 		mutex_robot_data.lock();
-		find_obstacles(current_scope_obstacles);
+		obstacles=find_obstacles(current_scope_obstacles);
 		obstacles_in_way = get_obstacles_in_way();
 		mutex_robot_data.unlock();
 
@@ -788,7 +788,7 @@ void RobotControll::find_path(Mapa working_map)
 	map_with_path = mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_Y, path, true, window_size);
 	if (!path.empty())
 		wanted_position = path.front();
-	emit(map_update_sig(map_with_path));
+	
 
 }
 
