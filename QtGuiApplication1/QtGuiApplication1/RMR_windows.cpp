@@ -167,13 +167,36 @@ void RobotControll::robot_controll()
 
 					if (slam_counter % slam_modulo_main == 0)
 					{
-						slam.dispersion_position = 0.2;
-						slam.dispersion_angle = 0.2;
+						slam.dispersion_position = 0.3;
+						slam.dispersion_angle = 0.15;
 						slam.feedback_gain = 0.8;
 						slam.odometry_gain = 0.2;
 						slam.n_particles = 100;
 
 						slam.locate(odometry_position, Laser_data_working);
+						
+						if (slam.estimate_quality < slam.quality_treshold)
+						{
+						
+							slam.dispersion_position = 0.5;
+							slam.dispersion_angle = 0.3;
+							slam.feedback_gain = 0.5;
+							slam.odometry_gain = 0.5;
+							slam.n_particles = 500;
+						
+						}
+
+						if (slam.estimate_quality < slam.quality_treshold)
+						{
+
+							slam.dispersion_position =1;
+							slam.dispersion_angle = 0.6;
+							slam.feedback_gain = 0;
+							slam.odometry_gain = 1;
+							slam.n_particles = 1500;
+
+						}
+
 						slam_position = slam.estimate;
 
 					}
@@ -552,34 +575,37 @@ std::list<obstacle> RobotControll::find_obstacles(std::list<Point>points)
 	if (points.empty())
 		return std::list<obstacle>();
 
-	std::list<Point>candidates(points);
+	std::list<Point>candidates=points;
 
 	while (!candidates.empty())
 	{
 		obstacle obst;
 		Point working_point;
-		std::list<Point>::iterator it;
+		
 		std::list<Point>::iterator starting_point = candidates.begin();
-
 		obst.points.push_back(*starting_point);
-		working_point = *candidates.begin();
+		working_point = *starting_point;
 		while (1)
 		{
+			if (candidates.size()<2)
+				break;
 			std::list<Point>::iterator closest_point = candidates.begin();
-			float min_distance;
-			for (it = candidates.begin(); it != candidates.end(); it++)
+			float min_distance = min_distance = 100000;
+			for (std::list<Point>::iterator it= candidates.begin(); it != candidates.end(); it++)
 			{
-				if (it == candidates.begin() ||(PointsDistance(working_point, *it) < min_distance && it != starting_point))
+				
+				if ((PointsDistance(working_point, *it) < min_distance && it != starting_point))
 				{
 					min_distance = PointsDistance(working_point, *it);
 					closest_point = it;
 				}
 			}
-			if (min_distance < point_dist_treshold)
+			if (min_distance < point_dist_treshold&&closest_point != starting_point)
 			{
 				obst.points.push_back(*closest_point);
 				working_point = *closest_point;
 				candidates.erase(closest_point);
+
 			}
 			else
 			{
@@ -589,23 +615,24 @@ std::list<obstacle> RobotControll::find_obstacles(std::list<Point>points)
 		}
 
 		working_point = *starting_point;
+
 		while (1)
 		{
-			std::list<Point>::iterator closest_point = candidates.begin();
-			float min_distance;
-			
-			if (candidates.empty())
+			if (candidates.size() < 2)
 				break;
 
-			for (it = candidates.begin(); it != candidates.end(); it++)
+			std::list<Point>::iterator closest_point = candidates.begin();
+			float min_distance = min_distance = 100000;
+
+			for (std::list<Point>::iterator it = candidates.begin(); it != candidates.end(); it++)
 			{
-				if (it == candidates.begin() || (PointsDistance(working_point, *it) < min_distance && it != starting_point))
+				if (PointsDistance(working_point, *it) < min_distance && it != starting_point)
 				{
 					min_distance = PointsDistance(working_point, *it);
 					closest_point = it;
 				}
 			}
-			if (min_distance < zone_width)
+			if (min_distance < point_dist_treshold && closest_point != starting_point)
 			{
 				obst.points.push_front(*closest_point);
 				working_point = *closest_point;
@@ -628,7 +655,7 @@ std::list<obstacle> RobotControll::find_obstacles(std::list<Point>points)
 
 void RobotControll::automode()
 {
-	
+	/*
 	if (!obstacles_in_way.empty())
 	{
 		
@@ -646,7 +673,7 @@ void RobotControll::automode()
 		}
 
 	}
-	
+	*/
 		
 		if (regulator.isRegulated(actual_position, wanted_position))
 		{

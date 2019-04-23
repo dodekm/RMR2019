@@ -57,7 +57,7 @@ public:
 		return output.radius;
 	}
 
-	float position_deadzone = 0.05;
+	float position_deadzone = 0.1;
 
 	robotSpeed output;
 

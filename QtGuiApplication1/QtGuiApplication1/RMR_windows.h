@@ -25,10 +25,10 @@
 
 #define use_slam
 
-#define lidar_build_modulo 2500
-#define lidar_scan_modulo 1000
+#define lidar_build_modulo 1500
+#define lidar_scan_modulo 600
 
-#define slam_modulo_main 10
+#define slam_modulo_main 20
 #define slam_modulo_rebuild 150
 
 #define histogram_treshold 30
@@ -254,7 +254,7 @@ private:
 
 	Speed_filter filter_speed;
 	
-	bool maping_enable = true;
+	bool maping_enable = false;
 	bool map_with_path_enable = false;
 	Mapa mapa;
 	Mapa histogram;
