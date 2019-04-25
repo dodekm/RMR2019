@@ -45,8 +45,8 @@ typedef enum
 	cell_direction = cell_yellow,
 	cell_slam_estimate = cell_cyan,
 
-	cell_obstacle_corner = cell_green,
-	cell_obstacle_corner_in_way = cell_red
+	cell_obstacle_edge = cell_green,
+	cell_obstacle_edge_in_way = cell_blue
 
 
 }cell_content;
@@ -160,7 +160,7 @@ public:
 		return *this;
 	}
 
-	auto& operator[](Matrix_position position)
+	int& operator[](Matrix_position position)
 	{
 		if (cells_data != NULL && assert_matrix_indices(position))
 		{
@@ -178,7 +178,7 @@ public:
 			for (i.X = 0; i.X < cols; i.X++)
 			{
 
-				AND[i] = ((*this)[i] ==cell_obstacle &&other[i]==cell_obstacle);
+				AND[i] = ((*this)[i]&& other[i]);
 
 			}
 
@@ -186,9 +186,6 @@ public:
 		
 		return AND;
 	}
-
-
-
 
 
 	long sum_elements()
@@ -200,7 +197,7 @@ public:
 			for (i.X = 0; i.X < cols; i.X++)
 			{
 
-				count += (*this)[i];
+				count =count+ (*this)[i];
 
 			}
 
@@ -224,17 +221,18 @@ public:
 		allocate();
 
 		Matrix_position i;
-
-		for (i.X = 0; i.X < rows; i.X++)
+		if (copy == true)
 		{
-			
-			for (i.Y = 0; i.Y < cols; i.Y++)
+			for (i.X = 0; i.X < rows; i.X++)
 			{
-				if (copy == true)
-				(*this)[i] = source.cells_data[i.Y][i.X];
+
+				for (i.Y = 0; i.Y < cols; i.Y++)
+				{
+
+					(*this)[i] = source.cells_data[i.Y][i.X];
+				}
 			}
 		}
-
 	}
 
 	~Mapa()
@@ -251,7 +249,6 @@ public:
 	
 	int assert_matrix_indices(Matrix_position XY);
 	int check_close_obstacle(Matrix_position XY,int window_size);
-
 
 	int addPoint(Point P, cell_content content);
 

@@ -173,7 +173,6 @@ void Mapa::clearMap()
 
 }
 
-
 void Mapa::FloodFill_fill(Point start, Point target, bool diagonal = false)
 {
 	Matrix_position target_indices = point2indices(target);

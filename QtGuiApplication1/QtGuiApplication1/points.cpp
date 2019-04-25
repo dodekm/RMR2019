@@ -26,5 +26,13 @@ Point polar2point(float angle, float length)
 }
 
 
-
+int is_triangle_sharp(Point A, Point B, Point C)
+{
+	
+	float AB = PointsDistance(A,B);
+	float AC = PointsDistance(A,C);
+	float BC = PointsDistance(B,C);
+	return (AC*AC + BC * BC) < AB*AB;
+		
+}
 

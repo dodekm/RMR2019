@@ -29,6 +29,8 @@ float PointLength(Point a);
 Point polar2point(float angle, float length);
 
 
+int is_triangle_sharp(Point A, Point B, Point C);
+
 
 
 class RobotPosition

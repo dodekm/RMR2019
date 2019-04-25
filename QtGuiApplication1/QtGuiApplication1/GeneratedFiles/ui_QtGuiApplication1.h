@@ -858,7 +858,7 @@ public:
         pushButton_back->setText(QApplication::translate("QtGuiApplication1Class", "V", nullptr));
         pushButton_right->setText(QApplication::translate("QtGuiApplication1Class", "->", nullptr));
         pushButton_left->setText(QApplication::translate("QtGuiApplication1Class", "<-", nullptr));
-        lineEdit->setText(QApplication::translate("QtGuiApplication1Class", "192.168.1.11", nullptr));
+        lineEdit->setText(QApplication::translate("QtGuiApplication1Class", "192.168.1.13", nullptr));
         pushButton_clear_map->setText(QApplication::translate("QtGuiApplication1Class", "ClearMap", nullptr));
         label->setText(QApplication::translate("QtGuiApplication1Class", "Odometria", nullptr));
         pushButton_find_path->setText(QApplication::translate("QtGuiApplication1Class", "Find", nullptr));

@@ -26,15 +26,15 @@
 #define use_slam
 
 #define lidar_build_modulo 1000
-#define lidar_scan_modulo 1000
+#define lidar_scan_modulo 1500
 
 #define slam_modulo_main 20
-#define slam_modulo_rebuild 150
 
-#define histogram_treshold 20
+
+#define histogram_treshold lidar_build_modulo/50
 
 #define zone_width 0.2
-#define point_dist_treshold 0.4
+#define point_dist_treshold 0.2
 
 
 const std::string command_to_string []=
@@ -230,7 +230,7 @@ private:
 	Odometry odometria_2;
 	Odometry odometria_3;
 	Odometry odometria_4;
-	Odometry* odometria_using;
+	
 	
 	robotSpeed motors_speed{ 0,0 };
 	
@@ -262,7 +262,7 @@ private:
 
 	std::list<Point> current_scope_obstacles;
 	bool is_obstacle_in_way(obstacle);
-	std::list<obstacle> get_obstacles_in_way();
+	std::list<obstacle> get_obstacles_in_way(std::list<obstacle>);
 	bool is_point_in_way(Point m);
 	std::list<obstacle> obstacles;
 	std::list<obstacle> find_obstacles(std::list<Point>points);

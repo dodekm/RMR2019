@@ -4,23 +4,19 @@
 #include <random>
 #include <misc.h>
 
-
-RobotPosition weighted_position(RobotPosition A, RobotPosition B, float weight_A, float weight_B);
-
-
 class Slam
 {
 	
 public:
 	RobotPosition locate(RobotPosition, std::vector<LaserData>& scan);
-	float dispersion_position=0.1;
-	float dispersion_angle=0.2;
-	unsigned int n_particles = 100;
+	float dispersion_position;
+	float dispersion_angle;
+	unsigned int n_particles;
 
-	float feedback_gain = 0.5;
-	float odometry_gain = 0.5;
+	float feedback_gain;
+	float odometry_gain;
 
-	float quality_treshold = 0.5;
+	float quality_treshold = 0.45;
 	float estimate_quality=0.0;
 	
 	RobotPosition estimate;
@@ -56,5 +52,5 @@ private:
 };
 
 
-
+RobotPosition weighted_position(RobotPosition A, RobotPosition B, float weight_A, float weight_B);
 

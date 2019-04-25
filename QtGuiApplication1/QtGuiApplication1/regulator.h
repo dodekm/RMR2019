@@ -8,7 +8,7 @@
 #define min_speed  30
 
 #define max_radius 65534/2
-#define min_radius  100
+#define min_radius  90
 
 #define singularity_product  2
 
@@ -57,7 +57,7 @@ public:
 		return output.radius;
 	}
 
-	float position_deadzone = 0.1;
+	float position_deadzone = 0.07;
 
 	robotSpeed output;
 
