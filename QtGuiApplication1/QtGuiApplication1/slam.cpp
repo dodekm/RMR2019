@@ -3,8 +3,7 @@
 
 RobotPosition Slam::locate(RobotPosition position_odometry, std::vector<LaserData>& scan)
 {
-	likehood_vector.clear();
-	auto max_likehood = 0;
+	long max_likehood = 0;
 	
 	RobotPosition estimate_last = estimate;
 
@@ -30,10 +29,9 @@ RobotPosition Slam::locate(RobotPosition position_odometry, std::vector<LaserDat
 			}
 
 		}
-		Mapa AND = map_reference && map_scan;
-		auto likehood = AND.sum_elements();
+		Mapa AND =(map_reference && map_scan);
+		long likehood = AND.sum_elements();
 		
-		likehood_vector.push_back(likehood);
 
 		if (likehood>max_likehood)
 		{
@@ -41,8 +39,18 @@ RobotPosition Slam::locate(RobotPosition position_odometry, std::vector<LaserDat
 			estimate = particle;
 		}
 	}
+	float scan_sum= (float)map_scan.sum_elements();
+	float new_quality = (float)max_likehood / scan_sum;
+	if (new_quality > estimate_quality)
+	{
+		estimate_quality = new_quality;
 
-	estimate_quality = (float)max_likehood / map_scan.sum_elements();
+	}
+	else
+	{
+		estimate = estimate_last;
+	}
+
 	return estimate;
 }
 

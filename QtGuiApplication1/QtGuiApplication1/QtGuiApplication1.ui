@@ -89,7 +89,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>192.168.1.13</string>
+     <string>192.168.1.11</string>
     </property>
    </widget>
    <widget class="QLCDNumber" name="lcdNumber">
@@ -4492,7 +4492,7 @@
      <string>mapping</string>
     </property>
     <property name="checked">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_locate">

@@ -159,51 +159,48 @@ void RobotControll::robot_controll()
 
 			case robot_command::slam:
 
-				if (motors_speed.translation_speed < min_speed)
+				if (abs(motors_speed.translation_speed) < min_speed)
 				{
 
 					slam_counter++;
 
-
-					if (slam_counter % slam_modulo_main == 0)
-					{
-						slam.dispersion_position = 0.3;
-						slam.dispersion_angle = 0.15;
-						slam.feedback_gain = 0.8;
-						slam.odometry_gain = 0.2;
-						slam.n_particles = 100;
-
-						slam.locate(odometry_position, Laser_data_working);
-						
-						if (slam.estimate_quality < slam.quality_treshold)
+						if (slam_counter % slam_modulo_main == 0)
 						{
-						
-							slam.dispersion_position = 0.5;
-							slam.dispersion_angle = 0.3;
-							slam.feedback_gain = 0.5;
-							slam.odometry_gain = 0.5;
-							slam.n_particles = 500;
-						
+							slam.dispersion_position = 0.2;
+							slam.dispersion_angle = 0.15;
+							slam.feedback_gain = 0.8;
+							slam.odometry_gain = 0.2;
+							slam.n_particles = 100;
+
+							slam.locate(odometry_position, Laser_data_working);
+
+							if (slam.estimate_quality < slam.quality_treshold)
+							{
+								slam.dispersion_position = 0.5;
+								slam.dispersion_angle = 0.3;
+								slam.feedback_gain = 0.5;
+								slam.odometry_gain = 0.5;
+								slam.n_particles = 500;
+								slam.locate(odometry_position, Laser_data_working);
+							}
+
+							if (slam.estimate_quality < slam.quality_treshold)
+							{
+								slam.dispersion_position = 1;
+								slam.dispersion_angle = 0.6;
+								slam.feedback_gain = 0;
+								slam.odometry_gain = 1;
+								slam.n_particles = 1500;
+								slam.locate(odometry_position, Laser_data_working);
+							}
+
+							slam_position = slam.estimate;
+
 						}
-
-						if (slam.estimate_quality < slam.quality_treshold)
-						{
-
-							slam.dispersion_position =1;
-							slam.dispersion_angle = 0.6;
-							slam.feedback_gain = 0;
-							slam.odometry_gain = 1;
-							slam.n_particles = 1500;
-
-						}
-
-						slam_position = slam.estimate;
-
-					}
 				}
-
 				else
 				{
+					slam.estimate = actual_position;
 					slam.estimate_quality = 0;
 					slam_counter = 0;
 				}
@@ -647,7 +644,6 @@ std::list<obstacle> RobotControll::find_obstacles(std::list<Point>points)
 		candidates.erase(starting_point);
 		obstacles.push_back(obst);
 
-
 	}
 	return obstacles;
 
@@ -671,7 +667,6 @@ void RobotControll::automode()
 			regulator.enabled = false;
 			return;
 		}
-
 	}
 	*/
 		

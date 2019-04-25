@@ -738,7 +738,7 @@ public:
         checkBox = new QCheckBox(centralWidget);
         checkBox->setObjectName(QString::fromUtf8("checkBox"));
         checkBox->setGeometry(QRect(400, 470, 70, 17));
-        checkBox->setChecked(true);
+        checkBox->setChecked(false);
         pushButton_locate = new QPushButton(centralWidget);
         pushButton_locate->setObjectName(QString::fromUtf8("pushButton_locate"));
         pushButton_locate->setGeometry(QRect(410, 370, 81, 41));
@@ -858,7 +858,7 @@ public:
         pushButton_back->setText(QApplication::translate("QtGuiApplication1Class", "V", nullptr));
         pushButton_right->setText(QApplication::translate("QtGuiApplication1Class", "->", nullptr));
         pushButton_left->setText(QApplication::translate("QtGuiApplication1Class", "<-", nullptr));
-        lineEdit->setText(QApplication::translate("QtGuiApplication1Class", "192.168.1.13", nullptr));
+        lineEdit->setText(QApplication::translate("QtGuiApplication1Class", "192.168.1.11", nullptr));
         pushButton_clear_map->setText(QApplication::translate("QtGuiApplication1Class", "ClearMap", nullptr));
         label->setText(QApplication::translate("QtGuiApplication1Class", "Odometria", nullptr));
         pushButton_find_path->setText(QApplication::translate("QtGuiApplication1Class", "Find", nullptr));

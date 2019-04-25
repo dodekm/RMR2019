@@ -178,7 +178,7 @@ public:
 			for (i.X = 0; i.X < cols; i.X++)
 			{
 
-				AND[i] = (*this)[i] && other[i];
+				AND[i] = ((*this)[i] ==cell_obstacle &&other[i]==cell_obstacle);
 
 			}
 
@@ -232,8 +232,6 @@ public:
 			{
 				if (copy == true)
 				(*this)[i] = source.cells_data[i.Y][i.X];
-				else
-				(*this)[i] = cell_free;
 			}
 		}
 

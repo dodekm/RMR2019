@@ -20,7 +20,7 @@ public:
 	float feedback_gain = 0.5;
 	float odometry_gain = 0.5;
 
-	float quality_treshold = 0.6;
+	float quality_treshold = 0.5;
 	float estimate_quality=0.0;
 	
 	RobotPosition estimate;

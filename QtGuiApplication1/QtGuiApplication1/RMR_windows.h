@@ -25,13 +25,13 @@
 
 #define use_slam
 
-#define lidar_build_modulo 1500
-#define lidar_scan_modulo 600
+#define lidar_build_modulo 1000
+#define lidar_scan_modulo 1000
 
 #define slam_modulo_main 20
 #define slam_modulo_rebuild 150
 
-#define histogram_treshold 30
+#define histogram_treshold 20
 
 #define zone_width 0.2
 #define point_dist_treshold 0.4
@@ -177,7 +177,6 @@ public:
 	void printData(std::ostream& stream);
 	void reset_robot();
 	void clear_path();
-
 
 	void move_arc(int mmpersec, int radius);
 	void forward(int);
