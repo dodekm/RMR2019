@@ -37,6 +37,7 @@ signals:
 	void set_threads_enabled_sig(bool status);
 	void set_maping_enabled_sig(bool status);
 	void set_map_with_path_enabled_sig(bool status);
+	void set_slam_enabled_sig(bool status);
 
 	void start_threads_sig(void);
 	void stop_threads_sig();
@@ -100,6 +101,8 @@ private slots:
 	void on_pushButton_save_map_clicked();
 
 	void on_pushButton_go_clicked();
+
+    void on_checkBox_3_stateChanged(int arg1);
 
 private:
 	Ui::QtGuiApplication1Class ui;

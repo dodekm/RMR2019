@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
 
 	QObject::connect(&gui, SIGNAL(set_threads_enabled_sig(bool)), &robot, SLOT(set_threads_enabled(bool)));
 	QObject::connect(&gui, SIGNAL(set_maping_enabled_sig(bool)), &robot, SLOT(set_maping_enabled(bool)));
+	QObject::connect(&gui, SIGNAL(set_slam_enabled_sig(bool)), &robot, SLOT(set_slam_enabled(bool)));
 	QObject::connect(&gui, SIGNAL(set_map_with_path_enabled_sig(bool)), &robot, SLOT(set_map_with_path_enabled(bool)));
 
 	QObject::connect(&gui, SIGNAL(set_filename_sig(std::string)), &robot, SLOT(setfilename(std::string)));

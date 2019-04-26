@@ -78,6 +78,7 @@ public:
     QDoubleSpinBox *doubleSpinBox_2;
     QTextBrowser *textBrowser_command;
     QTextBrowser *textBrowser_obstacles;
+    QCheckBox *checkBox_3;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -833,6 +834,10 @@ public:
         textBrowser_obstacles = new QTextBrowser(centralWidget);
         textBrowser_obstacles->setObjectName(QString::fromUtf8("textBrowser_obstacles"));
         textBrowser_obstacles->setGeometry(QRect(920, 430, 131, 71));
+        checkBox_3 = new QCheckBox(centralWidget);
+        checkBox_3->setObjectName(QString::fromUtf8("checkBox_3"));
+        checkBox_3->setGeometry(QRect(400, 500, 70, 17));
+        checkBox_3->setChecked(true);
         QtGuiApplication1Class->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(QtGuiApplication1Class);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
@@ -883,6 +888,7 @@ public:
         pushButton_locate->setText(QApplication::translate("QtGuiApplication1Class", "Locate", nullptr));
         checkBox_2->setText(QApplication::translate("QtGuiApplication1Class", "map with path", nullptr));
         label_12->setText(QApplication::translate("QtGuiApplication1Class", "quality", nullptr));
+        checkBox_3->setText(QApplication::translate("QtGuiApplication1Class", "slam", nullptr));
     } // retranslateUi
 
 };

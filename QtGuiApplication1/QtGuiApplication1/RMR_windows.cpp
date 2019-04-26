@@ -234,14 +234,18 @@ void RobotControll::processThisRobot()
 	odometria_4.odometry_curved(encL, encR);
 
 	odometry_position = (odometria_4.position+odometria_3.position)/2;
-#ifdef use_slam
-	if (slam.estimate_quality > slam.quality_treshold)
-	actual_position = slam_position + (odometry_position - odometry_position_last);
+#
+	if (slam_enable == true)
+	{
+		if (slam.estimate_quality > slam.quality_treshold)
+			actual_position = slam_position + (odometry_position - odometry_position_last);
+		else
+			actual_position = actual_position + (odometry_position - odometry_position_last);
+	}
 	else
-	actual_position = actual_position+ (odometry_position - odometry_position_last);
-#else
-	actual_position = odometry_position;
-#endif
+	{
+		actual_position = odometry_position;
+	}
 
 	odometry_position_last = odometry_position;
 
@@ -345,9 +349,12 @@ void RobotControll::set_map_with_path_enabled(bool status)
 
 void RobotControll::set_threads_enabled(bool status)
 {
-
 	threads_enabled = status;
+}
 
+void RobotControll::set_slam_enabled(bool status)
+{
+	slam_enable = status;
 }
 
 std::string RobotControll::get_command_name()
@@ -659,9 +666,9 @@ void RobotControll::automode()
 		{
 			if (!path.empty())
 			{
-		#ifdef use_slam
-				if (slam.estimate_quality > slam.quality_treshold)
-		#endif 
+		
+				if (slam.estimate_quality > slam.quality_treshold||slam_enable==false)
+		
 				{
 					wanted_position = path.front();
 					path.pop();
@@ -731,7 +738,7 @@ void RobotControll::build_scope()
 void RobotControll::build_map()
 {
 
-	if (motors_speed.translation_speed == 0 && maping_enable == true&&slam.estimate_quality>slam.quality_treshold)
+	if (motors_speed.translation_speed == 0 && maping_enable == true&&(slam.estimate_quality>slam.quality_treshold||slam_enable==false))
 	{
 		for (int i = 0; i < Laser_data_working.size(); i++)
 		{
@@ -816,9 +823,10 @@ void RobotControll::processThisLidar(std::vector<LaserData> new_scan)
 
 	push_command(robot_command::build_scope);
 	push_command(robot_command::build_map);
-#ifdef use_slam
+
+	if(slam_enable==true)
 	push_command(robot_command::slam);
-#endif
+
 }
 
 

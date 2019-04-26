@@ -182,6 +182,16 @@ void QtGuiApplication1::on_checkBox_2_stateChanged(int arg1)
 }
 
 
+void QtGuiApplication1::on_checkBox_3_stateChanged(int arg1)
+{
+	if (ui.checkBox_3->isChecked())
+		emit set_slam_enabled_sig(true);
+	else
+		emit set_slam_enabled_sig(false);
+
+}
+
+
 
 void map_render(QPainter& paint, QPen& pen, Mapa& map, QRect rect)
 {
@@ -302,4 +312,5 @@ void QtGuiApplication1::odometry_update(Robot_feedback data)
 	ui.statusBar->showMessage(QString(QString::fromStdString(data.command_string)));
 
 }
+
 

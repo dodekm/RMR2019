@@ -23,7 +23,6 @@
 #include "odometry.h"
 #include "slam.h"
 
-#define use_slam
 
 #define lidar_build_modulo 1000
 #define lidar_scan_modulo 1500
@@ -127,6 +126,8 @@ public slots:
 	void set_threads_enabled(bool status);
 	void set_maping_enabled(bool status);
 	void set_map_with_path_enabled(bool status);
+	void set_slam_enabled(bool status);
+
 
 	void start_threads();
 	void stop_threads();
@@ -255,6 +256,7 @@ private:
 	
 	bool maping_enable = false;
 	bool map_with_path_enable = false;
+	bool slam_enable = true;
 	Mapa mapa;
 	Mapa histogram;
 	Mapa map_with_path;
