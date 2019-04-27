@@ -24,13 +24,12 @@
 #include "slam.h"
 
 
-#define lidar_build_modulo 1000
-#define lidar_scan_modulo 1500
+#define lidar_build_modulo 2000
+#define lidar_scan_modulo 1000
 
 #define slam_modulo_main 20
 
-
-#define histogram_treshold lidar_build_modulo/50
+#define histogram_treshold lidar_build_modulo/80
 
 #define zone_width 0.2
 #define point_dist_treshold 0.2
@@ -167,8 +166,6 @@ public:
 	void processThisRobot();
 	void robot_controll();
 
-
-	void obstacle_avoidance();
 	void automode();
 
 	void build_map();
@@ -234,9 +231,7 @@ private:
 	
 	
 	robotSpeed motors_speed{ 0,0 };
-	
 
-	RobotPosition reset_position;
 
 	RobotPosition odometry_position_last;
 	RobotPosition odometry_position;

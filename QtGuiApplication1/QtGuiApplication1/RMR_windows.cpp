@@ -9,17 +9,16 @@ RobotControll::RobotControll() :
 	odometria_2(5.2, 2.5, -M_PI_2),
 	odometria_3(5.2, 2.5, -M_PI_2),
 	odometria_4(5.2, 2.5, -M_PI_2),
-	regulator(130, 1.0),
+	regulator(130, 0.6),
 	mapa(100, 100, -0.2, 6, -0.2, 6, ""),
+	
 	histogram(mapa, false),
 	current_scope(100, 100, -lidar_treshold_max / 1000.0, lidar_treshold_max / 1000.0, -lidar_treshold_max / 1000.0, lidar_treshold_max / 1000.0)
-
 {
 
 	command = robot_command::stop;
 
 	actual_position = odometria_4.position;
-	reset_position = actual_position;
 	slam_position = actual_position;
 	odometry_position_last = actual_position;
 	odometry_position = actual_position;
@@ -238,9 +237,14 @@ void RobotControll::processThisRobot()
 	if (slam_enable == true)
 	{
 		if (slam.estimate_quality > slam.quality_treshold)
+		{
 			actual_position = slam_position + (odometry_position - odometry_position_last);
+
+		}
 		else
+		{
 			actual_position = actual_position + (odometry_position - odometry_position_last);
+		}
 	}
 	else
 	{
@@ -255,7 +259,7 @@ void RobotControll::processThisRobot()
 		motors_speed = regulator.output;
 	}
 
-	move_arc(filter_speed.set_speed((int)round(motors_speed.translation_speed), 50), (int)round(motors_speed.radius));
+	move_arc(filter_speed.set_speed((int)round(motors_speed.translation_speed), 100), (int)round(motors_speed.radius));
 
 
 	emit odometry_update_sig(getRobotData());
@@ -279,14 +283,24 @@ void RobotControll::reset_robot()
 	reset_command_queue();
 	clear_path();
 	regulator.enabled = false;
-	mapa.clearMap();
 	histogram.clearMap();
 	current_scope.clearMap();
 	encoder_init_values(&encL, robotdata.EncoderLeft);
 	encoder_init_values(&encR, robotdata.EncoderRight);
 	motors_speed.translation_speed = 0;
 	motors_speed.radius = max_radius;
-	command = robot_command::stop;
+	
+	odometria_1.position = target;
+	odometria_2.position = target;
+	odometria_3.position = target;
+	odometria_4.position = target;
+
+	actual_position = target;
+	wanted_position = target;
+
+	slam_position = target;
+	slam.estimate = target;
+	slam.estimate_quality = 0;
 
 }
 
@@ -294,6 +308,7 @@ void RobotControll::addPointToPath(RobotPosition P)
 {
 	mutex_robot_data.lock();
 	path.push(P);
+	wanted_position = path.front();
 	mutex_robot_data.unlock();
 
 }
@@ -355,6 +370,13 @@ void RobotControll::set_threads_enabled(bool status)
 void RobotControll::set_slam_enabled(bool status)
 {
 	slam_enable = status;
+	if (status = true)
+	{
+		slam.estimate = actual_position;
+		
+	}
+	slam.estimate_quality = 0;
+	
 }
 
 std::string RobotControll::get_command_name()
@@ -485,8 +507,6 @@ void RobotControll::printData(std::ostream& stream)
 
 }
 
-
-
 bool RobotControll::is_point_in_way(Point m)
 {
 	//parametricke vyjadrenie priamky 
@@ -507,7 +527,6 @@ bool RobotControll::is_point_in_way(Point m)
 	float dist = abs(a*m.X + b * m.Y + c) / PointLength(Point{ a,b });
 	if (dist < zone_width && is_triangle_sharp(A,B,m))
 	{
-		
 			return true;
 	}
 	return false;
@@ -517,8 +536,6 @@ bool RobotControll::is_point_in_way(Point m)
 		float B = PointsDistance(actual_position.coordinates,m);
 		float C = PointsDistance(actual_position.coordinates,wanted_position.coordinates);
 		if (A*A+B*B<C*C)*/
-
-
 }
 
 bool RobotControll::is_obstacle_in_way(obstacle obst)
@@ -654,12 +671,9 @@ void RobotControll::automode()
 				}
 			}
 			find_path(merged_map);
+			obstacles_in_way = get_obstacles_in_way(obstacles);
 		}
 	}
-	
-
-	
-		
 	
 		
 		if (regulator.isRegulated(actual_position, wanted_position))

@@ -8,7 +8,7 @@
 #define min_speed  30
 
 #define max_radius 65534/2
-#define min_radius  90
+#define min_radius  70
 
 #define singularity_product  2
 
@@ -57,14 +57,14 @@ public:
 		return output.radius;
 	}
 
-	float position_deadzone = 0.07;
+	float position_deadzone = 0.08;
 
 	robotSpeed output;
 
 private:
 	float translation_gain;
 	float rotation_gain;
-	float gamma = 0.5;
+	float gamma = 0.7;
 	float delta;
 	Point error;
 
