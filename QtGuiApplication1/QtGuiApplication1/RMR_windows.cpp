@@ -4,11 +4,18 @@
 #include "RMR_windows.h"
 
 RobotControll::RobotControll() :
-
+	/*
 	odometria_1(5.2, 2.5, -M_PI_2),
 	odometria_2(5.2, 2.5, -M_PI_2),
 	odometria_3(5.2, 2.5, -M_PI_2),
-	odometria_4(5.2, 2.5, -M_PI_2),
+	odometria_4(5.2, 2.5, -M_PI_2),*/
+
+	odometria_1(0.4, 0.4, -M_PI_2),
+	odometria_2(0.4, 0.4, -M_PI_2),
+	odometria_3(0.4, 0.4, -M_PI_2),
+	odometria_4(0.4, 0.4, -M_PI_2),
+
+
 	regulator(130, 0.6),
 	mapa(100, 100, -0.2, 6, -0.2, 6, ""),
 	
@@ -653,7 +660,8 @@ std::list<obstacle> RobotControll::find_obstacles(std::list<Point>points)
 
 void RobotControll::automode()
 {
-	
+	obstacles_in_way = get_obstacles_in_way(obstacles);
+
 	if (!obstacles_in_way.empty())
 	{
 		
@@ -671,7 +679,7 @@ void RobotControll::automode()
 				}
 			}
 			find_path(merged_map);
-			obstacles_in_way = get_obstacles_in_way(obstacles);
+
 		}
 	}
 	
@@ -735,7 +743,7 @@ void RobotControll::build_scope()
 		}
 		mutex_robot_data.lock();
 		obstacles=find_obstacles(current_scope_obstacles);
-		obstacles_in_way = get_obstacles_in_way(obstacles);
+
 		mutex_robot_data.unlock();
 
 		emit scope_update_sig(current_scope);
@@ -802,15 +810,20 @@ void RobotControll::build_map()
 void RobotControll::find_path(Mapa working_map)
 {
 	start = actual_position.coordinates;
-	int window_size = 5;
+	
 	Mapa mapa_flood_fill(working_map, true);
 	mapa_flood_fill.FloodFill_fill(start, target, true);
+	int window_size = 5;
+
+
 	clear_path();
 	map_with_path = mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_Y, path, true, window_size);
+	
 	if (!path.empty())
 		wanted_position = path.front();
 	
-
+	emit(map_update_sig(map_with_path)); //REMOVE
+	emit odometry_update_sig(getRobotData());
 }
 
 

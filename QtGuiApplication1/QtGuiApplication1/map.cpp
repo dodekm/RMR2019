@@ -252,9 +252,7 @@ void Mapa::FloodFill_fill(Point start, Point target, bool diagonal = false)
 
 Mapa Mapa::FloodFill_find_path(Point start, Point target, floodfill_priority priority, std::queue <RobotPosition>& path, bool diagonal = false, int window_size = 3)
 {
-
-	Mapa map_with_path = Mapa(*this, true);
-	std::vector<Matrix_position> trajectory;
+	
 
 	Matrix_position target_indices = point2indices(target);
 	Matrix_position start_indices = point2indices(start);
@@ -265,8 +263,6 @@ Mapa Mapa::FloodFill_find_path(Point start, Point target, floodfill_priority pri
 		return Mapa();
 	if (cells_data[start_indices.Y][start_indices.X] != cell_start)
 		return Mapa();
-
-	Matrix_position working_cell = start_indices;
 
 	std::vector<Matrix_position> offset;
 
@@ -308,90 +304,131 @@ Mapa Mapa::FloodFill_find_path(Point start, Point target, floodfill_priority pri
 
 
 	}
+	std::vector<Matrix_position> trajectory;
 
-	unsigned long iter = 0;
-	unsigned long max_iter = cols * rows;
-	Matrix_position working_cell_prev = Matrix_position(-1, -1);
-	while (working_cell != target_indices)
+	while (window_size > 0)
 	{
-		if (iter > max_iter)
-			break;
-		iter++;
+		Mapa map_copy = Mapa(*this, true);
+		trajectory.clear();
+		
+		Matrix_position working_cell = start_indices;
 
-		int minvalue = INT32_MAX;
-		Matrix_position direction = { 0,0 };
-		Matrix_position gradient = { 0,0 };
-		for (int i = 0; i < offset.size(); i++)
+		unsigned long iter = 0;
+		unsigned long max_iter = cols * rows;
+		Matrix_position working_cell_prev = Matrix_position(-1, -1);
+		while (working_cell != target_indices)
 		{
-			Matrix_position new_position = working_cell + offset[i];
-
-			if (assert_matrix_indices(new_position))
+			if (iter > max_iter)
 			{
+				window_size--;
+				break;
 
-				if ((*this)[new_position] > cell_obstacle)
+			}
+			iter++;
+
+			int minvalue = INT32_MAX;
+			Matrix_position direction = { 0,0 };
+			Matrix_position gradient = { 0,0 };
+			for (int i = 0; i < offset.size(); i++)
+			{
+				Matrix_position new_position = working_cell + offset[i];
+
+				if (assert_matrix_indices(new_position))
 				{
-					if (this->check_close_obstacle(new_position, window_size))
+
+					if (map_copy[new_position] > cell_obstacle)
 					{
-						
-							if ((*this)[new_position] <= minvalue)
+						if (map_copy.check_close_obstacle(new_position, window_size))
+						{
+
+							if (map_copy[new_position] <= minvalue)
 							{
-								if ((*this)[new_position] == minvalue)
+								if (map_copy[new_position] == minvalue)
 								{
 									if (gradient == (new_position - working_cell) || gradient == Matrix_position{ 0,0 })
 									{
 										direction = new_position;
-										(*this)[new_position] = cell_path;
+										map_copy[new_position] = cell_path;
 									}
-									
+
 								}
 								else
 								{
 									direction = new_position;
-									minvalue = (*this)[new_position];
-									(*this)[new_position] = cell_path;
-								
+									minvalue = map_copy[new_position];
+									map_copy[new_position] = cell_path;
+
 								}
 
-								
+
 							}
-							
-								
-						
+
+
+
+						}
+
 					}
 
 				}
-
 			}
-		}
-		working_cell_prev = working_cell;
-		working_cell = direction;
-		gradient = working_cell - working_cell_prev;
-		trajectory.push_back(working_cell);
-	}
-	
 
+
+			working_cell_prev = working_cell;
+			working_cell = direction;
+			gradient = working_cell - working_cell_prev;
+			trajectory.push_back(working_cell);
+		}
+		
+		if (working_cell == target_indices)
+		{
+			break;
+		}
+	}
+
+	
+	Mapa map_with_path = Mapa(*this, true);
 	Matrix_position difference_backward = { 0,0 };
 	Matrix_position difference_forward = { 0,0 };
+	Matrix_position second_order_difference = difference_forward - difference_backward;
+	Matrix_position second_order_difference_last = second_order_difference;
+
+
 
 	for (int i = 1; i < trajectory.size() - 1; i++)
 	{
 		Matrix_position working_cell = trajectory[i];
 		difference_backward = working_cell - trajectory[i - 1];
 		difference_forward = trajectory[i + 1] - working_cell;
-		Matrix_position second_order_difference = difference_forward - difference_backward;
-
+		second_order_difference_last = second_order_difference;
+		second_order_difference = difference_forward - difference_backward;
+		Matrix_position third_order_difference = second_order_difference - second_order_difference_last;
 		map_with_path[working_cell] = cell_path;
+		
 
 		if (second_order_difference != Matrix_position{ 0,0 })
 		{
-			path.push(RobotPosition(indices2point(working_cell)));
-			map_with_path[working_cell] = cell_breakpoint;
+			if (third_order_difference.X != 0 && third_order_difference.Y != 0)
+			{
+				path.pop();
+				map_with_path[trajectory[i - 1]] = cell_path;
+				Matrix_position new_breakpoint = working_cell - second_order_difference_last;
+				map_with_path[new_breakpoint] = cell_breakpoint;
+				path.push(RobotPosition(indices2point(new_breakpoint)));
+			}
+			else
+			{
+				path.push(RobotPosition(indices2point(working_cell)));
+				map_with_path[working_cell] = cell_breakpoint;
+
+			}
 
 		}
 	}
 
 	path.push(RobotPosition(indices2point(target_indices)));
 	return map_with_path;
+
+	
 
 }
 

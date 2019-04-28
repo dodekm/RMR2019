@@ -998,7 +998,7 @@ public:
         checkBox_3->raise();
         menuBar = new QMenuBar(QtGuiApplication1Class);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1538, 23));
+        menuBar->setGeometry(QRect(0, 0, 1538, 21));
         QtGuiApplication1Class->setMenuBar(menuBar);
         mainToolBar = new QToolBar(QtGuiApplication1Class);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
