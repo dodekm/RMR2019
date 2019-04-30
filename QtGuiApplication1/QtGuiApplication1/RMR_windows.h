@@ -25,14 +25,25 @@
 
 
 #define lidar_build_modulo 2000
-#define lidar_scan_modulo 1000
+#define lidar_scan_modulo 300
 
-#define slam_modulo_main 20
+#define slam_modulo_main 500
 
-#define histogram_treshold lidar_build_modulo/80
+#define histogram_treshold_scan lidar_scan_modulo/100
+#define histogram_treshold_build lidar_build_modulo/150
 
 #define zone_width 0.2
 #define point_dist_treshold 0.2
+/*
+
+#define start_X 5.2
+#define start_Y 2.5
+#define start_alfa  -M_PI_2
+*/
+
+#define start_X 0.6
+#define start_Y 0.7
+#define start_alfa  M_PI_2
 
 
 const std::string command_to_string []=
@@ -210,7 +221,10 @@ private:
 	int	rob_recv_len;
 	int rob_slen;
 
-	std::vector<LaserData> Laser_data_working;
+	std::vector<LaserData> Laser_data_to_build;
+	std::vector<LaserData> Laser_data_to_scan;
+	std::vector<LaserData> Laser_data_to_slam;
+
 	std::vector<LaserData> Laser_data_new;
 
 	std::string ipaddress= "192.168.1.13";
@@ -218,9 +232,7 @@ private:
 	CKobuki robot;
 	TKobukiData robotdata;
 	
-	unsigned long datacounter=0;
-	unsigned long slam_counter = 1;
-	unsigned long lidar_measure_counter = 0;
+	bool first_packet = true;
 
 	Encoder encL;
 	Encoder encR;
@@ -231,7 +243,6 @@ private:
 	
 	
 	robotSpeed motors_speed{ 0,0 };
-
 
 	RobotPosition odometry_position_last;
 	RobotPosition odometry_position;
@@ -246,7 +257,6 @@ private:
 
 	std::queue <RobotPosition> path;
 	
-
 	Speed_filter filter_speed;
 	
 	bool maping_enable = false;

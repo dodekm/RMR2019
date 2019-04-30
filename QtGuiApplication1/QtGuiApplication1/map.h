@@ -244,11 +244,14 @@ public:
 
 
 	void FloodFill_fill(Point start, Point target,bool diagonal);
-	Mapa FloodFill_find_path(Point start, Point target, floodfill_priority priority, std::queue <RobotPosition>& path,bool diagonal,int window_size);
+	bool FloodFill_find_path(Mapa& map_with_path,Point start, Point target, floodfill_priority priority, std::queue <RobotPosition>& path,bool diagonal);
 
-	
+	std::list<Point> get_obstacles_points();
+
+
 	int assert_matrix_indices(Matrix_position XY);
-	int check_close_obstacle(Matrix_position XY,int window_size);
+
+	void enhance_obstacles(int window_size);
 
 	int addPoint(Point P, cell_content content);
 

@@ -4,23 +4,15 @@
 #include "RMR_windows.h"
 
 RobotControll::RobotControll() :
-	/*
-	odometria_1(5.2, 2.5, -M_PI_2),
-	odometria_2(5.2, 2.5, -M_PI_2),
-	odometria_3(5.2, 2.5, -M_PI_2),
-	odometria_4(5.2, 2.5, -M_PI_2),*/
+	odometria_1(start_X, start_Y, start_alfa),
+	odometria_2(start_X, start_Y, start_alfa),
+	odometria_3(start_X, start_Y, start_alfa),
+	odometria_4(start_X, start_Y, start_alfa),
 
-	odometria_1(0.4, 0.4, -M_PI_2),
-	odometria_2(0.4, 0.4, -M_PI_2),
-	odometria_3(0.4, 0.4, -M_PI_2),
-	odometria_4(0.4, 0.4, -M_PI_2),
-
-
-	regulator(130, 0.6),
+	regulator(120, 0.6),
 	mapa(100, 100, -0.2, 6, -0.2, 6, ""),
-	
 	histogram(mapa, false),
-	current_scope(100, 100, -lidar_treshold_max / 1000.0, lidar_treshold_max / 1000.0, -lidar_treshold_max / 1000.0, lidar_treshold_max / 1000.0)
+	current_scope(100, 100, start_X-lidar_treshold_max / 1000.0, start_X+lidar_treshold_max / 1000.0, start_Y-lidar_treshold_max / 1000.0, start_Y+lidar_treshold_max / 1000.0)
 {
 
 	command = robot_command::stop;
@@ -159,7 +151,6 @@ void RobotControll::robot_controll()
 
 				break;
 			case robot_command::print:
-
 				std::cout << (*this);
 				break;
 
@@ -168,9 +159,7 @@ void RobotControll::robot_controll()
 				if (abs(motors_speed.translation_speed) < min_speed)
 				{
 
-					slam_counter++;
-
-						if (slam_counter % slam_modulo_main == 0)
+						if (Laser_data_to_slam.size()>slam_modulo_main)
 						{
 							slam.dispersion_position = 0.3;
 							slam.dispersion_angle = 0.15;
@@ -178,7 +167,7 @@ void RobotControll::robot_controll()
 							slam.odometry_gain = 0.1;
 							slam.n_particles = 200;
 
-							slam.locate(odometry_position, Laser_data_working);
+							slam.locate(odometry_position, Laser_data_to_scan);
 
 							if (slam.estimate_quality < slam.quality_treshold)
 							{
@@ -187,7 +176,7 @@ void RobotControll::robot_controll()
 								slam.feedback_gain = 0.7;
 								slam.odometry_gain = 0.3;
 								slam.n_particles = 700;
-								slam.locate(odometry_position, Laser_data_working);
+								slam.locate(odometry_position, Laser_data_to_scan);
 							}
 
 							if (slam.estimate_quality < slam.quality_treshold)
@@ -197,18 +186,18 @@ void RobotControll::robot_controll()
 								slam.feedback_gain = 0.3;
 								slam.odometry_gain = 0.7;
 								slam.n_particles = 1500;
-								slam.locate(odometry_position, Laser_data_working);
+								slam.locate(odometry_position, Laser_data_to_scan);
 							}
 
 							slam_position = slam.estimate;
-
+							Laser_data_to_slam.clear();
 						}
-				}
+				} 
 				else
 				{
 					slam.estimate = actual_position;
 					slam.estimate_quality = 0;
-					slam_counter = 0;
+					Laser_data_to_slam.clear();
 				}
 
 				break;
@@ -267,7 +256,6 @@ void RobotControll::processThisRobot()
 	}
 
 	move_arc(filter_speed.set_speed((int)round(motors_speed.translation_speed), 100), (int)round(motors_speed.radius));
-
 
 	emit odometry_update_sig(getRobotData());
 	mutex_robot_data.unlock();
@@ -538,11 +526,6 @@ bool RobotControll::is_point_in_way(Point m)
 	}
 	return false;
 
-
-	/*float A = PointsDistance(wanted_position.coordinates,m);
-		float B = PointsDistance(actual_position.coordinates,m);
-		float C = PointsDistance(actual_position.coordinates,wanted_position.coordinates);
-		if (A*A+B*B<C*C)*/
 }
 
 bool RobotControll::is_obstacle_in_way(obstacle obst)
@@ -660,11 +643,9 @@ std::list<obstacle> RobotControll::find_obstacles(std::list<Point>points)
 
 void RobotControll::automode()
 {
-	obstacles_in_way = get_obstacles_in_way(obstacles);
-
+	
 	if (!obstacles_in_way.empty())
 	{
-		
 		
 		if (!current_scope_obstacles.empty())
 		{
@@ -679,7 +660,6 @@ void RobotControll::automode()
 				}
 			}
 			find_path(merged_map);
-
 		}
 	}
 	
@@ -717,41 +697,58 @@ void RobotControll::automode()
 void RobotControll::build_scope()
 {
 
-	if (Laser_data_new.size() > lidar_scan_modulo)
-	{
 		mutex_lidar_data.lock();
-		Laser_data_working.clear();
+		
 		for (std::vector<LaserData>::iterator it = Laser_data_new.begin(); it != Laser_data_new.end(); it++)
 		{
 			if (lidar_check_measure(*it))
 			{
-				Laser_data_working.push_back(*it);
+				if (motors_speed.translation_speed == 0 && maping_enable == true && (slam.estimate_quality > slam.quality_treshold || slam_enable == false))
+				{
+					Laser_data_to_build.push_back(*it);
+				}
+				if (abs(motors_speed.translation_speed) < min_speed&&slam_enable == true)
+				{
+					Laser_data_to_slam.push_back(*it);
+				}
+
+				Laser_data_to_scan.push_back(*it);
+				
 			}
 		}
 		Laser_data_new.clear();
 		mutex_lidar_data.unlock();
 
 
-		current_scope.clearMap();
-		current_scope_obstacles.clear();
-
-		current_scope.addPoint(Point{ 0.0,0.0 }, cell_robot);
-		for (int i = 0; i < Laser_data_working.size(); i++)
+		if (Laser_data_to_scan.size() > lidar_scan_modulo)
 		{
-				current_scope.addPoint(lidar_measure_2_point(Laser_data_working[i], RobotPosition(0, 0, M_PI_2)), cell_obstacle);
-				current_scope_obstacles.push_back(lidar_measure_2_point(Laser_data_working[i], actual_position));	
+			current_scope.clearMap();
+			current_scope_obstacles.clear();
+
+			current_scope = Mapa(100, 100, actual_position.coordinates.X - lidar_treshold_max / 1000.0, actual_position.coordinates.X + lidar_treshold_max / 1000.0, actual_position.coordinates.Y - lidar_treshold_max / 1000.0, actual_position.coordinates.Y + lidar_treshold_max / 1000.0);
+			Mapa local_histogram =Mapa(100, 100, actual_position.coordinates.X - lidar_treshold_max / 1000.0, actual_position.coordinates.X + lidar_treshold_max / 1000.0, actual_position.coordinates.Y - lidar_treshold_max / 1000.0, actual_position.coordinates.Y + lidar_treshold_max / 1000.0);
+
+			current_scope.addPoint(actual_position.coordinates, cell_robot);
+			for (int i = 0; i < Laser_data_to_scan.size(); i++)
+			{
+				local_histogram.addPointToHistogram(lidar_measure_2_point(Laser_data_to_scan[i], actual_position));
+			}
+			current_scope.buildFromHistogram(local_histogram, histogram_treshold_scan);
+			current_scope_obstacles = current_scope.get_obstacles_points(); 
+
+			mutex_robot_data.lock();
+
+			obstacles = find_obstacles(current_scope_obstacles);
+			obstacles_in_way = get_obstacles_in_way(obstacles);
+			Laser_data_to_scan.clear();
+			mutex_robot_data.unlock();
+
+			emit scope_update_sig(current_scope);
 		}
-		mutex_robot_data.lock();
-		obstacles=find_obstacles(current_scope_obstacles);
-
-		mutex_robot_data.unlock();
-
-		emit scope_update_sig(current_scope);
-
 		
 		
 		
-	}
+	
 
 	
 
@@ -759,24 +756,28 @@ void RobotControll::build_scope()
 
 void RobotControll::build_map()
 {
-
-	if (motors_speed.translation_speed == 0 && maping_enable == true&&(slam.estimate_quality>slam.quality_treshold||slam_enable==false))
+	
+	if (motors_speed.translation_speed == 0 && maping_enable == true && (slam.estimate_quality > slam.quality_treshold || slam_enable == false))
 	{
-		for (int i = 0; i < Laser_data_working.size(); i++)
+
+		if (Laser_data_to_build.size() > lidar_build_modulo)
 		{
-			
-				histogram.addPointToHistogram(lidar_measure_2_point(Laser_data_working[i], actual_position));
-				lidar_measure_counter++;
-			
-
-
-			if (lidar_measure_counter % lidar_build_modulo == 0)
+			for (int i = 0; i < Laser_data_to_build.size(); i++)
 			{
-				lidar_measure_counter = 0;
-				mapa.buildFromHistogram(histogram, histogram_treshold);
-				histogram.clearMap();
+				histogram.addPointToHistogram(lidar_measure_2_point(Laser_data_to_build[i], actual_position));
 			}
+
+			mapa.buildFromHistogram(histogram, histogram_treshold_build);
+			histogram.clearMap();
+
+			Laser_data_to_build.clear();
 		}
+
+	}
+	else
+	{
+		Laser_data_to_build.clear();
+	
 	}
 	Mapa map_to_send(mapa);
 	map_to_send.addPoint(actual_position.coordinates, cell_slam_estimate);
@@ -784,6 +785,8 @@ void RobotControll::build_map()
 	map_to_send.addPoint(actual_position.coordinates + polar2point(actual_position.alfa, 0.2), cell_direction);
 	map_to_send.addPoint(wanted_position.coordinates, cell_red);
 	map_to_send.addPoint(target, cell_finish);
+
+
 
 	
 	for (std::list<obstacle>::iterator it = obstacles_in_way.begin(); it != obstacles_in_way.end(); it++)
@@ -794,7 +797,6 @@ void RobotControll::build_map()
 			map_to_send.addPoint(*bod, cell_obstacle_edge_in_way);
 		}
 	}
-	
 
 	
 	if (map_with_path_enable == false)
@@ -810,20 +812,28 @@ void RobotControll::build_map()
 void RobotControll::find_path(Mapa working_map)
 {
 	start = actual_position.coordinates;
-	
-	Mapa mapa_flood_fill(working_map, true);
-	mapa_flood_fill.FloodFill_fill(start, target, true);
 	int window_size = 5;
+	
+	bool result = false;
+	do
+	{
+		clear_path();
+		Mapa mapa_flood_fill(working_map, true);
+		mapa_flood_fill.enhance_obstacles(window_size);
+		mapa_flood_fill.FloodFill_fill(start, target, true);
+		map_with_path = Mapa(working_map, true);
+		result = mapa_flood_fill.FloodFill_find_path(map_with_path, start, target, floodfill_priority_Y, path, true);
+		window_size--;
 
+		
+	} while (result == false&&window_size>=0);
 
-	clear_path();
-	map_with_path = mapa_flood_fill.FloodFill_find_path(start, target, floodfill_priority_Y, path, true, window_size);
 	
 	if (!path.empty())
 		wanted_position = path.front();
 	
-	emit(map_update_sig(map_with_path)); //REMOVE
-	emit odometry_update_sig(getRobotData());
+
+
 }
 
 
@@ -1068,12 +1078,13 @@ void RobotControll::robotprocess()
 		int returnval = robot.fillData(robotdata, (unsigned char*)buff);
 		if (returnval == 0)
 		{
-			if (datacounter == 0)
+			if (first_packet == true)
 			{
 				encoder_init_values(&encL, robotdata.EncoderLeft);
 				encoder_init_values(&encR, robotdata.EncoderRight);
+				first_packet = false;
 			}
-			datacounter++;
+			
 			processThisRobot();
 		}
 	}

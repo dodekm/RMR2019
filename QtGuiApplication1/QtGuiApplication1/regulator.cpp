@@ -18,8 +18,8 @@ void RobotRegulator::regulate(RobotPosition& current_position, RobotPosition& de
 	output.radius = rotation_gain / delta * output.translation_speed;
 	
 	saturate_radius();
-	saturate_speed();
 	nonlinear_power_function();
+	saturate_speed();
 }
 
 

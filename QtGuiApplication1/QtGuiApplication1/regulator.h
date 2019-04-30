@@ -11,7 +11,7 @@
 #define min_radius  70
 
 #define singularity_product  2
-
+#define rotation_correction_coeff 2.0
 
 typedef struct robotSpeed
 {
@@ -91,6 +91,16 @@ private:
 		{
 			output.translation_speed = 0;
 		}
+	}
+
+
+
+	void speed_rotation_correction()
+	{
+	
+		float l = output.radius / max_radius * rotation_correction_coeff;
+		output.translation_speed *= l;
+
 	}
 
 	void nonlinear_power_function()
