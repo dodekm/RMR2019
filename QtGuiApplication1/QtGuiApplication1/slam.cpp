@@ -9,22 +9,27 @@ RobotPosition Slam::locate(RobotPosition position_odometry, std::vector<LaserDat
 
 	RobotPosition position_center = weighted_position(estimate, position_odometry, feedback_gain, odometry_gain);
 	
-	Mapa map_scan(map_reference,false);
+	
+	
 
 	for (int p=0;p<n_particles;p++)
 	{
+		Mapa map_histogram(map_reference, false);
 
 		std::normal_distribution<float> distribution_X(position_center.coordinates.X, dispersion_position);
 		std::normal_distribution<float> distribution_Y(position_center.coordinates.Y, dispersion_position);
 		std::normal_distribution <float> distribution_alfa(position_center.alfa, dispersion_angle);
 
 		RobotPosition particle = RobotPosition(distribution_X(generator),distribution_Y(generator),distribution_alfa(generator));
-		map_scan.clearMap();
+		
 
 		for (int i = 0; i < scan.size(); i++)
 		{
-				map_scan.addPoint(lidar_measure_2_point(scan[i], particle), cell_obstacle);	
+				map_histogram.addPointToHistogram(lidar_measure_2_point(scan[i], particle));	
 		}
+
+		Mapa map_scan(map_reference, false);
+		map_scan.buildFromHistogram(map_histogram, scan.size()*histogram_treshold_slam);
 
 		Mapa AND(map_reference && map_scan);
 		long likehood = AND.sum_elements();

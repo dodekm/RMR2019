@@ -247,7 +247,7 @@ void QtGuiApplication1::paintEvent(QPaintEvent *e)
 		QPen pen(Qt::green, 2, Qt::SolidLine);
 		paint.setPen(pen);
 		paint.drawEllipse(rect);
-		pen.setWidth(4);
+		pen.setWidth(5);
 		paint.setPen(pen);
 
 		map_render(paint, pen, scope, rect);

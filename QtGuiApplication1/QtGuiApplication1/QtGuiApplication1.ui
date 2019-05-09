@@ -5447,6 +5447,9 @@
     <property name="singleStep">
      <double>0.200000000000000</double>
     </property>
+    <property name="value">
+     <double>0.600000000000000</double>
+    </property>
    </widget>
    <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
     <property name="geometry">
@@ -5465,6 +5468,9 @@
     </property>
     <property name="singleStep">
      <double>0.200000000000000</double>
+    </property>
+    <property name="value">
+     <double>0.700000000000000</double>
     </property>
    </widget>
    <widget class="QTextBrowser" name="textBrowser_command">

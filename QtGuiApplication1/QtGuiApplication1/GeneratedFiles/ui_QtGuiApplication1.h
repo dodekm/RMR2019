@@ -894,12 +894,14 @@ public:
         doubleSpinBox->setMinimum(-100.000000000000000);
         doubleSpinBox->setMaximum(100.000000000000000);
         doubleSpinBox->setSingleStep(0.200000000000000);
+        doubleSpinBox->setValue(0.600000000000000);
         doubleSpinBox_2 = new QDoubleSpinBox(centralWidget);
         doubleSpinBox_2->setObjectName(QString::fromUtf8("doubleSpinBox_2"));
         doubleSpinBox_2->setGeometry(QRect(220, 220, 62, 22));
         doubleSpinBox_2->setMinimum(-100.000000000000000);
         doubleSpinBox_2->setMaximum(100.000000000000000);
         doubleSpinBox_2->setSingleStep(0.200000000000000);
+        doubleSpinBox_2->setValue(0.700000000000000);
         textBrowser_command = new QTextBrowser(centralWidget);
         textBrowser_command->setObjectName(QString::fromUtf8("textBrowser_command"));
         textBrowser_command->setGeometry(QRect(1330, 550, 101, 141));

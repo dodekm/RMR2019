@@ -9,9 +9,9 @@ RobotControll::RobotControll() :
 	odometria_3(start_X, start_Y, start_alfa),
 	odometria_4(start_X, start_Y, start_alfa),
 
-	regulator(120, 0.6),
+	regulator(160, 0.8),
 	mapa(100, 100, -0.2, 6, -0.2, 6, ""),
-	histogram(mapa, false),
+	
 	current_scope(100, 100, start_X-lidar_treshold_max / 1000.0, start_X+lidar_treshold_max / 1000.0, start_Y-lidar_treshold_max / 1000.0, start_Y+lidar_treshold_max / 1000.0)
 {
 
@@ -167,7 +167,7 @@ void RobotControll::robot_controll()
 							slam.odometry_gain = 0.1;
 							slam.n_particles = 200;
 
-							slam.locate(odometry_position, Laser_data_to_scan);
+							slam.locate(odometry_position, Laser_data_to_slam);
 
 							if (slam.estimate_quality < slam.quality_treshold)
 							{
@@ -175,8 +175,8 @@ void RobotControll::robot_controll()
 								slam.dispersion_angle = 0.2;
 								slam.feedback_gain = 0.7;
 								slam.odometry_gain = 0.3;
-								slam.n_particles = 700;
-								slam.locate(odometry_position, Laser_data_to_scan);
+								slam.n_particles = 500;
+								slam.locate(odometry_position, Laser_data_to_slam);
 							}
 
 							if (slam.estimate_quality < slam.quality_treshold)
@@ -185,8 +185,8 @@ void RobotControll::robot_controll()
 								slam.dispersion_angle = 0.5;
 								slam.feedback_gain = 0.3;
 								slam.odometry_gain = 0.7;
-								slam.n_particles = 1500;
-								slam.locate(odometry_position, Laser_data_to_scan);
+								slam.n_particles = 1000;
+								slam.locate(odometry_position, Laser_data_to_slam);
 							}
 
 							slam_position = slam.estimate;
@@ -235,7 +235,6 @@ void RobotControll::processThisRobot()
 		if (slam.estimate_quality > slam.quality_treshold)
 		{
 			actual_position = slam_position + (odometry_position - odometry_position_last);
-
 		}
 		else
 		{
@@ -255,7 +254,7 @@ void RobotControll::processThisRobot()
 		motors_speed = regulator.output;
 	}
 
-	move_arc(filter_speed.set_speed((int)round(motors_speed.translation_speed), 100), (int)round(motors_speed.radius));
+	move_arc(filter_speed.set_speed((int)round(motors_speed.translation_speed), 50), (int)round(motors_speed.radius));
 
 	emit odometry_update_sig(getRobotData());
 	mutex_robot_data.unlock();
@@ -278,7 +277,6 @@ void RobotControll::reset_robot()
 	reset_command_queue();
 	clear_path();
 	regulator.enabled = false;
-	histogram.clearMap();
 	current_scope.clearMap();
 	encoder_init_values(&encL, robotdata.EncoderLeft);
 	encoder_init_values(&encR, robotdata.EncoderRight);
@@ -670,7 +668,6 @@ void RobotControll::automode()
 			{
 		
 				if (slam.estimate_quality > slam.quality_treshold||slam_enable==false)
-		
 				{
 					wanted_position = path.front();
 					path.pop();
@@ -711,9 +708,7 @@ void RobotControll::build_scope()
 				{
 					Laser_data_to_slam.push_back(*it);
 				}
-
 				Laser_data_to_scan.push_back(*it);
-				
 			}
 		}
 		Laser_data_new.clear();
@@ -729,17 +724,28 @@ void RobotControll::build_scope()
 			Mapa local_histogram =Mapa(100, 100, actual_position.coordinates.X - lidar_treshold_max / 1000.0, actual_position.coordinates.X + lidar_treshold_max / 1000.0, actual_position.coordinates.Y - lidar_treshold_max / 1000.0, actual_position.coordinates.Y + lidar_treshold_max / 1000.0);
 
 			current_scope.addPoint(actual_position.coordinates, cell_robot);
+			current_scope.addPoint(actual_position.coordinates + polar2point(actual_position.alfa, 0.2), cell_direction);
+
 			for (int i = 0; i < Laser_data_to_scan.size(); i++)
 			{
 				local_histogram.addPointToHistogram(lidar_measure_2_point(Laser_data_to_scan[i], actual_position));
 			}
-			current_scope.buildFromHistogram(local_histogram, histogram_treshold_scan);
+			current_scope.buildFromHistogram(local_histogram, Laser_data_to_scan.size()*histogram_treshold_scan);
 			current_scope_obstacles = current_scope.get_obstacles_points(); 
 
 			mutex_robot_data.lock();
 
-			obstacles = find_obstacles(current_scope_obstacles);
-			obstacles_in_way = get_obstacles_in_way(obstacles);
+			if (abs(motors_speed.radius) > 4 * min_radius|| motors_speed.radius==0)
+			{
+				obstacles = find_obstacles(current_scope_obstacles);
+				obstacles_in_way = get_obstacles_in_way(obstacles);
+			}
+
+			else
+			{
+				obstacles.clear();
+				obstacles_in_way.clear();
+			}
 			Laser_data_to_scan.clear();
 			mutex_robot_data.unlock();
 
@@ -762,14 +768,14 @@ void RobotControll::build_map()
 
 		if (Laser_data_to_build.size() > lidar_build_modulo)
 		{
+			Mapa histogram(mapa, false);
+
 			for (int i = 0; i < Laser_data_to_build.size(); i++)
 			{
 				histogram.addPointToHistogram(lidar_measure_2_point(Laser_data_to_build[i], actual_position));
 			}
 
-			mapa.buildFromHistogram(histogram, histogram_treshold_build);
-			histogram.clearMap();
-
+			mapa.buildFromHistogram(histogram, Laser_data_to_build.size()*histogram_treshold_build);
 			Laser_data_to_build.clear();
 		}
 
@@ -790,8 +796,7 @@ void RobotControll::build_map()
 
 	
 	for (std::list<obstacle>::iterator it = obstacles_in_way.begin(); it != obstacles_in_way.end(); it++)
-	{
-		
+	{	
 		for (std::list<Point>::iterator bod=(*it).points.begin();bod!= (*it).points.end();bod++)
 		{
 			map_to_send.addPoint(*bod, cell_obstacle_edge_in_way);
@@ -832,11 +837,7 @@ void RobotControll::find_path(Mapa working_map)
 	if (!path.empty())
 		wanted_position = path.front();
 	
-
-
 }
-
-
 
 
 void RobotControll::encoders_process()
@@ -858,10 +859,10 @@ void RobotControll::processThisLidar(std::vector<LaserData> new_scan)
 	}
 	mutex_lidar_data.unlock();
 
-	push_command(robot_command::build_scope);
-	push_command(robot_command::build_map);
+		push_command(robot_command::build_scope);
+		push_command(robot_command::build_map);
 
-	if(slam_enable==true)
+	if(slam_enable==true&&command!= robot_command::slam)
 	push_command(robot_command::slam);
 
 }

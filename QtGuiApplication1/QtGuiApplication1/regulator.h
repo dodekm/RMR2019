@@ -8,10 +8,11 @@
 #define min_speed  30
 
 #define max_radius 65534/2
+
 #define min_radius  70
 
 #define singularity_product  2
-#define rotation_correction_coeff 2.0
+
 
 typedef struct robotSpeed
 {
@@ -98,8 +99,10 @@ private:
 	void speed_rotation_correction()
 	{
 	
-		float l = output.radius / max_radius * rotation_correction_coeff;
-		output.translation_speed *= l;
+		float k = 10;
+
+		float l = abs(output.radius) / max_radius;
+		output.translation_speed = output.translation_speed* (1+k*l)/(1+k);
 
 	}
 

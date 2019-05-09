@@ -24,27 +24,28 @@
 #include "slam.h"
 
 
-#define lidar_build_modulo 2000
-#define lidar_scan_modulo 300
+#define lidar_build_modulo 3000
+#define lidar_scan_modulo 700
 
-#define slam_modulo_main 500
+#define slam_modulo_main 4000
 
-#define histogram_treshold_scan lidar_scan_modulo/100
-#define histogram_treshold_build lidar_build_modulo/150
+#define histogram_treshold_scan 0.001
+#define histogram_treshold_build 0.004
 
-#define zone_width 0.2
+
+#define zone_width 0.35
 #define point_dist_treshold 0.2
-/*
+
 
 #define start_X 5.2
 #define start_Y 2.5
 #define start_alfa  -M_PI_2
-*/
+/*
 
 #define start_X 0.6
 #define start_Y 0.7
 #define start_alfa  M_PI_2
-
+*/
 
 const std::string command_to_string []=
 {
@@ -263,7 +264,6 @@ private:
 	bool map_with_path_enable = false;
 	bool slam_enable = true;
 	Mapa mapa;
-	Mapa histogram;
 	Mapa map_with_path;
 	Mapa current_scope;
 

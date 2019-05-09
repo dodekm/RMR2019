@@ -4,6 +4,8 @@
 #include <random>
 #include <misc.h>
 
+#define histogram_treshold_slam 0.002
+
 class Slam
 {
 	
@@ -16,7 +18,7 @@ public:
 	float feedback_gain;
 	float odometry_gain;
 
-	float quality_treshold = 0.45;
+	float quality_treshold = 0.5;
 	float estimate_quality=0.0;
 	
 	RobotPosition estimate;

@@ -16,9 +16,11 @@ void RobotRegulator::regulate(RobotPosition& current_position, RobotPosition& de
 	delta = Point_angle(error);
 	symmetry_correct(current_position.coordinates,desired_position.coordinates);
 	output.radius = rotation_gain / delta * output.translation_speed;
-	
 	saturate_radius();
 	nonlinear_power_function();
+
+	//speed_rotation_correction();
+
 	saturate_speed();
 }
 
