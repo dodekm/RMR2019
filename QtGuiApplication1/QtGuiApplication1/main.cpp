@@ -15,6 +15,8 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<Mapa>();
 	qRegisterMetaType<Robot_feedback>();
 
+	
+
 	QObject::connect(&gui, SIGNAL(command_change_sig(robot_command)), &robot, SLOT(push_command(robot_command)));
 	QObject::connect(&gui, SIGNAL(start_threads_sig(void)), &robot, SLOT(start_threads(void)));
 	QObject::connect(&gui, SIGNAL(stop_threads_sig(void)), &robot, SLOT(stop_threads(void)));
@@ -36,6 +38,8 @@ int main(int argc, char *argv[])
 
 
 	gui.show();
+	gui.get_ui_ptr()->doubleSpinBox->setValue(target_X);
+	gui.get_ui_ptr()->doubleSpinBox_2->setValue(target_Y);
 	return app.exec();
 	robot.stop_threads();
 }

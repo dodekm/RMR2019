@@ -4,7 +4,7 @@
 #include "points.h"
 #include "misc.h"
 
-#define max_speed  300
+#define max_speed  450
 #define min_speed  30
 
 #define max_radius 65534/2
@@ -58,14 +58,14 @@ public:
 		return output.radius;
 	}
 
-	float position_deadzone = 0.08;
+	float position_deadzone = 0.06;
 
 	robotSpeed output;
 
 private:
 	float translation_gain;
 	float rotation_gain;
-	float gamma = 0.7;
+	float gamma = 0.6;
 	float delta;
 	Point error;
 

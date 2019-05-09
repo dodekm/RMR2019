@@ -36,16 +36,26 @@
 #define zone_width 0.35
 #define point_dist_treshold 0.2
 
-
+/*
 #define start_X 5.2
 #define start_Y 2.5
 #define start_alfa  -M_PI_2
-/*
+*/
 
+/*
 #define start_X 0.6
 #define start_Y 0.7
 #define start_alfa  M_PI_2
 */
+
+
+#define start_X 0.59
+#define start_Y 0.71
+#define start_alfa 0
+
+#define target_X 0.59
+#define target_Y 3.7
+
 
 const std::string command_to_string []=
 {

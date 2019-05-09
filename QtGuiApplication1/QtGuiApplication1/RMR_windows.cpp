@@ -9,7 +9,7 @@ RobotControll::RobotControll() :
 	odometria_3(start_X, start_Y, start_alfa),
 	odometria_4(start_X, start_Y, start_alfa),
 
-	regulator(160, 0.8),
+	regulator(400, 0.8),
 	mapa(100, 100, -0.2, 6, -0.2, 6, ""),
 	
 	current_scope(100, 100, start_X-lidar_treshold_max / 1000.0, start_X+lidar_treshold_max / 1000.0, start_Y-lidar_treshold_max / 1000.0, start_Y+lidar_treshold_max / 1000.0)
@@ -26,10 +26,12 @@ RobotControll::RobotControll() :
 
 	wanted_position = actual_position;
 	start = actual_position.coordinates;
-	target = Point{ 0, 0 };
+	target = Point{ target_X,target_Y };
 
 	map_loader::TMapArea objects;
-	map_loader::load_objects("priestor.txt", objects);
+	//map_loader::load_objects("priestor.txt", objects);
+	map_loader::load_objects("priestor_sutaz.txt", objects);
+	
 	mapa.fill_with_objects(objects);
 
 	slam.map_reference = mapa;
@@ -254,7 +256,7 @@ void RobotControll::processThisRobot()
 		motors_speed = regulator.output;
 	}
 
-	move_arc(filter_speed.set_speed((int)round(motors_speed.translation_speed), 50), (int)round(motors_speed.radius));
+	move_arc(filter_speed.set_speed((int)round(motors_speed.translation_speed), 100), (int)round(motors_speed.radius));
 
 	emit odometry_update_sig(getRobotData());
 	mutex_robot_data.unlock();
@@ -833,9 +835,12 @@ void RobotControll::find_path(Mapa working_map)
 		
 	} while (result == false&&window_size>=0);
 
+	emit(map_update_sig(map_with_path));
 	
 	if (!path.empty())
 		wanted_position = path.front();
+	
+	
 	
 }
 

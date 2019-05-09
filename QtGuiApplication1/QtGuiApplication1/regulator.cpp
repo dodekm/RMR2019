@@ -19,8 +19,6 @@ void RobotRegulator::regulate(RobotPosition& current_position, RobotPosition& de
 	saturate_radius();
 	nonlinear_power_function();
 
-	//speed_rotation_correction();
-
 	saturate_speed();
 }
 

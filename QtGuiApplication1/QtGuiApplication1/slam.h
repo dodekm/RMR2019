@@ -6,6 +6,8 @@
 
 #define histogram_treshold_slam 0.002
 
+#define slam_quality_treshold 0.4
+
 class Slam
 {
 	
@@ -18,7 +20,7 @@ public:
 	float feedback_gain;
 	float odometry_gain;
 
-	float quality_treshold = 0.5;
+	float quality_treshold = slam_quality_treshold;
 	float estimate_quality=0.0;
 	
 	RobotPosition estimate;
