@@ -1,5 +1,3 @@
-// RMR_windows.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
 
 #include "RMR_windows.h"
 
@@ -835,7 +833,6 @@ void RobotControll::find_path(Mapa working_map)
 		
 	} while (result == false&&window_size>=0);
 
-	emit(map_update_sig(map_with_path));
 	
 	if (!path.empty())
 		wanted_position = path.front();

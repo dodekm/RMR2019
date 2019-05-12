@@ -312,7 +312,6 @@ private:
 		return P;
 	}
 	
-
 };
 Q_DECLARE_METATYPE(Mapa)
 

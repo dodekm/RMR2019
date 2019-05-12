@@ -56,7 +56,6 @@
 #define target_X 0.59
 #define target_Y 3.7
 
-
 const std::string command_to_string []=
 {
 	"stop",

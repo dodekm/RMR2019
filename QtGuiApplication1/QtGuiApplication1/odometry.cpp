@@ -115,12 +115,9 @@ void Odometry::odometry_curved(Encoder encL, Encoder encR)
 		position.coordinates.X += delta_l * cos(position.alfa);
 		position.coordinates.Y += delta_l * sin(position.alfa);
 	}
-
-
 	position.alfa += delta_alfa;
 
 	wheel_last_distance_left = wheel_distance_left;
 	wheel_last_distance_right = wheel_distance_right;
-
 }
 
